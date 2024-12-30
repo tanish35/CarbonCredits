@@ -1,0 +1,3 @@
+[submodule "CarbonCreditsContract"]
+	path = CarbonCreditsContract
+	url = https://github.com/Somnath-Chattaraj/CarbonCreditsContract
