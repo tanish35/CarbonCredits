@@ -5,6 +5,7 @@ import {
   useDisconnect,
   useWaitForTransactionReceipt,
   useWriteContract,
+  useBalance,
 } from "wagmi";
 import {
   Box,
@@ -36,6 +37,13 @@ function MintPage() {
   const { data: hash, error, isPending, writeContract } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({ hash });
+  const {
+    data: balance,
+    isError,
+    isLoading,
+  } = useBalance({
+    address,
+  });
 
   const [recipient, setRecipient] = useState("");
   const [tokenURI, setTokenURI] = useState("");
@@ -84,6 +92,20 @@ function MintPage() {
         ) : (
           <Box>
             <Text>Wallet Connected: {address}</Text>
+            <Box mt={6}>
+              <Text fontSize="lg" fontWeight="medium">
+                Balance:
+              </Text>
+              {isLoading ? (
+                <Text>Loading...</Text>
+              ) : isError ? (
+                <Text color="red.500">Error fetching balance</Text>
+              ) : (
+                <Text fontSize="lg" fontWeight="bold">
+                  {balance?.formatted} {balance?.symbol}
+                </Text>
+              )}
+            </Box>
             <Button mt={4} colorScheme="red" onClick={() => disconnect()}>
               Disconnect Wallet
             </Button>
