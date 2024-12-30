@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String             @id @default(cuid())
+  email            String             @unique
+  name             String?
+  wallet_address   String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  nfts             NFT[]
+  transactions     Transaction[]
+  CreditRetirement CreditRetirement[]
+}
+
+model NFT {
+  id                  String             @id @default(cuid())
+  tokenId             String             @unique
+  tokenURI            String
+  owner               User               @relation(fields: [ownerId], references: [id])
+  price               Float              @default(0)
+  ownerId             String
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  isRetired           Boolean            @default(false)
+  creditType          String
+  quantity            Float
+  expiryDate          DateTime?
+  verificationDetails String?
+  auditorInfo         String?
+  Transaction         Transaction[]
+  Marketplace         Marketplace?
+  CreditRetirement    CreditRetirement[]
+}
+
+model Transaction {
+  id        String   @id @default(cuid())
+  nftId     String
+  nft       NFT      @relation(fields: [nftId], references: [id])
+  sellerId  String
+  buyerId   String
+  buyer     User     @relation(fields: [buyerId], references: [id])
+  price     Float
+  createdAt DateTime @default(now())
+}
+
+model Marketplace {
+  id           String    @id @default(cuid())
+  nftId        String    @unique
+  nft          NFT       @relation(fields: [nftId], references: [id])
+  listedPrice  Float
+  isAuction    Boolean   @default(false) // Flag for auction vs fixed-price
+  auctionStart DateTime?
+  auctionEnd   DateTime?
+  createdAt    DateTime  @default(now())
+}
+
+model CreditRetirement {
+  id          String   @id @default(cuid())
+  nftId       String
+  nft         NFT      @relation(fields: [nftId], references: [id])
+  retiredById String
+  retiredBy   User     @relation(fields: [retiredById], references: [id])
+  createdAt   DateTime @default(now())
+}
