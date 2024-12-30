@@ -32,7 +32,7 @@ const abi = [
       { internalType: "string", name: "certificateURI", type: "string" },
       { internalType: "uint256", name: "expiryDate", type: "uint256" },
     ],
-    name: "mintNFT",
+    name: "mint",
     outputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
     stateMutability: "nonpayable",
     type: "function",
@@ -91,7 +91,7 @@ function MintPage() {
   const [typeofcredit, setTypeOfCredit] = useState("");
   const [quantity, setQuantity] = useState("");
   const [certificateURI, setCertificateURI] = useState("");
-  const [expiryDate, setExpiryDate] = useState<string | Date | null>(null);
+  const [expiryDate, setExpiryDate] = useState<Date | null>(null);
 
   const contractAddress = "0x9a860C718FEA0844d65b1a8fD8e845467F16E670";
 
@@ -114,27 +114,35 @@ function MintPage() {
     }
   }, [nftRate]);
 
-  async function mintNFT(e: React.FormEvent<HTMLFormElement>) {
+  const mintNFT = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!to || !typeofcredit || !quantity || !certificateURI || !expiryDate)
+    if (!to || !typeofcredit || !quantity || !certificateURI || !expiryDate) {
+      console.log("to", to);
+      console.log("typeofcredit", typeofcredit);
+      console.log("quantity", quantity);
+      console.log("certificateURI", certificateURI);
+      console.log("expiryDate", expiryDate);
       return;
-    const expiryTimestamp =
-      expiryDate instanceof Date ? Math.floor(expiryDate.getTime() / 1000) : 0;
+    }
+
+    const expiryTimestamp = Math.floor(expiryDate.getTime() / 1000);
+    console.log(expiryDate);
+    console.log(expiryTimestamp);
 
     writeContract({
       address: contractAddress,
       abi,
-      functionName: "mintNFT",
+      functionName: "mint",
       args: [
         to,
         typeofcredit,
-        parseInt(quantity),
+        BigInt(quantity),
         certificateURI,
-        expiryTimestamp,
+        BigInt(expiryTimestamp),
       ],
     });
-  }
+  };
 
   async function submitTransfer(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
