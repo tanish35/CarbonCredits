@@ -1,12 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   useAccount,
   useConnect,
   useDisconnect,
   useWaitForTransactionReceipt,
   useWriteContract,
+  useReadContract,
   useBalance,
 } from "wagmi";
+
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+// import { format, parse } from "date-fns";
+
 import {
   Box,
   Button,
@@ -20,11 +26,46 @@ import {
 const abi = [
   {
     inputs: [
-      { internalType: "address", name: "recipient", type: "address" },
-      { internalType: "string", name: "tokenURI", type: "string" },
+      { internalType: "address", name: "to", type: "address" },
+      { internalType: "string", name: "typeofcredit", type: "string" },
+      { internalType: "uint256", name: "quantity", type: "uint256" },
+      { internalType: "string", name: "certificateURI", type: "string" },
+      { internalType: "uint256", name: "expiryDate", type: "uint256" },
     ],
     name: "mintNFT",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    outputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "address", name: "from", type: "address" },
+      { internalType: "address", name: "to", type: "address" },
+      { internalType: "uint256", name: "tokenId", type: "uint256" },
+    ],
+    name: "transferCredit",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
+    name: "retireNFT",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "minter", type: "address" }],
+    name: "addMinter",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "uint256", name: "rate", type: "uint256" }],
+    name: "setRate",
+    outputs: [],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -34,29 +75,112 @@ function MintPage() {
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const { isConnected: accountConnected, address } = useAccount();
-  const { data: hash, error, isPending, writeContract } = useWriteContract();
+  const { data: hash, error, writeContract } = useWriteContract();
+  const [paymentAmount, setPaymentAmount] = useState("");
+
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({ hash });
+  const { data: balance, isError, isLoading } = useBalance({ address });
+
+  // const [recipient, setRecipient] = useState("");
+  const [tokenId, setTokenId] = useState("");
+  const [newMinter, setNewMinter] = useState("");
+  const [rate, setRate] = useState("");
+
+  const [to, setTo] = useState("");
+  const [typeofcredit, setTypeOfCredit] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [certificateURI, setCertificateURI] = useState("");
+  const [expiryDate, setExpiryDate] = useState<string | Date | null>(null);
+
+  const contractAddress = "0x9a860C718FEA0844d65b1a8fD8e845467F16E670";
+
   const {
-    data: balance,
-    isError,
-    isLoading,
-  } = useBalance({
-    address,
+    data: nftRate,
+    isLoading: isRateLoading,
+    isError: isRateError,
+  } = useReadContract({
+    address: contractAddress,
+    abi,
+    functionName: "nftRate",
   });
 
-  const [recipient, setRecipient] = useState("");
-  const [tokenURI, setTokenURI] = useState("");
+  useEffect(() => {
+    console.log(nftRate);
+    if (nftRate) {
+      setPaymentAmount(nftRate.toString());
+    } else {
+      setPaymentAmount("10000000");
+    }
+  }, [nftRate]);
 
-  async function submit(e: React.FormEvent<HTMLFormElement>) {
+  async function mintNFT(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!recipient || !tokenURI) return;
+
+    if (!to || !typeofcredit || !quantity || !certificateURI || !expiryDate)
+      return;
+    const expiryTimestamp =
+      expiryDate instanceof Date ? Math.floor(expiryDate.getTime() / 1000) : 0;
 
     writeContract({
-      address: "0x150Fa2411e99AC9D98E862496fc5E710b0aF63BB",
+      address: contractAddress,
       abi,
       functionName: "mintNFT",
-      args: [recipient, tokenURI],
+      args: [
+        to,
+        typeofcredit,
+        parseInt(quantity),
+        certificateURI,
+        expiryTimestamp,
+      ],
+    });
+  }
+
+  async function submitTransfer(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!to || !tokenId || !paymentAmount) {
+      return;
+    }
+
+    writeContract({
+      address: contractAddress,
+      abi,
+      functionName: "transferCredit",
+      args: [address, to, tokenId],
+      value: BigInt(paymentAmount),
+    });
+  }
+
+  async function retireNFT(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!tokenId) return;
+    writeContract({
+      address: contractAddress,
+      abi,
+      functionName: "retireNFT",
+      args: [tokenId],
+    });
+  }
+
+  async function addNewMinter(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!newMinter) return;
+    writeContract({
+      address: contractAddress,
+      abi,
+      functionName: "addMinter",
+      args: [newMinter],
+    });
+  }
+
+  async function updateRate(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!rate) return;
+    writeContract({
+      address: contractAddress,
+      abi,
+      functionName: "setRate",
+      args: [rate],
     });
   }
 
@@ -71,12 +195,12 @@ function MintPage() {
     >
       <VStack padding={6} align="stretch">
         <Text fontSize="2xl" fontWeight="bold" textAlign="center">
-          Mint Carbon Credits NFT
+          Carbon Credit Management
         </Text>
 
         {!accountConnected ? (
           <VStack padding={4} align="center">
-            <Text>Please connect your wallet to mint the NFT.</Text>
+            <Text>Please connect your wallet to proceed.</Text>
             <HStack padding={4}>
               {connectors.map((connector) => (
                 <Button
@@ -109,35 +233,150 @@ function MintPage() {
             <Button mt={4} colorScheme="red" onClick={() => disconnect()}>
               Disconnect Wallet
             </Button>
-            <form onSubmit={submit}>
+
+            <form onSubmit={mintNFT}>
               <Box mt={6}>
-                <label htmlFor="recipient">Recipient Address</label>
+                <label htmlFor="to">Recipient Address</label>
                 <Input
-                  id="recipient"
+                  id="to"
                   placeholder="Enter Recipient Address"
-                  value={recipient}
-                  onChange={(e) => setRecipient(e.target.value)}
+                  value={to}
+                  onChange={(e) => setTo(e.target.value)}
                   required
                 />
               </Box>
               <Box mt={4}>
-                <label htmlFor="tokenURI">Token URI</label>
+                <label htmlFor="typeofcredit">Type of Credit</label>
                 <Input
-                  id="tokenURI"
-                  placeholder="Enter Token URI"
-                  value={tokenURI}
-                  onChange={(e) => setTokenURI(e.target.value)}
+                  id="typeofcredit"
+                  placeholder="Enter Type of Credit"
+                  value={typeofcredit}
+                  onChange={(e) => setTypeOfCredit(e.target.value)}
                   required
                 />
               </Box>
-              <Button
-                type="submit"
-                mt={4}
-                colorScheme="teal"
-                disabled={!recipient || !tokenURI}
-              >
-                {isPending ? "Confirming..." : "Mint"}
+              <Box mt={4}>
+                <label htmlFor="quantity">Quantity</label>
+                <Input
+                  id="quantity"
+                  placeholder="Enter Quantity"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  required
+                />
+              </Box>
+              <Box mt={4}>
+                <label htmlFor="certificateURI">Certificate URI</label>
+                <Input
+                  id="certificateURI"
+                  placeholder="Enter Certificate URI"
+                  value={certificateURI}
+                  onChange={(e) => setCertificateURI(e.target.value)}
+                  required
+                />
+              </Box>
+              <Box mt={4}>
+                <Text>Expiry Date</Text>
+                <DatePicker
+                  id="expiryDate"
+                  selected={expiryDate ? new Date(expiryDate) : null}
+                  onChange={(date: Date | null) => setExpiryDate(date)}
+                  dateFormat="dd/MM/yyyy"
+                  minDate={new Date()}
+                  placeholderText="DD/MM/YYYY"
+                  required
+                />
+              </Box>
+
+              <Button type="submit" mt={4} colorScheme="teal">
+                Mint
+                {/* {isPending ? "Confirming..." : "Mint"} */}
               </Button>
+            </form>
+
+            <form onSubmit={submitTransfer}>
+              <Box mt={6}>
+                <label htmlFor="to">Recipient Address</label>
+                <Input
+                  id="to"
+                  placeholder="Enter Recipient Address"
+                  value={to}
+                  onChange={(e) => setTo(e.target.value)}
+                  required
+                />
+              </Box>
+
+              <Box mt={4}>
+                <label htmlFor="tokenId">Token ID to Transfer</label>
+                <Input
+                  id="tokenId"
+                  placeholder="Enter Token ID"
+                  value={tokenId}
+                  onChange={(e) => setTokenId(e.target.value)}
+                  required
+                />
+              </Box>
+              <Box mt={4}>
+                <label htmlFor="paymentAmount">Payment Amount (ETH)</label>
+                <Input
+                  id="paymentAmount"
+                  placeholder="Enter Payment Amount"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  required
+                  readOnly={isRateLoading || isRateError}
+                />
+              </Box>
+
+              <Button type="submit" mt={4} colorScheme="blue">
+                Transfer Credit
+                {/* {isPending ? "Confirming..." : "Transfer Credit"} */}
+              </Button>
+            </form>
+
+            <form onSubmit={retireNFT}>
+              <Box mt={6}>
+                <Text>Retire Token ID</Text>
+                <Input
+                  placeholder="Token ID to Retire"
+                  value={tokenId}
+                  onChange={(e) => setTokenId(e.target.value)}
+                  required
+                />
+                <Button type="submit" mt={4} colorScheme="orange">
+                  Retire NFT
+                </Button>
+              </Box>
+            </form>
+
+            <form onSubmit={addNewMinter}>
+              <Box mt={6}>
+                <Text>New Minter Address</Text>
+                <Input
+                  placeholder="New Minter Address"
+                  value={newMinter}
+                  onChange={(e) => setNewMinter(e.target.value)}
+                  required
+                />
+                <Button type="submit" mt={4} colorScheme="blue">
+                  Add Minter
+                </Button>
+              </Box>
+            </form>
+
+            <form onSubmit={updateRate}>
+              <Box mt={6}>
+                <Text>New Rate</Text>
+                <Input
+                  placeholder="Set Rate"
+                  value={rate}
+                  onChange={(e) => setRate(e.target.value)}
+                  required
+                />
+                <Button type="submit" mt={4} colorScheme="purple">
+                  Set Rate
+                </Button>
+              </Box>
             </form>
           </Box>
         )}
