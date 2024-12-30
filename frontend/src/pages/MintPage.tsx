@@ -50,7 +50,7 @@ const abi = [
   },
   {
     inputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
-    name: "retireNFT",
+    name: "retire",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -165,7 +165,7 @@ function MintPage() {
     writeContract({
       address: contractAddress,
       abi,
-      functionName: "retireNFT",
+      functionName: "retire",
       args: [tokenId],
     });
   }
