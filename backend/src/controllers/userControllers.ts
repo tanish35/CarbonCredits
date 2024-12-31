@@ -136,3 +136,15 @@ export const updateUserWallet = asyncHandler(async (req: Request, res: Response)
     },
   });
 });
+
+export const deleteUserWallet = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const user = await prisma.user.update({
+    where: {
+      id,
+    },
+    data: {
+      wallet_address:null,
+    },
+  });
+});
