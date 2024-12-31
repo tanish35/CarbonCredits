@@ -38,6 +38,13 @@ const abi = [
     type: "function",
   },
   {
+    inputs: [],
+    name: "getRate",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       { internalType: "address", name: "from", type: "address" },
       { internalType: "address", name: "to", type: "address" },
@@ -93,7 +100,7 @@ function MintPage() {
   const [certificateURI, setCertificateURI] = useState("");
   const [expiryDate, setExpiryDate] = useState<Date | null>(null);
 
-  const contractAddress = "0x9a860C718FEA0844d65b1a8fD8e845467F16E670";
+  const contractAddress = "0xabB026C81ba331999b2343c417aC15dB9216F3bD";
 
   const {
     data: nftRate,
@@ -102,11 +109,11 @@ function MintPage() {
   } = useReadContract({
     address: contractAddress,
     abi,
-    functionName: "nftRate",
+    functionName: "getRate",
   });
 
   useEffect(() => {
-    console.log(nftRate);
+    // console.log(nftRate);
     if (nftRate) {
       setPaymentAmount(nftRate.toString());
     } else {
