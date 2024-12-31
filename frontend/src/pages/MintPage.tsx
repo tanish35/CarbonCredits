@@ -12,6 +12,7 @@ import {
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 // import { format, parse } from "date-fns";
+import { Toaster, toaster } from "../components/ui/toaster";
 
 import {
   Box,
@@ -31,6 +32,7 @@ const abi = [
       { internalType: "uint256", name: "quantity", type: "uint256" },
       { internalType: "string", name: "certificateURI", type: "string" },
       { internalType: "uint256", name: "expiryDate", type: "uint256" },
+      { internalType: "uint256", name: "rate", type: "uint256" },
     ],
     name: "mint",
     outputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
@@ -88,6 +90,7 @@ function MintPage() {
   const { isConnected: accountConnected, address } = useAccount();
   const { data: hash, error, writeContract } = useWriteContract();
   const [paymentAmount, setPaymentAmount] = useState("");
+  const [isPending, setIsPending] = useState(false);
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({ hash });
@@ -114,7 +117,7 @@ function MintPage() {
     address: contractAddress,
     abi,
     functionName: "getRate",
-    args: [tokenId == "" ? BigInt(99999) : BigInt(tokenId)],
+    args: [tokenId],
   });
 
   useEffect(() => {
@@ -125,22 +128,42 @@ function MintPage() {
     }
   }, [tokenId, nftRate, isRateLoading, isRateError]);
 
+  useEffect(() => {
+    if (isConfirmed || error) {
+      setIsPending(false);
+    }
+  }, [isConfirmed, error]);
+
   const mintNFT = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!to || !typeofcredit || !quantity || !certificateURI || !expiryDate) {
-      console.log("to", to);
-      console.log("typeofcredit", typeofcredit);
-      console.log("quantity", quantity);
-      console.log("certificateURI", certificateURI);
-      console.log("expiryDate", expiryDate);
+    if (
+      !to ||
+      !typeofcredit ||
+      !quantity ||
+      !certificateURI ||
+      !expiryDate ||
+      !rate
+    ) {
+      // console.log("to", to);
+      // console.log("typeofcredit", typeofcredit);
+      // console.log("quantity", quantity);
+      // console.log("certificateURI", certificateURI);
+      // console.log("expiryDate", expiryDate);
       return;
     }
 
     const expiryTimestamp = Math.floor(expiryDate.getTime() / 1000);
-    console.log(expiryDate);
-    console.log(expiryTimestamp);
+    // console.log(expiryDate);
+    // console.log(expiryTimestamp);
 
+    setIsPending(true);
+    toaster.create({
+      title: "Minting NFT",
+      description: "Please approve the transaction in your wallet",
+      type: "info",
+      duration: 5000,
+    });
     writeContract({
       address: contractAddress,
       abi,
@@ -151,6 +174,7 @@ function MintPage() {
         BigInt(quantity),
         certificateURI,
         BigInt(expiryTimestamp),
+        BigInt(rate),
       ],
     });
   };
@@ -285,6 +309,16 @@ function MintPage() {
                 />
               </Box>
               <Box mt={4}>
+                <label htmlFor="cost">Token cost</label>
+                <Input
+                  id="rate"
+                  placeholder="Enter token cost"
+                  value={rate}
+                  onChange={(e) => setRate(e.target.value)}
+                  required
+                />
+              </Box>
+              <Box mt={4}>
                 <label htmlFor="certificateURI">Certificate URI</label>
                 <Input
                   id="certificateURI"
@@ -307,9 +341,13 @@ function MintPage() {
                 />
               </Box>
 
-              <Button type="submit" mt={4} colorScheme="teal">
+              <Button
+                type="submit"
+                mt={4}
+                colorScheme="teal"
+                disabled={isPending}
+              >
                 Mint
-                {/* {isPending ? "Confirming..." : "Mint"} */}
               </Button>
             </form>
 
@@ -402,9 +440,11 @@ function MintPage() {
                 <Text>
                   {isRateLoading
                     ? "Loading rate..."
-                    : isRateError
-                      ? "Error fetching rate"
-                      : `Current Rate: ${nftRate}`}
+                    : tokenId == ""
+                      ? ""
+                      : isRateError
+                        ? "Error fetching rate"
+                        : `Current Rate: ${nftRate}`}
                 </Text>
                 <Button type="submit" mt={4} colorScheme="purple">
                   Set Rate
@@ -441,6 +481,7 @@ function MintPage() {
           </Box>
         )}
       </VStack>
+      <Toaster />
     </Box>
   );
 }
