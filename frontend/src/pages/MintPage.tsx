@@ -335,7 +335,7 @@ function MintPage() {
                   selected={expiryDate ? new Date(expiryDate) : null}
                   onChange={(date: Date | null) => setExpiryDate(date)}
                   dateFormat="dd/MM/yyyy"
-                  minDate={new Date()}
+                  minDate={new Date(Date.now() + 86400000)}
                   placeholderText="DD/MM/YYYY"
                   required
                 />

@@ -119,6 +119,7 @@ export const getUserDetails = asyncHandler(async (req: Request, res: Response) =
         where: {
             id,
         },
+        cacheStrategy:{ttl:300,swr:60}
     });
     res.json(user);
 });
