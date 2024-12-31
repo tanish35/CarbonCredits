@@ -123,3 +123,16 @@ export const getUserDetails = asyncHandler(async (req: Request, res: Response) =
     });
     res.json(user);
 });
+
+export const updateUserWallet = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const {wallet_address} = req.body;
+  const user = await prisma.user.update({
+    where: {
+      id,
+    },
+    data: {
+      wallet_address,
+    },
+  });
+});
