@@ -38,12 +38,13 @@ const abi = [
     type: "function",
   },
   {
-    inputs: [],
+    inputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
     name: "getRate",
     outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
   },
+
   {
     inputs: [
       { internalType: "address", name: "from", type: "address" },
@@ -70,7 +71,10 @@ const abi = [
     type: "function",
   },
   {
-    inputs: [{ internalType: "uint256", name: "rate", type: "uint256" }],
+    inputs: [
+      { internalType: "uint256", name: "tokenId", type: "uint256" },
+      { internalType: "uint256", name: "rate", type: "uint256" },
+    ],
     name: "setRate",
     outputs: [],
     stateMutability: "nonpayable",
@@ -100,7 +104,7 @@ function MintPage() {
   const [certificateURI, setCertificateURI] = useState("");
   const [expiryDate, setExpiryDate] = useState<Date | null>(null);
 
-  const contractAddress = "0xabB026C81ba331999b2343c417aC15dB9216F3bD";
+  const contractAddress = "0x960F177114F4ac70c1C79C7fdB5127Cf9c8bB1E8";
 
   const {
     data: nftRate,
@@ -110,16 +114,16 @@ function MintPage() {
     address: contractAddress,
     abi,
     functionName: "getRate",
+    args: [tokenId == "" ? BigInt(99999) : BigInt(tokenId)],
   });
 
   useEffect(() => {
-    // console.log(nftRate);
-    if (nftRate) {
+    if (tokenId != "" && !isRateLoading && !isRateError && nftRate) {
       setPaymentAmount(nftRate.toString());
-    } else {
-      setPaymentAmount("10000000");
+    } else if (tokenId == "") {
+      setPaymentAmount("0");
     }
-  }, [nftRate]);
+  }, [tokenId, nftRate, isRateLoading, isRateError]);
 
   const mintNFT = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -195,7 +199,7 @@ function MintPage() {
       address: contractAddress,
       abi,
       functionName: "setRate",
-      args: [rate],
+      args: [tokenId, BigInt(rate)],
     });
   }
 
@@ -381,6 +385,13 @@ function MintPage() {
 
             <form onSubmit={updateRate}>
               <Box mt={6}>
+                <Text>Token ID</Text>
+                <Input
+                  placeholder="Token ID"
+                  value={tokenId}
+                  onChange={(e) => setTokenId(e.target.value)}
+                  required
+                />
                 <Text>New Rate</Text>
                 <Input
                   placeholder="Set Rate"
@@ -388,6 +399,13 @@ function MintPage() {
                   onChange={(e) => setRate(e.target.value)}
                   required
                 />
+                <Text>
+                  {isRateLoading
+                    ? "Loading rate..."
+                    : isRateError
+                      ? "Error fetching rate"
+                      : `Current Rate: ${nftRate}`}
+                </Text>
                 <Button type="submit" mt={4} colorScheme="purple">
                   Set Rate
                 </Button>
