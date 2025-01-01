@@ -23,5 +23,5 @@ app.use('/api/user', router);
 app.use('/api/nft', NFTrouter);
 
 app.listen(3001, () => {
-  console.log('Server is running on http://localhost:4000');
+  console.log('Server is running on http://localhost:3001');
 })
