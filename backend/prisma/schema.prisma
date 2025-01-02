@@ -8,66 +8,53 @@ datasource db {
 }
 
 model User {
-  id               String             @id @default(cuid())
-  email            String             @unique
-  password         String
-  name             String?
-  wallet_address   String?
-  emailVerified    Boolean            @default(false)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  nfts             NFT[]
-  transactions     Transaction[]
-  CreditRetirement CreditRetirement[]
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  wallets   Wallet[] 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Wallet {
+  id                String   @id @default(cuid())
+  address           String   @unique             
+  userId            String                        
+  user              User     @relation(fields: [userId], references: [id])
+  nfts              NFT[]                         
+  creditRetirement  CreditRetirement[]
+  createdAt         DateTime @default(now())
 }
 
 model NFT {
-  id                  String             @id @default(cuid())
-  tokenId             String             @unique
-  tokenURI            String
-  owner               User               @relation(fields: [ownerId], references: [id])
-  price               Float              @default(0)
-  ownerId             String
-  createdAt           DateTime           @default(now())
-  updatedAt           DateTime           @updatedAt
-  isRetired           Boolean            @default(false)
-  creditType          String
-  quantity            Float
-  expiryDate          DateTime?
-  verificationDetails String?
-  auditorInfo         String?
-  Transaction         Transaction[]
-  Marketplace         Marketplace?
-  CreditRetirement    CreditRetirement[]
+  id                String   @id @default(cuid()) 
+  tokenId           String   @unique             
+  walletAddress     String                        
+  wallet            Wallet   @relation(fields: [walletAddress], references: [address])
+  price             String                          
+  certificateURI    String                        
+  expiryDate        DateTime?                      
+  createdAt         DateTime @default(now())       
+  transaction       Transaction[]
+  creditRetirement  CreditRetirement[]
 }
 
 model Transaction {
-  id        String   @id @default(cuid())
-  nftId     String
-  nft       NFT      @relation(fields: [nftId], references: [id])
-  sellerId  String
-  buyerId   String
-  buyer     User     @relation(fields: [buyerId], references: [id])
-  price     Float
-  createdAt DateTime @default(now())
-}
-
-model Marketplace {
-  id           String    @id @default(cuid())
-  nftId        String    @unique
-  nft          NFT       @relation(fields: [nftId], references: [id])
-  listedPrice  Float
-  isAuction    Boolean   @default(false) // Flag for auction vs fixed-price
-  auctionStart DateTime?
-  auctionEnd   DateTime?
-  createdAt    DateTime  @default(now())
+  id           String   @id @default(cuid())
+  nftId        String
+  nft          NFT      @relation(fields: [nftId], references: [id])
+  sellerWallet String                        
+  buyerWallet  String                        
+  price        String
+  createdAt    DateTime @default(now())
 }
 
 model CreditRetirement {
-  id          String   @id @default(cuid())
-  nftId       String
-  nft         NFT      @relation(fields: [nftId], references: [id])
-  retiredById String
-  retiredBy   User     @relation(fields: [retiredById], references: [id])
-  createdAt   DateTime @default(now())
+  id            String   @id @default(cuid())
+  nftId         String
+  nft           NFT      @relation(fields: [nftId], references: [id])
+  walletAddress String                        
+  wallet        Wallet   @relation(fields: [walletAddress], references: [address])
+  createdAt     DateTime @default(now())
 }

@@ -1,6 +1,5 @@
 import web3 from 'web3';
 import { abi } from './abi/abi';
-import { NFTtrasactions } from './controllers/nftController';
 import prisma from './lib/prisma';
 const rpcProviderURL = `https://avax-testnet.g.alchemy.com/v2/${process.env.RPC_KEY}`;
 const web3Provider = new web3.providers.HttpProvider(rpcProviderURL);
@@ -64,3 +63,25 @@ contract.events.CreditTransferred({
     console.error(error);
 });
 
+// contract.events.CreditMinted ({
+//     filter: { /* Optional: Filter conditions, e.g., address or value */ },
+//     fromBlock: 'latest' 
+// })
+// .on('data', async(event) => {
+//     const {from, tokenId, amount} = event.returnValues;
+//     const nft = await prisma.nFT.create({
+//         data: {
+//             id: String(tokenId),
+//             amount: Number(amount),
+//             owner: {
+//                 connect: {
+//                     id: String(from),
+//                 },
+//             },
+//         }
+//     })
+// })
+// // @ts-ignore
+// .on('error', (error:any) => {
+//     console.error(error);
+// })

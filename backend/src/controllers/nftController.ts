@@ -17,76 +17,31 @@ const provider = new ethers.JsonRpcProvider(RPC_URL);
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, wallet);
 
-export const buyNFT = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { nftId } = req.body;
-  if (!nftId) {
-    res.status(400).json({ message: "Please provide an NFT id" });
-    return;
-  }
-  const user = await prisma.user.update({
-    where: {
-      id,
-    },
-    data: {
-      nfts: {
-        connect: {
-          id: nftId,
-        },
-      },
-    },
-  });
-});
-
-export const sellNFT = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { nftId } = req.body;
-  if (!nftId) {
-    res.status(400).json({ message: "Please provide an NFT id" });
-    return;
-  }
-  const user = await prisma.user.update({
-    where: {
-      id,
-    },
-    data: {
-      nfts: {
-        disconnect: {
-          id: nftId,
-        },
-      },
-    },
-  });
-});
 
 export const NFTtrasactions = asyncHandler(
   async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { buyerId, sellerId, nftId } = req.body;
+    const { buyerId, sellerId, nftId, price } = req.body;
     if (!buyerId || !sellerId || !nftId) {
       res
         .status(400)
         .json({ message: "Please provide all the required fields" });
       return;
     }
-    const transaction = await prisma.transaction.create({
-      // @ts-ignore
+    const buyer = await prisma.wallet.update({
+      where: {
+        address: buyerId,
+      },
       data: {
-        buyer: {
-          connect: {
-            id: buyerId,
-          },
-        },
-        nft: {
+        nfts: {
           connect: {
             id: nftId,
           },
         },
-      },
-    });
-    const user = await prisma.user.update({
+      }
+    })
+    const seller = await prisma.wallet.update({
       where: {
-        id: sellerId,
+        address: sellerId,
       },
       data: {
         nfts: {
@@ -94,36 +49,45 @@ export const NFTtrasactions = asyncHandler(
             id: nftId,
           },
         },
+      }
+    })
+    const transaction = await prisma.transaction.create({
+      data: {
+        buyerWallet: buyerId,
+        sellerWallet: sellerId,
+        nftId,
+        price
       },
-    });
+    })
 
-    const user2 = await prisma.user.update({
+    const nft = await prisma.nFT.update({
       where: {
-        id: buyerId,
+        id: nftId,
       },
       data: {
-        nfts: {
-          connect: {
-            id: nftId,
-          },
-        },
+        walletAddress: buyerId,
       },
-    });
-    res.json(transaction);
-  }
-);
+    })
+    res.json({ message: "Transaction successful" });
+});
 
-export const getNFTs = asyncHandler(async (req: Request, res: Response) => {
+export const getOwnedNFTs = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const user = await prisma.user.findUnique({
+  const userNFTs = await prisma.user.findUnique({
     where: {
       id,
     },
     include: {
-      nfts: true,
+      wallets: {
+        include: {
+          nfts: true,
+        },
+      },
     },
   });
-  res.json(user);
+  
+  res.json(userNFTs);
+  
 });
 
 export const getNFT = asyncHandler(async (req: Request, res: Response) => {
@@ -134,55 +98,55 @@ export const getNFT = asyncHandler(async (req: Request, res: Response) => {
   }
   const nft = await prisma.nFT.findUnique({
     where: {
-      id: nftId,
+      tokenId: nftId,
     },
   });
   res.json(nft);
 });
 
-export const createNFT = asyncHandler(async (req: Request, res: Response) => {
-  const {
-    tokenId,
-    tokenURI,
-    ownerId,
-    price,
-    createdAt,
-    creditType,
-    quantity,
-    expiryDate,
-  } = req.body;
-  if (
-    !tokenId ||
-    !tokenURI ||
-    !ownerId ||
-    !price ||
-    !createdAt ||
-    !creditType ||
-    !quantity ||
-    !expiryDate
-  ) {
-    res.status(400).json({ message: "Please provide all the required fields" });
-    return;
-  }
-  const nft = await prisma.nFT.create({
-    data: {
-      tokenId,
-      tokenURI,
-      ownerId,
-      price,
-      createdAt,
-      creditType,
-      quantity,
-      expiryDate,
-      owner: {
-        connect: {
-          id: ownerId,
-        },
-      },
-    },
-  });
-  res.json(nft);
-});
+// export const createNFT = asyncHandler(async (req: Request, res: Response) => {
+//   const {
+//     tokenId,
+//     tokenURI,
+//     ownerId,
+//     price,
+//     createdAt,
+//     creditType,
+//     quantity,
+//     expiryDate,
+//   } = req.body;
+//   if (
+//     !tokenId ||
+//     !tokenURI ||
+//     !ownerId ||
+//     !price ||
+//     !createdAt ||
+//     !creditType ||
+//     !quantity ||
+//     !expiryDate
+//   ) {
+//     res.status(400).json({ message: "Please provide all the required fields" });
+//     return;
+//   }
+//   const nft = await prisma.nFT.create({
+//     data: {
+//       tokenId,
+//       tokenURI,
+//       ownerId,
+//       price,
+//       createdAt,
+//       creditType,
+//       quantity,
+//       expiryDate,
+//       owner: {
+//         connect: {
+//           id: ownerId,
+//         },
+//       },
+//     },
+//   });
+//   res.json(nft);
+// });
 
 export const transferNFT = asyncHandler(async (req: Request, res: Response) => {
   const { from, to, tokenId } = req.body;
