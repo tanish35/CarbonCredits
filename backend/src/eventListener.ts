@@ -10,103 +10,114 @@ const contractAddress = process.env.CONTRACT_ADDRESS;
 const contract = new web3Instance.eth.Contract(abi, contractAddress);
 
 contract.events.CreditTransferred({
-    filter: { /* Optional: Filter conditions, e.g., address or value */ },
-    fromBlock: 'latest' 
-})
-.on('data', async(event) => {
-    console.log(event); 
-    
-    const {from, to, tokenId, amount} = event.returnValues;
-    const price = amount;
-    const buyer = await prisma.wallet.update({
-        where: {
-          address: String(to),
-        },
-        data: {
-          nfts: {
-            connect: {
-              id: String(tokenId),
-            },
-          },
-        }
-      })
-      const seller = await prisma.wallet.update({
-        where: {
-          address: String(from),
-        },
-        data: {
-          nfts: {
-            disconnect: {
-              id: String(tokenId),
-            },
-          },
-        }
-      })
-      const transaction = await prisma.transaction.create({
-        data: {
-          buyerWallet: String(to),
-          sellerWallet: String(from),
-          nftId: String(tokenId),
-          price: String(price),
-        },
-      })
+    fromBlock: 'latest',
+  })
+    .on('data', async (event) => {
+      try {
+        const { from, to, tokenId, amount } = event.returnValues;
+        const price = amount;
   
-      const nft = await prisma.nFT.update({
-        where: {
-          id: String(tokenId),
-        },
-        data: {
-          walletAddress: String(to),
-        },
-      })
-    console.log(buyer, seller, transaction, nft);
-})
-// @ts-ignore
-.on('error', (error:any) => {
-    console.error(error);
-});
-
-contract.events.CreditMinted ({
-    filter: { /* Optional: Filter conditions, e.g., address or value */ },
-    fromBlock: 'latest' 
-})
-.on('data', async(event) => {
-    const {to, tokenId, price, certificateURI, expiryDate} = event.returnValues;
-    const nft = await prisma.nFT.create({
-        data: {
-            tokenId: String(tokenId),
-            price: String(price),
-            certificateURI: String(certificateURI),
-            expiryDate: String(expiryDate),
-            walletAddress: String(to),
-        }
+        // Use Prisma transaction to ensure atomicity
+        const [buyer, seller, transaction, nft] = await prisma.$transaction([
+          prisma.wallet.update({
+            where: { address: String(to) },
+            data: {
+              nfts: {
+                connect: { id: String(tokenId) },
+              },
+            },
+          }),
+          prisma.wallet.update({
+            where: { address: String(from) },
+            data: {
+              nfts: {
+                disconnect: { id: String(tokenId) },
+              },
+            },
+          }),
+          prisma.transaction.create({
+            data: {
+              buyerWallet: String(to),
+              sellerWallet: String(from),
+              nftId: String(tokenId),
+              price: String(price),
+            },
+          }),
+          prisma.nFT.update({
+            where: { id: String(tokenId) },
+            data: { walletAddress: String(to) },
+          }),
+        ]);
+  
+        console.log(buyer, seller, transaction, nft);
+      } catch (error) {
+        console.error('Error handling CreditTransferred event:', error);
+      }
     })
-})
-// @ts-ignore
-.on('error', (error:any) => {
-    console.error(error);
-})
+    // @ts-ignore
+    .on('error', (error) => {
+      console.error('CreditTransferred listener error:', error);
+    });
+  
+contract.events.CreditMinted({
+    fromBlock: 'latest',
+  })
+    .on('data', async (event) => {
+      try {
+        const { to, tokenId, price, certificateURI, expiryDate } = event.returnValues;
+  
+        // Use Prisma transaction to ensure atomicity
+        const nft = await prisma.$transaction([
+          prisma.nFT.create({
+            data: {
+              tokenId: String(tokenId),
+              price: String(price),
+              certificateURI: String(certificateURI),
+              expiryDate: new Date(Number(expiryDate)),
+              walletAddress: String(to),
+            },
+          }),
+        ]);
+  
+        console.log('NFT Minted:', nft);
+      } catch (error) {
+        console.error('Error handling CreditMinted event:', error);
+      }
+    })
+    // @ts-ignore
+    .on('error', (error) => {
+      console.error('CreditMinted listener error:', error);
+    });
+  
 
 
 contract.events.CreditRetired({
-    filter: { /* Optional: Filter conditions, e.g., address or value */ },
-    fromBlock: 'latest' 
-})
-.on('data', async(event) => {
-    const {owner, tokenId} = event.returnValues;
-    const nft = await prisma.nFT.delete({
-        where: {
-            id: String(tokenId),
-        }
-    })
-    const creditRetire = await prisma.creditRetirement.create({
-        data: {
-            nftId: String(tokenId),
-            walletAddress: String(owner),
-        }
-    })
-})
-// @ts-ignore
-.on('error', (error:any) => {
-    console.error(error);
-})
+        fromBlock: 'latest',
+      })
+        .on('data', async (event) => {
+          try {
+            const { owner, tokenId } = event.returnValues;
+      
+            // Use Prisma transaction to ensure atomicity
+            const [deletedNFT, creditRetire] = await prisma.$transaction([
+              prisma.nFT.delete({
+                where: { id: String(tokenId) },
+              }),
+              prisma.creditRetirement.create({
+                data: {
+                  nftId: String(tokenId),
+                  walletAddress: String(owner),
+                },
+              }),
+            ]);
+      
+            console.log('NFT Retired:', deletedNFT, creditRetire);
+          } catch (error) {
+            console.error('Error handling CreditRetired event:', error);
+          }
+        })
+        // @ts-ignore
+        .on('error', (error) => {
+          console.error('CreditRetired listener error:', error);
+        });
+      
