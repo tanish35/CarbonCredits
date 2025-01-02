@@ -5,3 +5,9 @@
 [submodule "CarbonCreditsNFT"]
 	path = CarbonCreditsNFT
 	url = https://github.com/tanish35/CarbonCredit-NFT
+[submodule "SmartContract/lib/forge-std"]
+	path = SmartContract/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "SmartContract/lib/openzeppelin-contracts"]
+	path = SmartContract/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
