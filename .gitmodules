@@ -1,7 +1,4 @@
 [submodule "CarbonCreditsContract"]
 	path = CarbonCreditsContract
 	url = https://github.com/Somnath-Chattaraj/CarbonCreditsContract
-
-[submodule "CarbonCreditsNFT"]
-	path = CarbonCreditsNFT
-	url = https://github.com/tanish35/CarbonCredit-NFT
+ß
