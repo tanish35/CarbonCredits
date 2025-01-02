@@ -1,9 +1,14 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-// import { parse } from "path";
+import {
+  useAccount,
+  useWriteContract,
+  useReadContract,
+  useWaitForTransactionReceipt,
+} from "wagmi";
 
 interface NFTDetailsProps {
   id: string;
@@ -20,22 +25,102 @@ interface NFTDetailsProps {
   };
 }
 
+const contractAddress = "0xe2dc0a8D8AAD4A177cE3285c65b71E042987184D";
+const operatorAddress = "0xf2eAcB364AD62cA6aaCEcF207aBf93FA7de4E03B";
+const abi = [
+  {
+    inputs: [
+      { internalType: "address", name: "to", type: "address" },
+      { internalType: "bool", name: "approved", type: "bool" },
+    ],
+    name: "setApprovalForAll",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "address", name: "owner", type: "address" },
+      { internalType: "address", name: "operator", type: "address" },
+    ],
+    name: "isApprovedForAll",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+];
+
 const NFTDetailsPage: React.FC = () => {
-  // const { id } = useParams<{ id: string }>();
+  const { address, isConnected } = useAccount();
   const location = useLocation();
   const nftDetails = location.state as NFTDetailsProps;
 
-  useEffect(() => {
-    console.log(location);
-  }, [location]);
+  const [isApproved, setIsApproved] = useState<boolean | null>(null);
+  const { data: isApprovedForAllData } = useReadContract({
+    address: contractAddress,
+    abi,
+    functionName: "isApprovedForAll",
+    args: [address, operatorAddress],
+  });
 
-  if (!nftDetails) {
-    return <div>Loading...</div>;
-  }
+  const { data: hash, error, writeContract } = useWriteContract();
+
+  // Waiting for the transaction receipt
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({ hash });
+
+  useEffect(() => {
+    if (isApprovedForAllData !== undefined) {
+      setIsApproved(Boolean(isApprovedForAllData));
+    }
+  }, [isApprovedForAllData]);
+
+  const handleApprovalToggle = async () => {
+    if (nftDetails && address) {
+      try {
+        writeContract({
+          address: contractAddress,
+          abi,
+          functionName: "setApprovalForAll",
+          args: [operatorAddress, true],
+        });
+
+        setIsApproved(true);
+      } catch (error) {
+        console.error("Error setting approval:", error);
+      }
+    }
+  };
+
+  const handleRemoveFromSale = async () => {
+    if (nftDetails && address) {
+      try {
+        writeContract({
+          address: contractAddress,
+          abi,
+          functionName: "setApprovalForAll",
+          args: [operatorAddress, false],
+        });
+
+        setIsApproved(false);
+      } catch (error) {
+        console.error("Error removing from sale:", error);
+      }
+    }
+  };
 
   return (
     <div className="container mx-auto p-4">
-      <Link to="/" className="text-blue-500 hover:underline mb-4 inline-block">
+      <Link
+        to="/my-nft"
+        className="text-blue-500 hover:underline mb-4 inline-block"
+      >
         &larr; Back to Wallet
       </Link>
       <Card className="mt-4">
@@ -72,14 +157,6 @@ const NFTDetailsPage: React.FC = () => {
                       nftDetails.expiryDate * 1000
                     ).toLocaleDateString()}
                   </li>
-                  {/* <li>
-                    <strong>Status:</strong>{" "}
-                    {nftDetails.retired ? (
-                      <Badge variant="destructive">Retired</Badge>
-                    ) : (
-                      <Badge variant="secondary">Active</Badge>
-                    )}
-                  </li> */}
                 </ul>
               </div>
               <div>
@@ -95,10 +172,30 @@ const NFTDetailsPage: React.FC = () => {
               </div>
               <Button
                 className="w-full mt-4"
-                onClick={() => alert("Listing functionality not implemented")}
+                onClick={
+                  isApproved ? handleRemoveFromSale : handleApprovalToggle
+                }
+                disabled={isConfirming}
               >
-                List for Sale
+                {isApproved
+                  ? isConfirming
+                    ? "Removing from Sale..."
+                    : "Remove from Sale"
+                  : isConfirming
+                    ? "Listing for Sale..."
+                    : "List for Sale"}
               </Button>
+              {isConfirming && (
+                <p className="mt-2 text-gray-500">
+                  Transaction is being confirmed...
+                </p>
+              )}
+              {isConfirmed && (
+                <p className="mt-2 text-green-500">Transaction Confirmed!</p>
+              )}
+              {error && (
+                <p className="mt-2 text-red-500">Error: {error.message}</p>
+              )}
             </div>
           </div>
         </CardContent>

@@ -60,7 +60,6 @@ const MyNFTPage: React.FC = () => {
   const [credits, setCredits] = useState<any[]>([]);
 
   useEffect(() => {
-    console.log(creditsData);
     if (creditsData && Array.isArray(creditsData)) {
       const fetchData = async () => {
         const creditData: any[] = await Promise.all(
@@ -135,101 +134,101 @@ const MyNFTPage: React.FC = () => {
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>Wallet Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-2">Wallet Connected: {address}</p>
-            <div className="mt-4">
-              <h3 className="text-lg font-medium">Balance:</h3>
-              {isLoading ? (
-                <Skeleton className="h-6 w-24" />
-              ) : isError ? (
-                <p className="text-red-500">Error fetching balance</p>
-              ) : (
-                <p className="text-xl font-bold">
-                  {balance?.formatted} {balance?.symbol}
-                </p>
-              )}
-            </div>
-            <Button
-              className="mt-4"
-              variant="destructive"
-              onClick={() => disconnect()}
-            >
-              Disconnect Wallet
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle>Wallet Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-2">Wallet Connected: {address}</p>
+              <div className="mt-4">
+                <h3 className="text-lg font-medium">Balance:</h3>
+                {isLoading ? (
+                  <Skeleton className="h-6 w-24" />
+                ) : isError ? (
+                  <p className="text-red-500">Error fetching balance</p>
+                ) : (
+                  <p className="text-xl font-bold">
+                    {balance?.formatted} {balance?.symbol}
+                  </p>
+                )}
+              </div>
+              <Button
+                className="mt-4"
+                variant="destructive"
+                onClick={() => disconnect()}
+              >
+                Disconnect Wallet
+              </Button>
+            </CardContent>
+          </Card>
 
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Your Credits</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isCreditLoading ? (
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-full" />
-            </div>
-          ) : isCreditError ? (
-            <p className="text-red-500">Error fetching credits</p>
-          ) : (
-            <ScrollArea className="h-[400px] pr-4">
-              {credits.length === 0 ? (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle>Your Credits</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isCreditLoading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                </div>
+              ) : isCreditError ? (
+                <p className="text-red-500">Error fetching credits</p>
+              ) : credits.length === 0 ? (
                 <p>No credits owned</p>
               ) : (
-                <div className="space-y-4">
-                  {credits.map((credit, index) => (
-                    <Card
-                      key={index}
-                      className="cursor-pointer hover:shadow-md transition-shadow"
-                      onClick={() => handleCardClick(credit)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="text-xl font-bold">
-                              Credit #{credit.id.toString()}
-                            </h3>
-                            <p className="text-sm text-muted-foreground">
-                              {credit.typeofcredit}
-                            </p>
-                            <p className="mt-2">
-                              Quantity: {credit.quantity.toString()}
-                            </p>
-                            <p className="mt-1">
-                              Expiry Date:{" "}
-                              {new Date(
-                                credit.expiryDate * 1000
-                              ).toLocaleDateString()}
-                            </p>
-                            {credit.retired && (
-                              <Badge variant="destructive" className="mt-2">
-                                Retired
-                              </Badge>
+                <ScrollArea className="h-[400px] pr-4">
+                  <div className="space-y-4">
+                    {credits.map((credit, index) => (
+                      <Card
+                        key={index}
+                        className="cursor-pointer hover:shadow-md transition-shadow"
+                        onClick={() => handleCardClick(credit)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h3 className="text-xl font-bold">
+                                Credit #{credit.id.toString()}
+                              </h3>
+                              <p className="text-sm text-muted-foreground">
+                                {credit.typeofcredit}
+                              </p>
+                              <p className="mt-2">
+                                Quantity: {credit.quantity.toString()}
+                              </p>
+                              <p className="mt-1">
+                                Expiry Date:{" "}
+                                {new Date(
+                                  credit.expiryDate * 1000
+                                ).toLocaleDateString()}
+                              </p>
+                              {credit.retired && (
+                                <Badge variant="destructive" className="mt-2">
+                                  Retired
+                                </Badge>
+                              )}
+                            </div>
+                            {credit.certificateURI && (
+                              <img
+                                src={credit.certificateURI}
+                                alt={`Credit #${credit.id.toString()}`}
+                                className="w-24 h-24 object-cover rounded-md"
+                              />
                             )}
                           </div>
-                          {credit.certificateURI && (
-                            <img
-                              src={credit.certificateURI}
-                              alt={`Credit #${credit.id.toString()}`}
-                              className="w-24 h-24 object-cover rounded-md"
-                            />
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </ScrollArea>
               )}
-            </ScrollArea>
-          )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 };

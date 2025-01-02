@@ -1,237 +1,488 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import {
+  useAccount,
   useConnect,
   useDisconnect,
-  useAccount,
-  useBalance,
+  useWaitForTransactionReceipt,
+  useWriteContract,
   useReadContract,
+  useBalance,
 } from "wagmi";
-import axios from "axios";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
 
-const contractAddress = "0xe2dc0a8D8AAD4A177cE3285c65b71E042987184D";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+// import { format, parse } from "date-fns";
+import { Toaster, toaster } from "../components/ui/toaster";
+
+import {
+  Box,
+  Button,
+  Input,
+  VStack,
+  Text,
+  Spinner,
+  HStack,
+} from "@chakra-ui/react";
+
 const abi = [
   {
-    inputs: [{ internalType: "address", name: "owner", type: "address" }],
-    name: "getCreditByOwner",
-    outputs: [
-      {
-        components: [
-          { internalType: "uint256", name: "id", type: "uint256" },
-          { internalType: "string", name: "typeofcredit", type: "string" },
-          { internalType: "uint256", name: "quantity", type: "uint256" },
-          { internalType: "string", name: "certificateURI", type: "string" },
-          { internalType: "uint256", name: "expiryDate", type: "uint256" },
-          { internalType: "bool", name: "retired", type: "bool" },
-        ],
-        internalType: "struct Credit[]",
-        name: "",
-        type: "tuple[]",
-      },
+    inputs: [
+      { internalType: "address", name: "to", type: "address" },
+      { internalType: "string", name: "typeofcredit", type: "string" },
+      { internalType: "uint256", name: "quantity", type: "uint256" },
+      { internalType: "string", name: "certificateURI", type: "string" },
+      { internalType: "uint256", name: "expiryDate", type: "uint256" },
+      { internalType: "uint256", name: "rate", type: "uint256" },
     ],
+    name: "mint",
+    outputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
+    name: "getRate",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
     stateMutability: "view",
+    type: "function",
+  },
+
+  {
+    inputs: [
+      { internalType: "address", name: "from", type: "address" },
+      { internalType: "address", name: "to", type: "address" },
+      { internalType: "uint256", name: "tokenId", type: "uint256" },
+    ],
+    name: "transferCredit",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
+    name: "retire",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [{ internalType: "address", name: "minter", type: "address" }],
+    name: "addMinter",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "uint256", name: "tokenId", type: "uint256" },
+      { internalType: "uint256", name: "rate", type: "uint256" },
+    ],
+    name: "setRate",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
 ];
 
-const WalletPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { connect, connectors: availableConnectors } = useConnect();
+function MintPage() {
+  const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const { isConnected: accountConnected, address } = useAccount();
+  const { data: hash, error, writeContract } = useWriteContract();
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [isPending, setIsPending] = useState(false);
+
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({ hash });
   const { data: balance, isError, isLoading } = useBalance({ address });
 
+  // const [recipient, setRecipient] = useState("");
+  const [tokenId, setTokenId] = useState("");
+  const [newMinter, setNewMinter] = useState("");
+  const [rate, setRate] = useState("");
+
+  const [to, setTo] = useState("");
+  const [typeofcredit, setTypeOfCredit] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [certificateURI, setCertificateURI] = useState("");
+  const [expiryDate, setExpiryDate] = useState<Date | null>(null);
+
+  const contractAddress = "0xe2dc0a8D8AAD4A177cE3285c65b71E042987184D";
   const {
-    data: creditsData,
-    isLoading: isCreditLoading,
-    isError: isCreditError,
+    data: nftRate,
+    isLoading: isRateLoading,
+    isError: isRateError,
   } = useReadContract({
     address: contractAddress,
     abi,
-    functionName: "getCreditByOwner",
-    args: [address],
+    functionName: "getRate",
+    args: [tokenId],
   });
 
-  const [credits, setCredits] = useState<any[]>([]);
+  useEffect(() => {
+    if (tokenId != "" && !isRateLoading && !isRateError && nftRate) {
+      setPaymentAmount(nftRate.toString());
+    } else if (tokenId == "") {
+      setPaymentAmount("0");
+    }
+  }, [tokenId, nftRate, isRateLoading, isRateError]);
 
   useEffect(() => {
-    console.log(creditsData);
-    if (creditsData && Array.isArray(creditsData)) {
-      const fetchData = async () => {
-        const creditData: any[] = await Promise.all(
-          creditsData.map(async (credit) => {
-            const certificateURI = `https://${credit.certificateURI.replace(
-              /^ipfs:\/\//,
-              ""
-            )}.ipfs.dweb.link/`;
-
-            try {
-              const response = await axios.get(certificateURI, {
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              });
-
-              const imageURI = response.data?.image;
-              const updatedCertificateURI = `https://${imageURI.replace(
-                /^ipfs:\/\//,
-                ""
-              )}.ipfs.dweb.link/`;
-
-              return {
-                ...credit,
-                expiryDate: parseInt(credit.expiryDate),
-                certificateURI: updatedCertificateURI,
-                metadata: response.data,
-              };
-            } catch (error) {
-              console.error("Error fetching data:", error);
-              return {
-                ...credit,
-                expiryDate: parseInt(credit.expiryDate),
-                certificateURI,
-                metadata: null,
-              };
-            }
-          })
-        );
-
-        setCredits(creditData);
-      };
-
-      fetchData();
+    if (isConfirmed || error) {
+      setIsPending(false);
     }
-  }, [creditsData]);
+  }, [isConfirmed, error]);
 
-  const handleCardClick = (credit: any) => {
-    navigate(`/nft/${credit.id}`, { state: credit });
+  const mintNFT = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (
+      !to ||
+      !typeofcredit ||
+      !quantity ||
+      !certificateURI ||
+      !expiryDate ||
+      !rate
+    ) {
+      // console.log("to", to);
+      // console.log("typeofcredit", typeofcredit);
+      // console.log("quantity", quantity);
+      // console.log("certificateURI", certificateURI);
+      // console.log("expiryDate", expiryDate);
+      return;
+    }
+
+    const expiryTimestamp = Math.floor(expiryDate.getTime() / 1000);
+    // console.log(expiryDate);
+    // console.log(expiryTimestamp);
+
+    setIsPending(true);
+    toaster.create({
+      title: "Minting NFT",
+      description: "Please approve the transaction in your wallet",
+      type: "info",
+      duration: 5000,
+    });
+    writeContract({
+      address: contractAddress,
+      abi,
+      functionName: "mint",
+      args: [
+        to,
+        typeofcredit,
+        BigInt(quantity),
+        certificateURI,
+        BigInt(expiryTimestamp),
+        BigInt(rate),
+      ],
+    });
   };
 
+  async function submitTransfer(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!to || !tokenId || !paymentAmount) {
+      return;
+    }
+
+    writeContract({
+      address: contractAddress,
+      abi,
+      functionName: "transferCredit",
+      args: [address, to, tokenId],
+      value: BigInt(paymentAmount),
+    });
+  }
+
+  async function retireNFT(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!tokenId) return;
+    writeContract({
+      address: contractAddress,
+      abi,
+      functionName: "retire",
+      args: [tokenId],
+    });
+  }
+
+  async function addNewMinter(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!newMinter) return;
+    writeContract({
+      address: contractAddress,
+      abi,
+      functionName: "addMinter",
+      args: [newMinter],
+    });
+  }
+
+  async function updateRate(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!rate) return;
+    writeContract({
+      address: contractAddress,
+      abi,
+      functionName: "setRate",
+      args: [tokenId, BigInt(rate)],
+    });
+  }
+
   return (
-    <div className="container mx-auto p-4">
-      {!accountConnected ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Connect Your Wallet</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-4">Please connect your wallet to proceed.</p>
-            <div className="flex flex-wrap gap-4">
-              {availableConnectors.map((connector) => (
+    <Box
+      maxW="lg"
+      mx="auto"
+      p={6}
+      bg="gray.50"
+      borderRadius="md"
+      boxShadow="lg"
+    >
+      <VStack padding={6} align="stretch">
+        <Text fontSize="2xl" fontWeight="bold" textAlign="center">
+          Carbon Credit Management
+        </Text>
+
+        {!accountConnected ? (
+          <VStack padding={4} align="center">
+            <Text>Please connect your wallet to proceed.</Text>
+            <HStack padding={4}>
+              {connectors.map((connector) => (
                 <Button
                   key={connector.id}
                   onClick={() => connect({ connector })}
-                  variant="outline"
+                  colorScheme="teal"
                 >
                   Connect with {connector.name}
                 </Button>
               ))}
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>Wallet Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-2">Wallet Connected: {address}</p>
-            <div className="mt-4">
-              <h3 className="text-lg font-medium">Balance:</h3>
+            </HStack>
+          </VStack>
+        ) : (
+          <Box>
+            <Text>Wallet Connected: {address}</Text>
+            <Box mt={6}>
+              <Text fontSize="lg" fontWeight="medium">
+                Balance:
+              </Text>
               {isLoading ? (
-                <Skeleton className="h-6 w-24" />
+                <Text>Loading...</Text>
               ) : isError ? (
-                <p className="text-red-500">Error fetching balance</p>
+                <Text color="red.500">Error fetching balance</Text>
               ) : (
-                <p className="text-xl font-bold">
+                <Text fontSize="lg" fontWeight="bold">
                   {balance?.formatted} {balance?.symbol}
-                </p>
+                </Text>
               )}
-            </div>
-            <Button
-              className="mt-4"
-              variant="destructive"
-              onClick={() => disconnect()}
-            >
+            </Box>
+            <Button mt={4} colorScheme="red" onClick={() => disconnect()}>
               Disconnect Wallet
             </Button>
-          </CardContent>
-        </Card>
-      )}
 
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Your Credits</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isCreditLoading ? (
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-full" />
-            </div>
-          ) : isCreditError ? (
-            <p className="text-red-500">Error fetching credits</p>
-          ) : (
-            <ScrollArea className="h-[400px] pr-4">
-              {credits.length === 0 ? (
-                <p>No credits owned</p>
-              ) : (
-                <div className="space-y-4">
-                  {credits.map((credit, index) => (
-                    <Card
-                      key={index}
-                      className="cursor-pointer hover:shadow-md transition-shadow"
-                      onClick={() => handleCardClick(credit)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="text-xl font-bold">
-                              Credit #{credit.id.toString()}
-                            </h3>
-                            <p className="text-sm text-muted-foreground">
-                              {credit.typeofcredit}
-                            </p>
-                            <p className="mt-2">
-                              Quantity: {credit.quantity.toString()}
-                            </p>
-                            <p className="mt-1">
-                              Expiry Date:{" "}
-                              {new Date(
-                                credit.expiryDate * 1000
-                              ).toLocaleDateString()}
-                            </p>
-                            {credit.retired && (
-                              <Badge variant="destructive" className="mt-2">
-                                Retired
-                              </Badge>
-                            )}
-                          </div>
-                          {credit.certificateURI && (
-                            <img
-                              src={credit.certificateURI}
-                              alt={`Credit #${credit.id.toString()}`}
-                              className="w-24 h-24 object-cover rounded-md"
-                            />
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </ScrollArea>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+            <form onSubmit={mintNFT}>
+              <Box mt={6}>
+                <label htmlFor="to">Recipient Address</label>
+                <Input
+                  id="to"
+                  placeholder="Enter Recipient Address"
+                  value={to}
+                  onChange={(e) => setTo(e.target.value)}
+                  required
+                />
+              </Box>
+              <Box mt={4}>
+                <label htmlFor="typeofcredit">Type of Credit</label>
+                <Input
+                  id="typeofcredit"
+                  placeholder="Enter Type of Credit"
+                  value={typeofcredit}
+                  onChange={(e) => setTypeOfCredit(e.target.value)}
+                  required
+                />
+              </Box>
+              <Box mt={4}>
+                <label htmlFor="quantity">Quantity</label>
+                <Input
+                  id="quantity"
+                  placeholder="Enter Quantity"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  required
+                />
+              </Box>
+              <Box mt={4}>
+                <label htmlFor="cost">Token cost</label>
+                <Input
+                  id="rate"
+                  placeholder="Enter token cost"
+                  value={rate}
+                  onChange={(e) => setRate(e.target.value)}
+                  required
+                />
+              </Box>
+              <Box mt={4}>
+                <label htmlFor="certificateURI">Certificate URI</label>
+                <Input
+                  id="certificateURI"
+                  placeholder="Enter Certificate URI"
+                  value={certificateURI}
+                  onChange={(e) => setCertificateURI(e.target.value)}
+                  required
+                />
+              </Box>
+              <Box mt={4}>
+                <Text>Expiry Date</Text>
+                <DatePicker
+                  id="expiryDate"
+                  selected={expiryDate ? new Date(expiryDate) : null}
+                  onChange={(date: Date | null) => setExpiryDate(date)}
+                  dateFormat="dd/MM/yyyy"
+                  minDate={new Date(Date.now() + 86400000)}
+                  placeholderText="DD/MM/YYYY"
+                  required
+                />
+              </Box>
+
+              <Button
+                type="submit"
+                mt={4}
+                colorScheme="teal"
+                disabled={isPending}
+              >
+                Mint
+              </Button>
+            </form>
+
+            <form onSubmit={submitTransfer}>
+              <Box mt={6}>
+                <label htmlFor="to">Recipient Address</label>
+                <Input
+                  id="to"
+                  placeholder="Enter Recipient Address"
+                  value={to}
+                  onChange={(e) => setTo(e.target.value)}
+                  required
+                />
+              </Box>
+
+              <Box mt={4}>
+                <label htmlFor="tokenId">Token ID to Transfer</label>
+                <Input
+                  id="tokenId"
+                  placeholder="Enter Token ID"
+                  value={tokenId}
+                  onChange={(e) => setTokenId(e.target.value)}
+                  required
+                />
+              </Box>
+              <Box mt={4}>
+                <label htmlFor="paymentAmount">Payment Amount (ETH)</label>
+                <Input
+                  id="paymentAmount"
+                  placeholder="Enter Payment Amount"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  required
+                  readOnly={isRateLoading || isRateError}
+                />
+              </Box>
+
+              <Button type="submit" mt={4} colorScheme="blue">
+                Transfer Credit
+                {/* {isPending ? "Confirming..." : "Transfer Credit"} */}
+              </Button>
+            </form>
+
+            <form onSubmit={retireNFT}>
+              <Box mt={6}>
+                <Text>Retire Token ID</Text>
+                <Input
+                  placeholder="Token ID to Retire"
+                  value={tokenId}
+                  onChange={(e) => setTokenId(e.target.value)}
+                  required
+                />
+                <Button type="submit" mt={4} colorScheme="orange">
+                  Retire NFT
+                </Button>
+              </Box>
+            </form>
+
+            <form onSubmit={addNewMinter}>
+              <Box mt={6}>
+                <Text>New Minter Address</Text>
+                <Input
+                  placeholder="New Minter Address"
+                  value={newMinter}
+                  onChange={(e) => setNewMinter(e.target.value)}
+                  required
+                />
+                <Button type="submit" mt={4} colorScheme="blue">
+                  Add Minter
+                </Button>
+              </Box>
+            </form>
+
+            <form onSubmit={updateRate}>
+              <Box mt={6}>
+                <Text>Token ID</Text>
+                <Input
+                  placeholder="Token ID"
+                  value={tokenId}
+                  onChange={(e) => setTokenId(e.target.value)}
+                  required
+                />
+                <Text>New Rate</Text>
+                <Input
+                  placeholder="Set Rate"
+                  value={rate}
+                  onChange={(e) => setRate(e.target.value)}
+                  required
+                />
+                <Text>
+                  {isRateLoading
+                    ? "Loading rate..."
+                    : tokenId == ""
+                      ? ""
+                      : isRateError
+                        ? "Error fetching rate"
+                        : `Current Rate: ${nftRate}`}
+                </Text>
+                <Button type="submit" mt={4} colorScheme="purple">
+                  Set Rate
+                </Button>
+              </Box>
+            </form>
+          </Box>
+        )}
+
+        {hash && !isConfirming && (
+          <Box mt={4} p={4} bg="gray.100" borderRadius="md">
+            <Text>
+              <strong>Transaction Hash:</strong> {hash}
+            </Text>
+          </Box>
+        )}
+
+        {isConfirming && (
+          <Box mt={4} p={4} bg="yellow.100" borderRadius="md">
+            <Spinner />
+            <Text>Waiting for confirmation...</Text>
+          </Box>
+        )}
+
+        {isConfirmed && (
+          <Box mt={4} p={4} bg="green.100" borderRadius="md">
+            <Text>Transaction confirmed!</Text>
+          </Box>
+        )}
+
+        {error && (
+          <Box mt={4} p={4} bg="red.100" borderRadius="md">
+            <Text>Error: {error.message}</Text>
+          </Box>
+        )}
+      </VStack>
+      <Toaster />
+    </Box>
   );
-};
+}
 
-export default WalletPage;
+export default MintPage;
