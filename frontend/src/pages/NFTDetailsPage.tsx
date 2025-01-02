@@ -25,7 +25,7 @@ interface NFTDetailsProps {
   };
 }
 
-const contractAddress = "0xe2dc0a8D8AAD4A177cE3285c65b71E042987184D";
+const contractAddress = "0x9CfdAEAff42D4941B8435A97646E80568e525f71";
 const operatorAddress = "0xB76c4D0BDc1B1508b66A36BE5fdc362Cc79988b3";
 const abi = [
   {
@@ -90,7 +90,7 @@ const NFTDetailsPage: React.FC = () => {
           address: contractAddress,
           abi,
           functionName: "approve",
-          args: [operatorAddress, parseInt(nftDetails.id)],
+          args: [operatorAddress, BigInt(nftDetails.id)],
         });
 
         setApprovedAddress(operatorAddress);
@@ -103,15 +103,14 @@ const NFTDetailsPage: React.FC = () => {
   const handleRemoveApproval = async () => {
     if (nftDetails && address) {
       try {
-        // Set the approval to the zero address (removes approval for the operator)
         writeContract({
           address: contractAddress,
           abi,
           functionName: "approve",
-          args: [address, parseInt(nftDetails.id)], // Removes the operator by approving the owner's address
+          args: [address, BigInt(nftDetails.id)],
         });
 
-        setApprovedAddress(null); // Removes operator address
+        setApprovedAddress(null);
       } catch (error) {
         console.error("Error removing approval:", error);
       }

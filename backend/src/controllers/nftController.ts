@@ -148,16 +148,29 @@ export const getNFT = asyncHandler(async (req: Request, res: Response) => {
 //   res.json(nft);
 // });
 
+//@ts-ignore
 export const transferNFT = asyncHandler(async (req: Request, res: Response) => {
   const { from, to, tokenId } = req.body;
+
   if (!from || !to || !tokenId) {
-    res.status(400).json({ message: "Please provide all the required fields" });
-    return;
+    return res
+      .status(400)
+      .json({ message: "Please provide all the required fields" });
   }
-  const balance = await provider.getBalance(from);
-  console.log(provider);
-  console.log("Balance:", balance.toString());
-  const tx = await contract.safeTransferFrom(from, to, tokenId);
-  await tx.wait();
-  res.json({ message: "Token transferred successfully" });
+
+  try {
+    const tx = await contract.safeTransferFrom(from, to, tokenId);
+    const receipt = await tx.wait();
+    res.json({
+      message: "Token transferred successfully",
+      transactionHash: tx.hash,
+      receipt,
+    });
+  } catch (error: any) {
+    console.error("Transfer Error:", error);
+    const errorMessage =
+      error.reason ||
+      "Failed to transfer NFT. Please check the input data and try again.";
+    res.status(500).json({ message: errorMessage });
+  }
 });
