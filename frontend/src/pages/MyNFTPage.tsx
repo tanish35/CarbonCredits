@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   useConnect,
   useDisconnect,
@@ -39,6 +40,7 @@ const abi = [
 ];
 
 const MyNFTPage: React.FC = () => {
+  const navigate = useNavigate();
   const { connect, connectors: availableConnectors } = useConnect();
   const { disconnect } = useDisconnect();
   const { isConnected: accountConnected, address } = useAccount();
@@ -106,6 +108,10 @@ const MyNFTPage: React.FC = () => {
     }
   }, [creditsData]);
 
+  const handleCardClick = (credit: any) => {
+    navigate(`/nft/${credit.id}`, { state: credit });
+  };
+
   return (
     <div className="container mx-auto p-4">
       {!accountConnected ? (
@@ -158,7 +164,6 @@ const MyNFTPage: React.FC = () => {
         </Card>
       )}
 
-      {/* Display Credits */}
       <Card className="mt-8">
         <CardHeader>
           <CardTitle>Your Credits</CardTitle>
@@ -179,7 +184,11 @@ const MyNFTPage: React.FC = () => {
               ) : (
                 <div className="space-y-4">
                   {credits.map((credit, index) => (
-                    <Card key={index}>
+                    <Card
+                      key={index}
+                      className="cursor-pointer hover:shadow-md transition-shadow"
+                      onClick={() => handleCardClick(credit)}
+                    >
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start">
                           <div>
