@@ -1,7 +1,7 @@
 import web3 from 'web3';
 import { abi } from './abi/abi';
 import prisma from './lib/prisma';
-const rpcProviderURL = `https://avax-testnet.g.alchemy.com/v2/${process.env.RPC_KEY}`;
+const rpcProviderURL = `https://avax-testnet.g.alchemy.com/v2/${process.env.PRIVATE_KEY}`;
 const web3Provider = new web3.providers.HttpProvider(rpcProviderURL);
 const web3Instance = new web3(web3Provider);
 
