@@ -15,8 +15,6 @@ contract TransferCarbonCreditNFT is Script {
         address to = 0xf2eAcB364AD62cA6aaCEcF207aBf93FA7de4E03B;
         address owner1 = carbonCreditNFT.ownerOf(0);
         console.log("Owner:", owner1);
-
-        // Transfer the token from the current owner to the new address
         carbonCreditNFT.safeTransferFrom(owner, to, 0);
 
         vm.stopBroadcast();
