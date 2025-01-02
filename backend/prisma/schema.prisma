@@ -37,7 +37,6 @@ model NFT {
   expiryDate        DateTime?                      
   createdAt         DateTime @default(now())       
   transaction       Transaction[]
-  creditRetirement  CreditRetirement[]
 }
 
 model Transaction {
@@ -53,7 +52,6 @@ model Transaction {
 model CreditRetirement {
   id            String   @id @default(cuid())
   nftId         String
-  nft           NFT      @relation(fields: [nftId], references: [id])
   walletAddress String                        
   wallet        Wallet   @relation(fields: [walletAddress], references: [address])
   createdAt     DateTime @default(now())
