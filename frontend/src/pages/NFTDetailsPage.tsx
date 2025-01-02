@@ -26,29 +26,26 @@ interface NFTDetailsProps {
 }
 
 const contractAddress = "0xe2dc0a8D8AAD4A177cE3285c65b71E042987184D";
-const operatorAddress = "0xf2eAcB364AD62cA6aaCEcF207aBf93FA7de4E03B";
+const operatorAddress = "0xB76c4D0BDc1B1508b66A36BE5fdc362Cc79988b3";
 const abi = [
   {
     inputs: [
       { internalType: "address", name: "to", type: "address" },
-      { internalType: "bool", name: "approved", type: "bool" },
+      { internalType: "uint256", name: "tokenId", type: "uint256" },
     ],
-    name: "setApprovalForAll",
+    name: "approve",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
   },
   {
-    inputs: [
-      { internalType: "address", name: "owner", type: "address" },
-      { internalType: "address", name: "operator", type: "address" },
-    ],
-    name: "isApprovedForAll",
+    inputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
+    name: "getApproved",
     outputs: [
       {
-        internalType: "bool",
+        internalType: "address",
         name: "",
-        type: "bool",
+        type: "address",
       },
     ],
     stateMutability: "view",
@@ -61,56 +58,62 @@ const NFTDetailsPage: React.FC = () => {
   const location = useLocation();
   const nftDetails = location.state as NFTDetailsProps;
 
-  const [isApproved, setIsApproved] = useState<boolean | null>(null);
-  const { data: isApprovedForAllData } = useReadContract({
+  const [approvedAddress, setApprovedAddress] = useState<string | null>(null);
+  const { data: approvedAddressData } = useReadContract({
     address: contractAddress,
     abi,
-    functionName: "isApprovedForAll",
-    args: [address, operatorAddress],
+    functionName: "getApproved",
+    args: [parseInt(nftDetails.id)],
   });
 
   const { data: hash, error, writeContract } = useWriteContract();
 
-  // Waiting for the transaction receipt
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({ hash });
 
   useEffect(() => {
-    if (isApprovedForAllData !== undefined) {
-      setIsApproved(Boolean(isApprovedForAllData));
+    if (
+      //@ts-ignore
+      parseInt(approvedAddressData) &&
+      typeof approvedAddressData === "string"
+    ) {
+      setApprovedAddress(approvedAddressData);
+    } else {
+      setApprovedAddress(null);
     }
-  }, [isApprovedForAllData]);
+  }, [approvedAddressData]);
 
-  const handleApprovalToggle = async () => {
+  const handleApproval = async () => {
     if (nftDetails && address) {
       try {
         writeContract({
           address: contractAddress,
           abi,
-          functionName: "setApprovalForAll",
-          args: [operatorAddress, true],
+          functionName: "approve",
+          args: [operatorAddress, parseInt(nftDetails.id)],
         });
 
-        setIsApproved(true);
+        setApprovedAddress(operatorAddress);
       } catch (error) {
         console.error("Error setting approval:", error);
       }
     }
   };
 
-  const handleRemoveFromSale = async () => {
+  const handleRemoveApproval = async () => {
     if (nftDetails && address) {
       try {
+        // Set the approval to the zero address (removes approval for the operator)
         writeContract({
           address: contractAddress,
           abi,
-          functionName: "setApprovalForAll",
-          args: [operatorAddress, false],
+          functionName: "approve",
+          args: [address, parseInt(nftDetails.id)], // Removes the operator by approving the owner's address
         });
 
-        setIsApproved(false);
+        setApprovedAddress(null); // Removes operator address
       } catch (error) {
-        console.error("Error removing from sale:", error);
+        console.error("Error removing approval:", error);
       }
     }
   };
@@ -173,17 +176,17 @@ const NFTDetailsPage: React.FC = () => {
               <Button
                 className="w-full mt-4"
                 onClick={
-                  isApproved ? handleRemoveFromSale : handleApprovalToggle
+                  approvedAddress ? handleRemoveApproval : handleApproval
                 }
                 disabled={isConfirming}
               >
-                {isApproved
+                {approvedAddress
                   ? isConfirming
-                    ? "Removing from Sale..."
-                    : "Remove from Sale"
+                    ? "Removing Approval..."
+                    : "Remove Approval"
                   : isConfirming
                     ? "Listing for Sale..."
-                    : "List for Sale"}
+                    : "Approve for Sale"}
               </Button>
               {isConfirming && (
                 <p className="mt-2 text-gray-500">
