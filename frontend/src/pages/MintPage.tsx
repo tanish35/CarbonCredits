@@ -107,8 +107,7 @@ function MintPage() {
   const [certificateURI, setCertificateURI] = useState("");
   const [expiryDate, setExpiryDate] = useState<Date | null>(null);
 
-  const contractAddress = "0x960F177114F4ac70c1C79C7fdB5127Cf9c8bB1E8";
-
+  const contractAddress = "0xe2dc0a8D8AAD4A177cE3285c65b71E042987184D";
   const {
     data: nftRate,
     isLoading: isRateLoading,

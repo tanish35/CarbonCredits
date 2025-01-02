@@ -38,7 +38,7 @@ const abi = [
   },
 ];
 
-const WalletPage: React.FC = () => {
+const MyNFTPage: React.FC = () => {
   const { connect, connectors: availableConnectors } = useConnect();
   const { disconnect } = useDisconnect();
   const { isConnected: accountConnected, address } = useAccount();
@@ -84,8 +84,8 @@ const WalletPage: React.FC = () => {
               return {
                 ...credit,
                 expiryDate: parseInt(credit.expiryDate),
-                certificateURI: updatedCertificateURI, // Set the updated URI
-                metadata: response.data, // Store metadata from the JSON response
+                certificateURI: updatedCertificateURI,
+                metadata: response.data,
               };
             } catch (error) {
               console.error("Error fetching data:", error);
@@ -225,4 +225,4 @@ const WalletPage: React.FC = () => {
   );
 };
 
-export default WalletPage;
+export default MyNFTPage;
