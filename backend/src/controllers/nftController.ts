@@ -185,12 +185,15 @@ export const createNFT = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const transferNFT = asyncHandler(async (req: Request, res: Response) => {
-  const { to, tokenId } = req.body;
-  if (!to || !tokenId) {
+  const { from, to, tokenId } = req.body;
+  if (!from || !to || !tokenId) {
     res.status(400).json({ message: "Please provide all the required fields" });
     return;
   }
-  const tx = await contract.safeTransferFrom(wallet.address, to, tokenId);
+  const balance = await provider.getBalance(from);
+  console.log(provider);
+  console.log("Balance:", balance.toString());
+  const tx = await contract.safeTransferFrom(from, to, tokenId);
   await tx.wait();
   res.json({ message: "Token transferred successfully" });
 });

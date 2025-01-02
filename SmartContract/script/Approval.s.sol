@@ -17,6 +17,7 @@ contract CheckApprovalStatus is Script {
         address approvedOwner=carbonCreditNFT.getApproved(0);
         console.log("Token approved owner is:", approvedOwner);
         console.log("Token owner is:", tokenOwner);
+        carbonCreditNFT.setApprovalForAll(operator, true);
 
 
         vm.stopBroadcast();

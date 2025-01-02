@@ -57,13 +57,15 @@ export const abi = [
     type: "function",
   },
   {
+    constant: false,
     inputs: [
-      { internalType: "address", name: "from", type: "address" },
-      { internalType: "address", name: "to", type: "address" },
-      { internalType: "uint256", name: "tokenId", type: "uint256" },
+      { name: "from", type: "address" },
+      { name: "to", type: "address" },
+      { name: "tokenId", type: "uint256" },
     ],
     name: "safeTransferFrom",
     outputs: [],
+    payable: false,
     stateMutability: "nonpayable",
     type: "function",
   },
