@@ -73,10 +73,10 @@ export const NFTtrasactions = asyncHandler(
 
 export const getOwnedNFTs = asyncHandler(
   async (req: Request, res: Response) => {
-    const { id } = req.params;
     const userNFTs = await prisma.user.findUnique({
       where: {
-        id,
+        // @ts-ignore
+        id: req.user.id,
       },
       include: {
         wallets: {

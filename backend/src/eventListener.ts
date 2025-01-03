@@ -9,7 +9,7 @@ let web3Instance;
 let contract:any;
 
 const initializeWeb3 = () => {
-  const provider = new Web3.providers.WebsocketProvider(rpcProviderURL);
+  const provider = new Web3.providers.WebsocketProvider('wss://api.avax-test.network/ext/bc/C/ws');
 
   provider.on('connect', () => {
     console.log('WebSocket connected');
