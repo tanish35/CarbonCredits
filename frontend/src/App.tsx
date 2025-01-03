@@ -7,6 +7,7 @@ import { LoginPage } from "./pages/Login";
 import { ThemeProvider } from "./components/theme-provider";
 import NotFound from "./pages/NotFound";
 import MarketplacePage from "./pages/Marketplace";
+import BuyPage from "./pages/BuyNFTPage";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/my-nft" element={<MyNFTPage />} />
           <Route path="/nft/:id" element={<NFTDetailsPage />} />
           <Route path="/marketplace" element={<MarketplacePage />} />
+          <Route path="/buy" element={<BuyPage />} />
         </Routes>
       </Router>
     </ThemeProvider>

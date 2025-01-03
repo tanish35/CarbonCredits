@@ -26,7 +26,7 @@ interface NFTDetailsProps {
 }
 
 const contractAddress = "0x9CfdAEAff42D4941B8435A97646E80568e525f71";
-const operatorAddress = "0xB76c4D0BDc1B1508b66A36BE5fdc362Cc79988b3";
+const operatorAddress = "0x885Bf0169bE4c29bf7EDd3343EE76d6FE8AB55dd";
 const abi = [
   {
     inputs: [
@@ -175,11 +175,11 @@ const NFTDetailsPage: React.FC = () => {
               <Button
                 className="w-full mt-4"
                 onClick={
-                  approvedAddress ? handleRemoveApproval : handleApproval
+                  approvedAddress!=address ? handleRemoveApproval : handleApproval
                 }
                 disabled={isConfirming}
               >
-                {approvedAddress
+                {approvedAddress!=address
                   ? isConfirming
                     ? "Removing Approval..."
                     : "Remove Approval"
