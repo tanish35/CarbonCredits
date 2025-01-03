@@ -1,6 +1,7 @@
 import express from "express";
 import requireAuth from "../milddleware/checkAuth";
 import {
+  getMarketPlaceNFTs,
   getNFT,
   getOwnedNFTs,
   NFTtrasactions,
@@ -9,7 +10,8 @@ import {
 
 const NFTrouter = express.Router();
 NFTrouter.put("/transactions", requireAuth, NFTtrasactions);
-NFTrouter.get("/getNFT", requireAuth, getOwnedNFTs);
-NFTrouter.get("/getNFTs", requireAuth, getNFT);
+NFTrouter.get("/getOwnedNFTs", requireAuth, getOwnedNFTs);
+NFTrouter.get("/getNFT", requireAuth, getNFT);
 NFTrouter.post("/transfer", transferNFT);
+NFTrouter.get('/getMarketNFTs', getMarketPlaceNFTs);
 export default NFTrouter;
