@@ -25,18 +25,7 @@ export const registerUser = asyncHandler(
       return;
     }
 
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: await bcrypt.hash(password, 10),
-      },
-    });
 
-    const exp = Math.floor(Date.now() / 1000) + 60 * 60; // Token valid for 1 hour
-    const token = jwt.sign({ sub: user.id, exp }, process.env.SECRET!);
-
-    res.json({ user, token });
-  }
 
   const user = await prisma.user.create({
     data: {
@@ -62,7 +51,6 @@ export const registerUser = asyncHandler(
   });
 });
 
-);
 
 
 // Login User
@@ -133,7 +121,7 @@ export const googleLogin = asyncHandler(async (req: Request, res: Response) => {
   const exp = Math.floor(Date.now() / 1000) + 60 * 60; // Token valid for 1 hour
   const token = jwt.sign({ sub: user.id, exp }, process.env.SECRET!);
 
-
+});
 // Update User Wallet
 export const updateUserWallet = asyncHandler(async (req: Request, res: Response) => {
   // @ts-ignore
@@ -148,44 +136,22 @@ export const updateUserWallet = asyncHandler(async (req: Request, res: Response)
   })
   res.json(wallet);
 
-  // console.log(req.user.id, wallet_address);  
-
-  res.json({ user, token });
 
 });
 
-// Get User Details
-export const getUserDetails = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
+export const getUserWallet = asyncHandler(async (req: Request, res: Response) => {
+  const wallet = await prisma.wallet.findMany({
+    where: {
+      // @ts-ignore
+      userId: req.user.id,
+    },
+  });
+  res.json(wallet);
+})
 
-    const user = await prisma.user.findUnique({
-      where: { id },
-      cacheStrategy: { ttl: 300, swr: 60 },
-    });
 
-    if (!user) {
-      res.status(404).json({ message: "User not found" });
-      return;
-    }
+export const getUserDetails = asyncHandler(async (req: Request, res: Response) => {
+  // @ts-ignore
+  res.json(req.user);
+})
 
-    res.json(user);
-  }
-);
-
-// Update User Wallet
-export const updateUserWallet = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { wallet_address } = req.body;
-
-    const wallet = await prisma.wallet.create({
-      data: {
-        address: wallet_address,
-        userId: id,
-      },
-    });
-
-    res.json(wallet);
-  }
-);
