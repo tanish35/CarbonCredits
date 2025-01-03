@@ -2,7 +2,7 @@ import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import prisma from "../lib/prisma";
 import { ethers } from "ethers";
-import { abi } from "../abi/abi";
+import { abi } from "../abi/abi_old";
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 if (!PRIVATE_KEY) {
@@ -16,7 +16,6 @@ if (!RPC_URL || !CONTRACT_ADDRESS) {
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, wallet);
-
 
 export const NFTtrasactions = asyncHandler(
   async (req: Request, res: Response) => {
@@ -37,8 +36,8 @@ export const NFTtrasactions = asyncHandler(
             id: nftId,
           },
         },
-      }
-    })
+      },
+    });
     const seller = await prisma.wallet.update({
       where: {
         address: sellerId,
@@ -49,16 +48,16 @@ export const NFTtrasactions = asyncHandler(
             id: nftId,
           },
         },
-      }
-    })
+      },
+    });
     const transaction = await prisma.transaction.create({
       data: {
         buyerWallet: buyerId,
         sellerWallet: sellerId,
         nftId,
-        price
+        price,
       },
-    })
+    });
 
     const nft = await prisma.nFT.update({
       where: {
@@ -67,28 +66,30 @@ export const NFTtrasactions = asyncHandler(
       data: {
         walletAddress: buyerId,
       },
-    })
+    });
     res.json({ message: "Transaction successful" });
-});
+  }
+);
 
-export const getOwnedNFTs = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const userNFTs = await prisma.user.findUnique({
-    where: {
-      id,
-    },
-    include: {
-      wallets: {
-        include: {
-          nfts: true,
+export const getOwnedNFTs = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const userNFTs = await prisma.user.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        wallets: {
+          include: {
+            nfts: true,
+          },
         },
       },
-    },
-  });
-  
-  res.json(userNFTs);
-  
-});
+    });
+
+    res.json(userNFTs);
+  }
+);
 
 export const getNFT = asyncHandler(async (req: Request, res: Response) => {
   const { nftId } = req.body;
