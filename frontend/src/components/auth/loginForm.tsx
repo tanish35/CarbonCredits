@@ -4,6 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { auth, googleProvider } from "@/firebase";
+import { signInWithPopup } from "firebase/auth";
+import { FcGoogle } from "react-icons/fc";
+import axios from "axios";
+// import { set } from "react-datepicker/dist/date_utils";
 
 export function LoginForm({
   className,
@@ -13,6 +18,7 @@ export function LoginForm({
     email: "",
     password: "",
   });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -23,6 +29,20 @@ export function LoginForm({
     e.preventDefault();
     console.log(inputText);
     setInputText({ email: "", password: "" });
+  };
+
+  const handleGoogleLogin = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+    setLoading(true);
+    const result = await signInWithPopup(auth, googleProvider);
+    const response = await axios.post("/api/user/google", {
+      email: result.user.email,
+      name: result.user.displayName,
+    });
+    console.log(response.data);
+    setLoading(false);
   };
 
   return (
@@ -45,7 +65,6 @@ export function LoginForm({
             type="email"
             name="email"
             placeholder="elon@x.com"
-            required
             value={inputText.email}
             onChange={handleChange}
           />
@@ -64,7 +83,6 @@ export function LoginForm({
             id="password"
             type="password"
             name="password"
-            required
             value={inputText.password}
             onChange={handleChange}
           />
@@ -77,7 +95,12 @@ export function LoginForm({
             Or continue with
           </span>
         </div>
-        <Button variant="outline" className="w-full">
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={(e) => handleGoogleLogin(e)}
+        >
+          <FcGoogle />
           Login with Google
         </Button>
       </div>
