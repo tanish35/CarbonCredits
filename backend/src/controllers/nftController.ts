@@ -73,10 +73,10 @@ export const NFTtrasactions = asyncHandler(
 
 export const getOwnedNFTs = asyncHandler(
   async (req: Request, res: Response) => {
-    const { id } = req.params;
     const userNFTs = await prisma.user.findUnique({
       where: {
-        id,
+        // @ts-ignore
+        id: req.user.id,
       },
       include: {
         wallets: {
@@ -174,4 +174,18 @@ export const transferNFT = asyncHandler(async (req: Request, res: Response) => {
       "Failed to transfer NFT. Please check the input data and try again.";
     res.status(500).json({ message: errorMessage });
   }
+});
+
+export const getMarketPlaceNFTs = asyncHandler(async (_req: Request, res: Response) => {
+  const owner = process.env.OWNER_ADDRESS;
+  if (!owner) {
+    res.status(400).json({ message: "Please provide an owner address" });
+    return;
+  }
+  const nfts = await prisma.nFT.findMany({
+    where: {
+      walletAddress: owner,
+    },
+  });
+  res.json(nfts);
 });
