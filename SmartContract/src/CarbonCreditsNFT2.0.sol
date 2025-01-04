@@ -200,7 +200,7 @@ contract CarbonCreditNFT is ERC721URIStorage, Ownable(msg.sender) {
     //     return tokenRates[tokenId];
     // }
 
-    function getRate(uint256 tokenId) public view returns (uint256) {
+    function getRate (uint256 tokenId) public view returns (uint256) {
         uint256 baseRate = tokenRates[tokenId];
         uint256 mintedAt = tokenMintedAt[tokenId];
         uint256 timeElapsed = block.timestamp - mintedAt;
