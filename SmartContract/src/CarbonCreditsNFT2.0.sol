@@ -40,6 +40,7 @@ contract CarbonCreditNFT is ERC721URIStorage, Ownable(msg.sender) {
     mapping(uint256 => Credit) public creditId;
     mapping(uint256 => address) public creditOwner;
     mapping(uint256 => uint256) public tokenRates;
+    mapping(uint256 => uint256) public tokenMintedAt;
 
     address[] public authorizedMinters;
     mapping(address => bool) public isMinter;
@@ -73,6 +74,7 @@ contract CarbonCreditNFT is ERC721URIStorage, Ownable(msg.sender) {
         credits[to].push(credit);
         creditId[id] = credit;
         creditOwner[id] = to;
+        tokenMintedAt[id] = block.timestamp;
         totalSupply++;
         _tokenId++;
 
@@ -194,7 +196,27 @@ contract CarbonCreditNFT is ERC721URIStorage, Ownable(msg.sender) {
         return credits[owner];
     }
 
+    // function getRate(uint256 tokenId) public view returns (uint256) {
+    //     return tokenRates[tokenId];
+    // }
+
     function getRate(uint256 tokenId) public view returns (uint256) {
-        return tokenRates[tokenId];
-    }
+        uint256 baseRate = tokenRates[tokenId];
+        uint256 mintedAt = tokenMintedAt[tokenId];
+        uint256 timeElapsed = block.timestamp - mintedAt;
+
+        if (timeElapsed > 30 days) {
+            baseRate = (baseRate * 90) / 100;
+        }
+
+        if (creditId[tokenId].quantity > 100) {
+            baseRate += (baseRate * 20) / 100;
+        }
+
+        if (block.timestamp + 7 days > creditId[tokenId].expiryDate) {
+            baseRate = (baseRate * 80) / 100;
+        }
+        return baseRate;
+    } 
+
 }
