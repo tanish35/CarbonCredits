@@ -9,6 +9,7 @@ import {
   useReadContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
+import {abi} from "../lib/abi";
 
 interface NFTDetailsProps {
   id: string;
@@ -25,33 +26,33 @@ interface NFTDetailsProps {
   };
 }
 
-const contractAddress = "0x9CfdAEAff42D4941B8435A97646E80568e525f71";
-const operatorAddress = "0x885Bf0169bE4c29bf7EDd3343EE76d6FE8AB55dd";
-const abi = [
-  {
-    inputs: [
-      { internalType: "address", name: "to", type: "address" },
-      { internalType: "uint256", name: "tokenId", type: "uint256" },
-    ],
-    name: "approve",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
-    name: "getApproved",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-];
+const contractAddress = "0xb525D4F4EDB03eb4cAc9b2E5110D136486cE1fdd";
+const operatorAddress = "0x336AF71Ec2b362560b35307B2193eD45ac8C64a8";
+// const abi = [
+//   {
+//     inputs: [
+//       { internalType: "address", name: "to", type: "address" },
+//       { internalType: "uint256", name: "tokenId", type: "uint256" },
+//     ],
+//     name: "approve",
+//     outputs: [],
+//     stateMutability: "nonpayable",
+//     type: "function",
+//   },
+//   {
+//     inputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
+//     name: "getApproved",
+//     outputs: [
+//       {
+//         internalType: "address",
+//         name: "",
+//         type: "address",
+//       },
+//     ],
+//     stateMutability: "view",
+//     type: "function",
+//   },
+// ];
 
 const NFTDetailsPage: React.FC = () => {
   const { address, isConnected } = useAccount();
@@ -77,6 +78,7 @@ const NFTDetailsPage: React.FC = () => {
       parseInt(approvedAddressData) &&
       typeof approvedAddressData === "string"
     ) {
+      console.log("Approved Address:", approvedAddressData);
       setApprovedAddress(approvedAddressData);
     } else {
       setApprovedAddress(null);
@@ -175,11 +177,11 @@ const NFTDetailsPage: React.FC = () => {
               <Button
                 className="w-full mt-4"
                 onClick={
-                  approvedAddress!=address ? handleRemoveApproval : handleApproval
+                  (approvedAddress!=address && approvedAddress!=null) ? handleRemoveApproval : handleApproval
                 }
                 disabled={isConfirming}
               >
-                {approvedAddress!=address
+                {(approvedAddress!=address && approvedAddress!=null)
                   ? isConfirming
                     ? "Removing Approval..."
                     : "Remove Approval"

@@ -122,16 +122,13 @@ contract CarbonCreditMarketplace is AutomationCompatible {
         auction.active = false;
 
         if (auction.currentBidder != address(0)) {
-            // Transfer NFT to the highest bidder
+            address seller = IERC721(carbonCreditNFT).ownerOf(tokenId);
+            payable(seller).transfer(auction.currentPrice);
+
             IERC721(carbonCreditNFT).safeTransferFrom(
-                IERC721(carbonCreditNFT).ownerOf(tokenId),
+                seller,
                 auction.currentBidder,
                 tokenId
-            );
-
-            // Transfer funds to the seller
-            payable(IERC721(carbonCreditNFT).ownerOf(tokenId)).transfer(
-                auction.currentPrice
             );
 
             emit AuctionEnded(

@@ -6,8 +6,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { abi } from "../pages/abi";
 import { abi_marketplace } from "../lib/abi_marketplace";
 
-const NFT_CONTRACT_ADDRESS = "0x9CfdAEAff42D4941B8435A97646E80568e525f71";
-const MARKETPLACE_ADDRESS = "0x885Bf0169bE4c29bf7EDd3343EE76d6FE8AB55dd"; 
+const NFT_CONTRACT_ADDRESS = "0xb525D4F4EDB03eb4cAc9b2E5110D136486cE1fdd";
+const MARKETPLACE_ADDRESS = "0x336AF71Ec2b362560b35307B2193eD45ac8C64a8"; 
 const TOKEN_ID = 7;
 const TOKEN_PRICE = "0.01";
 interface Credit {

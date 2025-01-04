@@ -14,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 
-const contractAddress = "0x9CfdAEAff42D4941B8435A97646E80568e525f71";
+const contractAddress = "0xb525D4F4EDB03eb4cAc9b2E5110D136486cE1fdd";
 const abi = [
   {
     inputs: [{ internalType: "address", name: "owner", type: "address" }],
