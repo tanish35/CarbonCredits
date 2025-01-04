@@ -7,6 +7,7 @@ import { config } from "./wagmi";
 import App from "./App";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import "./index.css";
+import { Toaster } from "./components/ui/toaster";
 
 //@ts-ignore
 globalThis.Buffer = Buffer;
@@ -19,6 +20,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <QueryClientProvider client={queryClient}>
         <ChakraProvider value={defaultSystem}>
           <App />
+          <Toaster />
         </ChakraProvider>
       </QueryClientProvider>
     </WagmiProvider>

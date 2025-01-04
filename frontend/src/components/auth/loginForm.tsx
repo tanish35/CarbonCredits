@@ -45,7 +45,6 @@ export function LoginForm({
             type="email"
             name="email"
             placeholder="elon@x.com"
-            required
             value={inputText.email}
             onChange={handleChange}
           />
@@ -64,7 +63,6 @@ export function LoginForm({
             id="password"
             type="password"
             name="password"
-            required
             value={inputText.password}
             onChange={handleChange}
           />
