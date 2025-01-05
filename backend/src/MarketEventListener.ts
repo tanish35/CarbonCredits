@@ -1,10 +1,9 @@
 import Web3 from 'web3';
-import { abi } from './abi/abi';
+import { abi_marketplace } from './abi/abi_marketplace';
 import prisma from './lib/prisma';
 import sendMail from './mail/sendMail';
 
-const rpcProviderURL = `wss://avax-testnet.g.alchemy.com/v2/${process.env.RPC_KEY}`;
-const contractAddress = process.env.CONTRACT_ADDRESS;
+const contractAddress = process.env.MARKETPLACE_CONTRACT_ADDRESS;
 
 let web3Instance;
 let contract: any;
@@ -24,7 +23,7 @@ const initializeWeb3 = () => {
   });
 
   web3Instance = new Web3(provider);
-  contract = new web3Instance.eth.Contract(abi, contractAddress);
+  contract = new web3Instance.eth.Contract(abi_marketplace, contractAddress);
 };
 
 // Reconnect with exponential backoff
@@ -58,78 +57,6 @@ const safeSendMail = async (htmlContent: string, walletAddress: string | null, s
 
 // Subscribe to events
 const subscribeToEvents = () => {
-  contract.events.CreditTransferred({ fromBlock: 'latest' })
-    .on('data', async (event: any) => {
-      try {
-        const { from, to, tokenId, amount } = event.returnValues;
-        await prisma.$transaction(async (prisma) => {
-          await prisma.wallet.update({
-            where: { address: String(to) },
-            data: { nfts: { connect: { id: String(tokenId) } } },
-          });
-          await prisma.wallet.update({
-            where: { address: String(from) },
-            data: { nfts: { disconnect: { id: String(tokenId) } } },
-          });
-          await prisma.transaction.create({
-            data: {
-              buyerWallet: String(to),
-              sellerWallet: String(from),
-              nftId: String(tokenId),
-              price: String(amount),
-            },
-          });
-          await prisma.nFT.update({
-            where: { id: String(tokenId) },
-            data: { walletAddress: String(to) },
-          });
-        });
-        console.log('CreditTransferred:', { from, to, tokenId, amount });
-      } catch (error) {
-        console.error('Error handling CreditTransferred event:', error);
-      }
-    });
-
-  contract.events.CreditMinted({ fromBlock: 'latest' })
-    .on('data', async (event: any) => {
-      try {
-        const { to, tokenId, price, typeofCredit, quantity, certificateURI, expiryDate } = event.returnValues;
-        await prisma.nFT.create({
-          data: {
-            tokenId: String(tokenId),
-            price: String(price),
-            certificateURI: String(certificateURI),
-            expiryDate: new Date(Number(expiryDate)),
-            walletAddress: String(to),
-            typeofCredit: String(typeofCredit),
-            quantity: String(quantity),
-          },
-        });
-        console.log('CreditMinted:', { to, tokenId });
-      } catch (error) {
-        console.error('Error handling CreditMinted event:', error);
-      }
-    });
-
-  contract.events.CreditRetired({ fromBlock: 'latest' })
-    .on('data', async (event: any) => {
-      try {
-        const { owner, tokenId } = event.returnValues;
-        await prisma.$transaction(async (prisma) => {
-          await prisma.nFT.delete({ where: { id: String(tokenId) } });
-          await prisma.creditRetirement.create({
-            data: {
-              nftId: String(tokenId),
-              walletAddress: String(owner),
-            },
-          });
-        });
-        console.log('CreditRetired:', { owner, tokenId });
-      } catch (error) {
-        console.error('Error handling CreditRetired event:', error);
-      }
-    });
-
   contract.events.AuctionCreated({ fromBlock: 'latest' })
     .on('data', async (event: any) => {
       const { tokenId, createrAddress, startingPrice, auctionEndTime } = event.returnValues;
