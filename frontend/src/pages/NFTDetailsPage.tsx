@@ -9,6 +9,7 @@ import {
   useReadContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
+import {abi} from "../lib/abi";
 
 interface NFTDetailsProps {
   id: string;
@@ -25,92 +26,95 @@ interface NFTDetailsProps {
   };
 }
 
-const contractAddress = "0xe2dc0a8D8AAD4A177cE3285c65b71E042987184D";
-const operatorAddress = "0xf2eAcB364AD62cA6aaCEcF207aBf93FA7de4E03B";
-const abi = [
-  {
-    inputs: [
-      { internalType: "address", name: "to", type: "address" },
-      { internalType: "bool", name: "approved", type: "bool" },
-    ],
-    name: "setApprovalForAll",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      { internalType: "address", name: "owner", type: "address" },
-      { internalType: "address", name: "operator", type: "address" },
-    ],
-    name: "isApprovedForAll",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-];
+const contractAddress = "0xb525D4F4EDB03eb4cAc9b2E5110D136486cE1fdd";
+const operatorAddress = "0x336AF71Ec2b362560b35307B2193eD45ac8C64a8";
+// const abi = [
+//   {
+//     inputs: [
+//       { internalType: "address", name: "to", type: "address" },
+//       { internalType: "uint256", name: "tokenId", type: "uint256" },
+//     ],
+//     name: "approve",
+//     outputs: [],
+//     stateMutability: "nonpayable",
+//     type: "function",
+//   },
+//   {
+//     inputs: [{ internalType: "uint256", name: "tokenId", type: "uint256" }],
+//     name: "getApproved",
+//     outputs: [
+//       {
+//         internalType: "address",
+//         name: "",
+//         type: "address",
+//       },
+//     ],
+//     stateMutability: "view",
+//     type: "function",
+//   },
+// ];
 
 const NFTDetailsPage: React.FC = () => {
   const { address, isConnected } = useAccount();
   const location = useLocation();
   const nftDetails = location.state as NFTDetailsProps;
 
-  const [isApproved, setIsApproved] = useState<boolean | null>(null);
-  const { data: isApprovedForAllData } = useReadContract({
+  const [approvedAddress, setApprovedAddress] = useState<string | null>(null);
+  const { data: approvedAddressData } = useReadContract({
     address: contractAddress,
     abi,
-    functionName: "isApprovedForAll",
-    args: [address, operatorAddress],
+    functionName: "getApproved",
+    args: [parseInt(nftDetails.id)],
   });
 
   const { data: hash, error, writeContract } = useWriteContract();
 
-  // Waiting for the transaction receipt
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({ hash });
 
   useEffect(() => {
-    if (isApprovedForAllData !== undefined) {
-      setIsApproved(Boolean(isApprovedForAllData));
+    if (
+      //@ts-ignore
+      parseInt(approvedAddressData) &&
+      typeof approvedAddressData === "string"
+    ) {
+      console.log("Approved Address:", approvedAddressData);
+      setApprovedAddress(approvedAddressData);
+    } else {
+      setApprovedAddress(null);
     }
-  }, [isApprovedForAllData]);
+  }, [approvedAddressData]);
 
-  const handleApprovalToggle = async () => {
+  const handleApproval = async () => {
     if (nftDetails && address) {
       try {
         writeContract({
           address: contractAddress,
           abi,
-          functionName: "setApprovalForAll",
-          args: [operatorAddress, true],
+          functionName: "approve",
+          args: [operatorAddress, BigInt(nftDetails.id)],
         });
 
-        setIsApproved(true);
+        setApprovedAddress(operatorAddress);
       } catch (error) {
         console.error("Error setting approval:", error);
       }
     }
   };
 
-  const handleRemoveFromSale = async () => {
+  const handleRemoveApproval = async () => {
     if (nftDetails && address) {
       try {
         writeContract({
           address: contractAddress,
           abi,
-          functionName: "setApprovalForAll",
-          args: [operatorAddress, false],
+          functionName: "approve",
+          args: [address, BigInt(nftDetails.id)],
         });
 
-        setIsApproved(false);
+        setApprovedAddress(null);
       } catch (error) {
-        console.error("Error removing from sale:", error);
+        console.error("Error removing approval:", error);
       }
     }
   };
@@ -173,17 +177,17 @@ const NFTDetailsPage: React.FC = () => {
               <Button
                 className="w-full mt-4"
                 onClick={
-                  isApproved ? handleRemoveFromSale : handleApprovalToggle
+                  (approvedAddress!=address && approvedAddress!=null) ? handleRemoveApproval : handleApproval
                 }
                 disabled={isConfirming}
               >
-                {isApproved
+                {(approvedAddress!=address && approvedAddress!=null)
                   ? isConfirming
-                    ? "Removing from Sale..."
-                    : "Remove from Sale"
+                    ? "Removing Approval..."
+                    : "Remove Approval"
                   : isConfirming
                     ? "Listing for Sale..."
-                    : "List for Sale"}
+                    : "Approve for Sale"}
               </Button>
               {isConfirming && (
                 <p className="mt-2 text-gray-500">

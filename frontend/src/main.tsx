@@ -8,9 +8,12 @@ import App from "./App";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import "./index.css";
 import { Toaster } from "./components/ui/toaster";
+import axios from "axios";
 
 //@ts-ignore
 globalThis.Buffer = Buffer;
+
+axios.defaults.baseURL = "http://localhost:3001";
 
 const queryClient = new QueryClient();
 
