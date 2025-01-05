@@ -10,6 +10,7 @@ import {
   useWaitForTransactionReceipt,
 } from "wagmi";
 import {abi} from "../lib/abi";
+import axios from "axios";
 
 interface NFTDetailsProps {
   id: string;
@@ -24,6 +25,18 @@ interface NFTDetailsProps {
     image: string;
     attributes: Array<{ trait_type: string; value: string }>;
   };
+}
+
+interface NFTMetadata {
+  id: String;
+  tokenId: String;
+  walletAddress: String;
+  price: String;
+  typeofCredit: String;
+  quantity: String;
+  certificateURI: String;
+  expiryDate: Date;
+  createdAt: Date;
 }
 
 const contractAddress = "0xb525D4F4EDB03eb4cAc9b2E5110D136486cE1fdd";
@@ -58,6 +71,7 @@ const NFTDetailsPage: React.FC = () => {
   const { address, isConnected } = useAccount();
   const location = useLocation();
   const nftDetails = location.state as NFTDetailsProps;
+  const [nftMetaDataArray, setNftMetaDataArray] = useState<NFTMetadata[]>([]);
 
   const [approvedAddress, setApprovedAddress] = useState<string | null>(null);
   const { data: approvedAddressData } = useReadContract({
@@ -71,6 +85,16 @@ const NFTDetailsPage: React.FC = () => {
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({ hash });
+
+  async function getOwnedNFTs() {
+    const ownedNFTS = await axios.get("/api/nft/getOwnedNFTs", {
+      withCredentials: true,
+    });
+    // @ts-ignore
+    ownedNFTS.wallets.map((wallet:any)=> {
+      wallet.nfts.map((nft:NFTMetadata) => {setNftMetaDataArray(nftMetaDataArray => [...nftMetaDataArray, nft])})
+    })
+  }
 
   useEffect(() => {
     if (

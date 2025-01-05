@@ -12,6 +12,8 @@ model User {
   email     String   @unique
   password  String
   name      String?
+  address   String?
+  phone     String?
   wallets   Wallet[] 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -32,7 +34,9 @@ model NFT {
   tokenId           String   @unique             
   walletAddress     String                        
   wallet            Wallet   @relation(fields: [walletAddress], references: [address])
-  price             String                          
+  price             String   
+  typeofCredit      String   @default("Renewable Energy Credit")   
+  quantity          String  @default("1")           
   certificateURI    String                        
   expiryDate        DateTime?                      
   createdAt         DateTime @default(now())       

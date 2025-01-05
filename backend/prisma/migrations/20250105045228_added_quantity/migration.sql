@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "NFT" ADD COLUMN     "quantity" TEXT NOT NULL DEFAULT '1';

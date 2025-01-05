@@ -88,7 +88,7 @@ const subscribeToEvents = () => {
   contract.events.CreditMinted({ fromBlock: 'latest' })
     .on('data', async (event:any) => {
       try {
-        const { to, tokenId, price, certificateURI, expiryDate } = event.returnValues;
+        const { to, tokenId,price,typeofCredit,quantity, certificateURI, expiryDate } = event.returnValues;
 
         await prisma.$transaction(async (prisma) => {
           const nft = await prisma.nFT.create({
@@ -98,6 +98,8 @@ const subscribeToEvents = () => {
               certificateURI: String(certificateURI),
               expiryDate: new Date(Number(expiryDate)),
               walletAddress: String(to),
+              typeofCredit:String(typeofCredit),
+              quantity:String(quantity)
             },
           });
 

@@ -1,5 +1,3 @@
-"use client";
-
 import { Wallet } from "@/components/dashboard/Wallet";
 import { VerifyProject } from "@/components/dashboard/VerifyProject";
 import { UserDetails } from "@/components/dashboard/UserDetail";
@@ -9,58 +7,98 @@ import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { Loader } from "@/components/Loader";
 import { GreenProjectDetail } from "@/components/dashboard/ProjectDetails";
+import axios from "axios";
 
-const nfts = [
-  {
-    id: 1,
-    price: "0.5",
-    expiresAt: new Date(2080, 12, 12),
-    quantity: 10,
-    image:
-      "https://be-cis.com/wp-content/uploads/2023/12/view-green-forest-trees-with-co2-scaled.webp",
-    description: "A beautiful green forest NFT", // New description added
-  },
-  { id: 2, price: "0.7", expiresAt: new Date(2028, 12, 12), quantity: 20, description: "A serene mountain NFT" },
-  { id: 3, price: "0.9", expiresAt: new Date(2028, 12, 12), quantity: 30, description: "A tranquil lake NFT" },
-  { id: 4, price: "1.1", expiresAt: new Date(2028), quantity: 40, description: "A vibrant city NFT" },
-  { id: 5, price: "1.1", expiresAt: new Date(2028), quantity: 40, description: "A bustling market NFT" },
-];
+interface NFTMetadata {
+  id: string;
+  tokenId: string;
+  walletAddress: string;
+  price: string;
+  typeofCredit: string;
+  quantity: string;
+  certificateURI: string;
+  expiryDate: Date;
+  createdAt: Date;
+  image?: string;
+  description?: string;
+}
+
+interface User {
+  id: string;
+  email: string;
+  password: string;
+  name?: string;
+  address?: string;
+  phone?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export const Dashboard = () => {
   const [role, setRole] = useState<"buyer" | "seller" | "admin" | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [nftMetaDataArray, setNftMetaDataArray] = useState<NFTMetadata[]>([]);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setRole("seller");
-      setIsLoading(false);
-    }, 3000);
+    Promise.all([getUser(), getOwnedNFTs()])
+      .then(([user]) => {
+        setUser(user);
+        setRole("seller"); // Assume role is fetched dynamically; here set to seller for example
+      })
+      .catch((error) => console.error("Error fetching data:", error))
+      .finally(() => setIsLoading(false));
   }, []);
+
+  async function getOwnedNFTs() {
+    try {
+      const response = await axios.get("/api/nft/getOwnedNFTs", {
+        withCredentials: true,
+      });
+      const ownedNFTs = response.data.wallets.flatMap((wallet: any) =>
+        wallet.nfts.map((nft: NFTMetadata) => ({
+          ...nft,
+          image: nft.certificateURI, // Use IPFS URI if available
+          description: nft.description || "NFT Description unavailable",
+        }))
+      );
+      setNftMetaDataArray(ownedNFTs);
+    } catch (error) {
+      console.error("Error fetching owned NFTs:", error);
+    }
+  }
+
+  async function getUser(): Promise<User> {
+    try {
+      const response = await axios.get("/api/user/me", { withCredentials: true });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      throw error;
+    }
+  }
 
   return (
     <>
-      {isLoading && <Loader isLoading />}
-      {role === "buyer" && <BuyerDashboard />}
-      {role === "seller" && <SellerDashboard />}
-      {role === "admin" && <AdminDashboard />}
+      {isLoading && <Loader isLoading />} {/* Show loader while data is being fetched */}
+      {!isLoading && role === "buyer" && user && <BuyerDashboard user={user} nfts={nftMetaDataArray} />}
+      {!isLoading && role === "seller" && user && <SellerDashboard user={user} nfts={nftMetaDataArray} />}
+      {!isLoading && role === "admin" && <AdminDashboard nfts={nftMetaDataArray} />}
     </>
   );
 };
 
-const BuyerDashboard = () => {
+const BuyerDashboard = ({ user, nfts }: { user: User; nfts: NFTMetadata[] }) => {
   return (
     <div className="space-y-6 p-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">Elon's Dashboard</h1>
-        <p className="text-muted-foreground">
-          Manage your green projects and NFTs
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">{user.name}'s Dashboard</h1>
+        <p className="text-muted-foreground">Manage your green projects and NFTs</p>
       </div>
       <div className="grid gap-6 md:grid-cols-2">
         <div className="flex flex-col gap-6">
-          <UserDetails />
+          <UserDetails user={user} />
           <Card className="p-6">
             <Wallet />
           </Card>
@@ -72,11 +110,11 @@ const BuyerDashboard = () => {
   );
 };
 
-const SellerDashboard = () => {
+const SellerDashboard = ({ user, nfts }: { user: User; nfts: NFTMetadata[] }) => {
   return (
     <div className="space-y-6 p-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">Elon's Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{user.name}'s Dashboard</h1>
         <p className="text-muted-foreground">Manage your sales and NFTs</p>
       </div>
       <Card className="p-6 space-y-5">
@@ -87,7 +125,7 @@ const SellerDashboard = () => {
             <RewardCard />
           </div>
           <div className="flex flex-col gap-6">
-            <UserDetails />
+            <UserDetails user={user} />
             <NFTGrid nfts={nfts} />
           </div>
         </div>
@@ -96,7 +134,17 @@ const SellerDashboard = () => {
   );
 };
 
-const AdminDashboard = () => {
+const AdminDashboard = ({ nfts }: { nfts: NFTMetadata[] }) => {
+  const user = {
+    id: "1",
+    email: "ECOX@ECOX.com",
+    password: "123456",
+    name: "ECOX Admin",
+    address: "ECOX,India",
+    phone: "+123456789",
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }
   return (
     <div className="space-y-6 p-6">
       <div className="flex flex-col gap-2">
@@ -109,7 +157,7 @@ const AdminDashboard = () => {
             <Wallet />
           </Card>
           <Card className="p-6">
-            <UserDetails />
+            <UserDetails user={user}/>
           </Card>
           <GreenProjectDetail />
         </div>

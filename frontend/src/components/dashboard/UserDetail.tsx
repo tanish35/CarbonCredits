@@ -2,19 +2,30 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Mail, Edit2, Phone, MapPin } from "lucide-react";
 
-export function UserDetails() {
-  const name = "Elon Musk";
-  const email = "Elon@x.com";
-  const phone = "+1 234 567 890";
-  const address = "123 Main St, Springfield, USA";
+interface UserProps {
+  user: {
+    id: string;
+    email: string;
+    password: string;
+    name?: string;
+    address?: string;
+    phone?: string;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+}
+
+export function UserDetails({ user }: UserProps) {
+  const name = user.name || "Not provided";
+  const email = user.email || "Not provided";
+  const phone = user.phone || "Not provided";
+  const address = user.address || "Not provided";
 
   return (
     <Card className="overflow-hidden">
       <CardHeader className="border-b bg-muted/50 space-y-1">
         <CardTitle className="text-lg font-medium">User Details</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Your personal information
-        </p>
+        <p className="text-sm text-muted-foreground">Your personal information</p>
       </CardHeader>
       <CardContent className="p-6 space-y-6">
         <div className="space-y-3">

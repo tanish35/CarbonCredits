@@ -7,9 +7,9 @@ import bcrypt from "bcrypt";
 // Register User
 export const registerUser = asyncHandler(
   async (req: Request, res: Response) => {
-    const { email, password } = req.body;
+    const { email, password,name,address } = req.body;
 
-    if (!email || !password) {
+    if (!email || !password || !name || !address) {
       res
         .status(400)
         .json({ message: "Please provide an email and a password" });
@@ -31,6 +31,8 @@ export const registerUser = asyncHandler(
     data: {
       email,
       password: await bcrypt.hash(password, 10),
+      name,
+      address
     },
   });
 

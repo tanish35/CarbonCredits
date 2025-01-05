@@ -15,6 +15,8 @@ contract CarbonCreditNFT is ERC721URIStorage, Ownable(msg.sender) {
         address indexed to,
         uint256 indexed tokenId,
         uint256 price,
+        string typeofcredit,
+        uint256 quantity,
         string certificateURI,
         uint256 expiryDate
     );
@@ -83,7 +85,7 @@ contract CarbonCreditNFT is ERC721URIStorage, Ownable(msg.sender) {
 
         tokenRates[id] = rate > 0 ? rate : defaultRate;
 
-        emit CreditMinted(to, id, rate, certificateURI, expiryDate);
+        emit CreditMinted(to, id, rate, typeofcredit, quantity, certificateURI, expiryDate);
     }
 
     modifier setApproved(uint256 tokenId, address _from) {
