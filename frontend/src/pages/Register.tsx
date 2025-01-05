@@ -4,6 +4,7 @@ import { ModeToggle } from "@/components/mode-toggle";
 import { Leaf, ShieldCheck, Wallet, Flame } from "lucide-react";
 
 export const RegisterPage = () =>{
+  
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="relative hidden lg:block">
