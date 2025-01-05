@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Search, Grid, List, Columns, LayoutGrid } from 'lucide-react'
-import Header from '../components/Header'
+import {Header} from '../components/Header'
 import Sidebar from '../components/Sidebar'
 import CarbonCreditCard from '../components/CarbonCreditCard'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
