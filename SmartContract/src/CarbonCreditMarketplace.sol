@@ -28,7 +28,7 @@ contract CarbonCreditMarketplace is AutomationCompatible {
     );
     event AuctionCreated(
         uint256 indexed tokenId,
-        uint256 indexed createrId,
+        address indexed createrId,
         uint256 basePrice,
         uint256 endTime
     );
@@ -52,7 +52,7 @@ contract CarbonCreditMarketplace is AutomationCompatible {
         uint256 indexed tokenId,
         address indexed auctionStarter,
         address indexed lastBidder
-    )
+    );
 
 
     constructor(address _carbonCreditNFT) {
