@@ -139,6 +139,18 @@ contract CarbonCreditMarketplace is AutomationCompatible {
         }
     }
 
+    function cancelAuction(uint256 tokenId) external payable{
+        Auction storage auction = auctions[tokenId];
+        require(auction.active, "Auction not active");
+        require(msg.sender == IERC721(carbonCreditNFT).ownerOf(tokenId), "Not the owner of the token");
+        auction.active = false;
+        if (auction.currentBidder != address(0)) {
+            payable(auction.currentBidder).transfer(auction.currentPrice);
+        }
+
+        emit AuctionEnded(tokenId, address(0), 0);
+    }
+
     function withdraw() external onlyOwner {
         payable(owner).transfer(address(this).balance);
     }
