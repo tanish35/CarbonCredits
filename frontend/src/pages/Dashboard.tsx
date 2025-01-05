@@ -36,36 +36,57 @@ interface User {
 
 export const Dashboard = () => {
   const [role, setRole] = useState<"buyer" | "seller" | "admin" | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [nftMetaDataArray, setNftMetaDataArray] = useState<NFTMetadata[]>([]);
   const [user, setUser] = useState<User | null>(null);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+
+  // Fetch NFTs whenever the wallet address changes
+  useEffect(() => {
+    if (!walletAddress) {
+      setNftMetaDataArray([]); // Clear NFTs if no wallet is connected
+      return;
+    }
+
+    setIsLoading(true);
+    getOwnedNFTs(walletAddress)
+      .then((nfts) => setNftMetaDataArray(nfts))
+      .catch((error) => console.error("Error fetching NFTs:", error))
+      .finally(() => setIsLoading(false));
+  }, [walletAddress]);
 
   useEffect(() => {
     setIsLoading(true);
-    Promise.all([getUser(), getOwnedNFTs()])
-      .then(([user]) => {
+    getUser()
+      .then((user) => {
         setUser(user);
-        setRole("seller"); // Assume role is fetched dynamically; here set to seller for example
+        setRole("seller"); // Set default role (dynamic in real scenarios)
       })
-      .catch((error) => console.error("Error fetching data:", error))
+      .catch((error) => console.error("Error fetching user:", error))
       .finally(() => setIsLoading(false));
   }, []);
 
-  async function getOwnedNFTs() {
+  async function getOwnedNFTs(walletAddress: string): Promise<NFTMetadata[]> {
     try {
       const response = await axios.get("/api/nft/getOwnedNFTs", {
         withCredentials: true,
       });
-      const ownedNFTs = response.data.wallets.flatMap((wallet: any) =>
-        wallet.nfts.map((nft: NFTMetadata) => ({
-          ...nft,
-          image: nft.certificateURI, // Use IPFS URI if available
-          description: nft.description || "NFT Description unavailable",
-        }))
-      );
-      setNftMetaDataArray(ownedNFTs);
+
+      // Filter NFTs based on the wallet address
+      const ownedNFTs = response.data.wallets
+        .flatMap((wallet: any) =>
+          wallet.nfts.map((nft: NFTMetadata) => ({
+            ...nft,
+            image: nft.certificateURI,
+            description: nft.description || "NFT Description unavailable",
+          }))
+        )
+        .filter((nft:NFTMetadata) => nft.walletAddress.toLowerCase() === walletAddress.toLowerCase());
+
+      return ownedNFTs;
     } catch (error) {
       console.error("Error fetching owned NFTs:", error);
+      return [];
     }
   }
 
@@ -74,14 +95,15 @@ export const Dashboard = () => {
       const response = await axios.get("/api/user/me", { withCredentials: true });
       return response.data;
     } catch (error) {
-      console.error("Error fetching user data:", error);
+      console.error("Error fetching user:", error);
       throw error;
     }
   }
 
   return (
     <>
-      {isLoading && <Loader isLoading />} {/* Show loader while data is being fetched */}
+      {isLoading && <Loader isLoading />}
+      <Wallet onWalletChange={setWalletAddress} />
       {!isLoading && role === "buyer" && user && <BuyerDashboard user={user} nfts={nftMetaDataArray} />}
       {!isLoading && role === "seller" && user && <SellerDashboard user={user} nfts={nftMetaDataArray} />}
       {!isLoading && role === "admin" && <AdminDashboard nfts={nftMetaDataArray} />}
@@ -100,11 +122,10 @@ const BuyerDashboard = ({ user, nfts }: { user: User; nfts: NFTMetadata[] }) => 
         <div className="flex flex-col gap-6">
           <UserDetails user={user} />
           <Card className="p-6">
-            <Wallet />
           </Card>
           <VerifyProject />
         </div>
-        <NFTGrid nfts={nfts} />
+        <NFTGrid nfts={nfts.length > 0 ? nfts : []} />
       </div>
     </div>
   );
@@ -120,13 +141,12 @@ const SellerDashboard = ({ user, nfts }: { user: User; nfts: NFTMetadata[] }) =>
       <Card className="p-6 space-y-5">
         <div className="grid gap-6 md:grid-cols-2">
           <div className="flex flex-col gap-6">
-            <Wallet />
             <GreenProjectDetail />
             <RewardCard />
           </div>
           <div className="flex flex-col gap-6">
             <UserDetails user={user} />
-            <NFTGrid nfts={nfts} />
+            <NFTGrid nfts={nfts.length > 0 ? nfts : []} />
           </div>
         </div>
       </Card>
@@ -154,7 +174,6 @@ const AdminDashboard = ({ nfts }: { nfts: NFTMetadata[] }) => {
       <div className="grid gap-6 md:grid-cols-2">
         <div className="flex flex-col gap-6">
           <Card className="p-6">
-            <Wallet />
           </Card>
           <Card className="p-6">
             <UserDetails user={user}/>
@@ -162,7 +181,7 @@ const AdminDashboard = ({ nfts }: { nfts: NFTMetadata[] }) => {
           <GreenProjectDetail />
         </div>
         <Card className="p-6">
-          <NFTGrid nfts={nfts} />
+          <NFTGrid nfts={nfts.length > 0 ? nfts : []} />
         </Card>
       </div>
     </div>
