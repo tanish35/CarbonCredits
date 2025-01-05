@@ -99,7 +99,7 @@ const subscribeToEvents = () => {
             tokenId: String(tokenId),
             price: String(price),
             certificateURI: String(certificateURI),
-            expiryDate: new Date(Number(expiryDate)),
+            expiryDate: new Date(Number(expiryDate*1000)),
             walletAddress: String(to),
             typeofCredit: String(typeofCredit),
             quantity: String(quantity),
