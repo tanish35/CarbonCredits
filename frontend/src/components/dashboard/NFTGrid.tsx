@@ -5,9 +5,9 @@ interface NFT {
   id: number;
   price: string;
   image?: string;
-  expiresAt: string | Date; 
+  expiresAt: string | Date;
   quantity?: number;
-  description?: string; // New property added
+  description?: string;
 }
 
 const formatDate = (date: string | Date) => {
@@ -38,7 +38,9 @@ export function NFTGrid({ nfts }: { nfts: NFT[] }) {
               className={`group relative aspect-square rounded-lg border-primary bg-muted/50 p-2 transition-colors hover:bg-muted ${
                 nft.image ? "bg-cover bg-center bg-no-repeat" : ""
               }`}
-              style={{ backgroundImage: nft.image ? `url(${nft.image})` : "none" }}
+              style={{
+                backgroundImage: nft.image ? `url(${nft.image})` : "none",
+              }}
             >
               <div className="flex h-full flex-col justify-between rounded p-2">
                 <div className="flex items-center justify-between">
@@ -55,7 +57,9 @@ export function NFTGrid({ nfts }: { nfts: NFT[] }) {
                   </Badge>
                 </div>
                 <div className="space-y-1 bg-secondary/50 rounded p-2">
-                  <p className="text-xs font-medium text-secondary-foreground-600">Details</p>
+                  <p className="text-xs font-medium text-secondary-foreground-600">
+                    Details
+                  </p>
                   <p className="text-sm font-semibold">{nft.price} AVAX</p>
                   {nft.quantity && (
                     <p className="text-sm font-semibold">{nft.quantity} Tons</p>
