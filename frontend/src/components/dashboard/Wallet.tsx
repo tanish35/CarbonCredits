@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "../ui/separator";
+import { api } from "@/lib/api";
 
 interface WalletProps {
   onWalletChange: (address: string | null) => void;
@@ -13,11 +14,17 @@ export const Wallet: React.FC<WalletProps> = ({ onWalletChange }) => {
   const { toast } = useToast();
   const { isConnected, address } = useAccount();
   const { data: balance, isError, isLoading } = useBalance({ address });
-
+  async function updateWallet(address: String) {
+    const wallet = await api.put('/api/user/walletUpdate', {
+      wallet_address: address
+    })
+    console.log(wallet);
+  }
   // Notify parent about wallet changes
   useEffect(() => {
     if (isConnected && address) {
       onWalletChange(address); // Pass the wallet address to parent
+      updateWallet(address);
     } else {
       onWalletChange(null); // Notify parent that no wallet is connected
     }

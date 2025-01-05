@@ -7,9 +7,9 @@ import bcrypt from "bcrypt";
 // Register User
 export const registerUser = asyncHandler(
   async (req: Request, res: Response) => {
-    const { email, password,name,address } = req.body;
+    const { email, password,name,address,phone } = req.body;
 
-    if (!email || !password || !name || !address) {
+    if (!email || !password || !name || !address || !phone) {
       res
         .status(400)
         .json({ message: "Please provide an email and a password" });
@@ -32,7 +32,8 @@ export const registerUser = asyncHandler(
       email,
       password: await bcrypt.hash(password, 10),
       name,
-      address
+      address,
+      phone
     },
   });
 
@@ -128,16 +129,27 @@ export const googleLogin = asyncHandler(async (req: Request, res: Response) => {
 export const updateUserWallet = asyncHandler(async (req: Request, res: Response) => {
   // @ts-ignore
   const { wallet_address } = req.body;
+  try {
+    const wallet = await prisma.wallet.upsert({
+      where: {
+        address: wallet_address,
+      },
+      update: {
+        // @ts-ignore
+        userId: req.user.id, 
+      },
+      create: {
+        address: wallet_address,
+        // @ts-ignore
+        userId: req.user.id, 
+      },
+    });
 
-  const wallet = await prisma.wallet.create({
-    data: {
-      address: wallet_address,
-      // @ts-ignore
-      userId: req.user.id,
-    } 
-  })
-  res.json(wallet);
-
+    res.json(wallet);
+  } catch (error) {
+    console.error("Error updating or creating wallet:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 
 });
 

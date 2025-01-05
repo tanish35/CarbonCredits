@@ -22,6 +22,8 @@ export const RegisterForm = ({
     email: "",
     password: "",
     confirmPassword: "",
+    phNumber: "",
+    address: "",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,7 +53,15 @@ export const RegisterForm = ({
     console.log(inputText);
     //api call
     try{
-      const user = await api.post("/auth/register", inputText);
+      const user = await api.post("/api/user/register", 
+      {
+        email: inputText.email,
+        password: inputText.password,
+        name: inputText.name,
+        address: inputText.address,
+        phone: inputText.phNumber
+      }
+      );
     if (user) {
       toast({
         title: "Success",
@@ -68,7 +78,7 @@ export const RegisterForm = ({
       });
     }
 
-    setInputText({ name: "", email: "", password: "", confirmPassword: "" });
+    setInputText({ name: "", email: "", password: "", confirmPassword: "", phNumber: "", address: "" });
     setIsSubmitting(false);
   };
 
@@ -113,6 +123,7 @@ export const RegisterForm = ({
             id="password"
             type="password"
             name="password"
+            placeholder="Password"
             value={inputText.password}
             onChange={handleChange}
           />
@@ -123,7 +134,30 @@ export const RegisterForm = ({
             id="confirmPassword"
             type="password"
             name="confirmPassword"
+            placeholder="Password"
             value={inputText.confirmPassword}
+            onChange={handleChange}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="confirmPassword">Phone Number</Label>
+          <Input
+            id="phNumber"
+            type="text"
+            name="phNumber"
+            placeholder="+123456789"
+            value={inputText.phNumber}
+            onChange={handleChange}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="confirmPassword">Address</Label>
+          <Input
+            id="Address"
+            type="text"
+            name="address"
+            placeholder="Address"
+            value={inputText.address}
             onChange={handleChange}
           />
         </div>
