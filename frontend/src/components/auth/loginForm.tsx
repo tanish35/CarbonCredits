@@ -51,7 +51,7 @@ export function LoginForm({
     console.log(inputText);
     //api call
     try {
-      const user = await api.post("/api/user/login", inputText);
+      const user = await api.post("/user/login", inputText);
       if (user) {
         toast({
           title: "Success",

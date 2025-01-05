@@ -176,16 +176,65 @@ export const transferNFT = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-export const getMarketPlaceNFTs = asyncHandler(async (_req: Request, res: Response) => {
-  const owner = process.env.OWNER_ADDRESS;
-  if (!owner) {
-    res.status(400).json({ message: "Please provide an owner address" });
-    return;
+export const getNFTstatus = asyncHandler(
+  async (req: Request, res: Response) => {
+    let { tokenId } = req.body;
+    if (tokenId == null) {
+      res.status(400).json({ message: "Please provide an NFT id" });
+      return;
+    }
+    tokenId = String(tokenId);
+    const nft = await prisma.nFT.findUnique({
+      select: {
+        isDirectSale: true,
+        isAuction: true,
+      },
+      where: {
+        tokenId,
+      },
+    });
+    if (!nft) {
+      res.status(404).json({ message: "NFT not found" });
+      return;
+    }
+    res.json({ isDirectSale: nft.isDirectSale, isAuction: nft.isAuction });
   }
-  const nfts = await prisma.nFT.findMany({
-    where: {
-      walletAddress: owner,
-    },
-  });
-  res.json(nfts);
-});
+);
+
+export const setNFTstatus = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { tokenId, type } = req.body;
+    if (!tokenId || !type) {
+      res
+        .status(400)
+        .json({ message: "Please provide all the required fields" });
+      return;
+    }
+    const nft = await prisma.nFT.update({
+      where: {
+        tokenId,
+      },
+      data: {
+        isDirectSale: type === "directSell",
+        isAuction: type === "auction",
+      },
+    });
+    res.json(nft);
+  }
+);
+
+export const getMarketPlaceNFTs = asyncHandler(
+  async (_req: Request, res: Response) => {
+    const owner = process.env.OWNER_ADDRESS;
+    if (!owner) {
+      res.status(400).json({ message: "Please provide an owner address" });
+      return;
+    }
+    const nfts = await prisma.nFT.findMany({
+      where: {
+        walletAddress: owner,
+      },
+    });
+    res.json(nfts);
+  }
+);

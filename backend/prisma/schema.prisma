@@ -38,7 +38,9 @@ model NFT {
   typeofCredit      String   @default("Renewable Energy Credit")   
   quantity          String  @default("1")           
   certificateURI    String                        
-  expiryDate        DateTime?                      
+  expiryDate        DateTime?
+  isAuction         Boolean  @default(false)
+  isDirectSale      Boolean  @default(false)                      
   createdAt         DateTime @default(now())       
   transaction       Transaction[]
 }

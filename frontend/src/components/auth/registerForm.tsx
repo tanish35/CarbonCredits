@@ -13,7 +13,6 @@ export const RegisterForm = ({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"form">) => {
-
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -33,7 +32,9 @@ export const RegisterForm = ({
     setInputText((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleSubmit = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
     e.preventDefault();
     setIsSubmitting(true);
     //zod validation
@@ -52,23 +53,21 @@ export const RegisterForm = ({
     }
     console.log(inputText);
     //api call
-    try{
-      const user = await api.post("/api/user/register", 
-      {
+    try {
+      const user = await api.post("/user/register", {
         email: inputText.email,
         password: inputText.password,
         name: inputText.name,
         address: inputText.address,
-        phone: inputText.phNumber
-      }
-      );
-    if (user) {
-      toast({
-        title: "Success",
-        description: "Registered successfully",
+        phone: inputText.phNumber,
       });
-      navigate("/");
-    }
+      if (user) {
+        toast({
+          title: "Success",
+          description: "Registered successfully",
+        });
+        navigate("/");
+      }
     } catch (error: any) {
       console.error(error.message);
       toast({
@@ -78,7 +77,14 @@ export const RegisterForm = ({
       });
     }
 
-    setInputText({ name: "", email: "", password: "", confirmPassword: "", phNumber: "", address: "" });
+    setInputText({
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      phNumber: "",
+      address: "",
+    });
     setIsSubmitting(false);
   };
 

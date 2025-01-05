@@ -13,7 +13,7 @@ import axios from "axios";
 //@ts-ignore
 globalThis.Buffer = Buffer;
 
-axios.defaults.baseURL = "http://localhost:3001";
+axios.defaults.baseURL = "http://localhost:3001/api";
 
 const queryClient = new QueryClient();
 

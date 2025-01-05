@@ -6,7 +6,7 @@ import "../src/CarbonCreditMarketplace.sol";
 
 contract DeployCarbonCreditMarketplace is Script {
     function run() external {
-        address carbonCreditNFTAddress = 0xb525D4F4EDB03eb4cAc9b2E5110D136486cE1fdd;
+        address carbonCreditNFTAddress = 0x1A33A6F1A7D001A5767Cd9303831Eb3B9b916AEA;
         vm.startBroadcast();
         CarbonCreditMarketplace marketplace = new CarbonCreditMarketplace(
             carbonCreditNFTAddress
@@ -21,4 +21,4 @@ contract DeployCarbonCreditMarketplace is Script {
     }
 }
 
-//0x336AF71Ec2b362560b35307B2193eD45ac8C64a8
+//0x79298aF4e4F51c746dEeE692a40a3141C9b142ef
