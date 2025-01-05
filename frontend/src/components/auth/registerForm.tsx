@@ -47,7 +47,6 @@ export const  RegisterForm=({
             type="text"
             name="name"
             placeholder="Elon Musk"
-            required
             value={inputText.name}
             onChange={handleChange}
           />
@@ -59,7 +58,6 @@ export const  RegisterForm=({
             type="email"
             name="email"
             placeholder="elon@x.com"
-            required
             value={inputText.email}
             onChange={handleChange}
           />
@@ -70,7 +68,6 @@ export const  RegisterForm=({
             id="password"
             type="password"
             name="password"
-            required
             value={inputText.password}
             onChange={handleChange}
           />
@@ -81,7 +78,6 @@ export const  RegisterForm=({
             id="confirmPassword"
             type="password"
             name="confirmPassword"
-            required
             value={inputText.confirmPassword}
             onChange={handleChange}
           />
