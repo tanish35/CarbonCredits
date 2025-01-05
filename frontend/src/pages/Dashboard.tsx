@@ -146,7 +146,7 @@ const SellerDashboard = ({ user, nfts }: { user: User; nfts: NFTMetadata[] }) =>
           </div>
           <div className="flex flex-col gap-6">
             <UserDetails user={user} />
-            <NFTGrid nfts={nfts.length > 0 ? nfts : []} />
+            <NFTGrid nfts={nfts} />
           </div>
         </div>
       </Card>
@@ -181,7 +181,7 @@ const AdminDashboard = ({ nfts }: { nfts: NFTMetadata[] }) => {
           <GreenProjectDetail />
         </div>
         <Card className="p-6">
-          <NFTGrid nfts={nfts.length > 0 ? nfts : []} />
+          <NFTGrid nfts={nfts} />
         </Card>
       </div>
     </div>

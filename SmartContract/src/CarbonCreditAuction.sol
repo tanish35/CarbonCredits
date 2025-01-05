@@ -21,6 +21,11 @@ contract CarbonCreditAuction {
         address indexed winner,
         uint256 indexed amount
     );
+    event AuctionOutBid(
+        uint256 indexed tokenId,
+        address indexed outBidder,
+        uint256 indexed amount
+    );
 
     struct Auction {
         uint256 tokenId;
@@ -68,6 +73,7 @@ contract CarbonCreditAuction {
 
         if (auction.highestBidder != address(0)) {
             payable(auction.highestBidder).transfer(auction.highestBid);
+            emit AuctionOutBid(tokenId, auction.highestBidder, auction.highestBid);
         }
 
         auction.highestBidder = msg.sender;

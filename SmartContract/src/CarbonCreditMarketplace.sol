@@ -28,6 +28,7 @@ contract CarbonCreditMarketplace is AutomationCompatible {
     );
     event AuctionCreated(
         uint256 indexed tokenId,
+        uint256 indexed createrId,
         uint256 basePrice,
         uint256 endTime
     );
@@ -36,11 +37,23 @@ contract CarbonCreditMarketplace is AutomationCompatible {
         address indexed bidder,
         uint256 price
     );
+    event AuctionOutBid(
+        uint256 indexed tokenId,
+        address indexed outBidder,
+        uint256 indexed amount
+    );
     event AuctionEnded(
         uint256 indexed tokenId,
+        address indexed auctionStarter,
         address indexed winner,
         uint256 price
     );
+    event AuctionCancelled(
+        uint256 indexed tokenId,
+        address indexed auctionStarter,
+        address indexed lastBidder
+    )
+
 
     constructor(address _carbonCreditNFT) {
         require(_carbonCreditNFT != address(0), "Invalid NFT contract address");
@@ -91,7 +104,7 @@ contract CarbonCreditMarketplace is AutomationCompatible {
             active: true
         });
 
-        emit AuctionCreated(tokenId, basePrice, block.timestamp + duration);
+        emit AuctionCreated(tokenId,msg.sender, basePrice, block.timestamp + duration);
     }
 
     function placeBid(uint256 tokenId) external payable {
@@ -133,6 +146,7 @@ contract CarbonCreditMarketplace is AutomationCompatible {
 
             emit AuctionEnded(
                 tokenId,
+                seller,
                 auction.currentBidder,
                 auction.currentPrice
             );
@@ -148,7 +162,7 @@ contract CarbonCreditMarketplace is AutomationCompatible {
             payable(auction.currentBidder).transfer(auction.currentPrice);
         }
 
-        emit AuctionEnded(tokenId, address(0), 0);
+        emit AuctionCancelled(tokenId, msg.sender, auction.currentBidder);
     }
 
     function withdraw() external onlyOwner {
