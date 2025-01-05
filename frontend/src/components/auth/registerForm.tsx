@@ -3,11 +3,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { registrationSchema } from "@/validators/auth.validator";
+import { Loader2 } from "lucide-react";
+import { api } from "@/lib/api";
+import { useNavigate } from "react-router-dom";
 
-export const  RegisterForm=({
+export const RegisterForm = ({
   className,
   ...props
-}: React.ComponentPropsWithoutRef<"form">) =>{
+}: React.ComponentPropsWithoutRef<"form">) => {
+
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
   const [inputText, setInputText] = useState({
     name: "",
     email: "",
@@ -15,16 +24,52 @@ export const  RegisterForm=({
     confirmPassword: "",
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setInputText((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleSubmit = async(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
-    if(inputText.password !== inputText.confirmPassword) return alert("Passwords do not match"); 
+    setIsSubmitting(true);
+    //zod validation
+    const result = registrationSchema.safeParse(inputText);
+    if (!result.success) {
+      const errorMessages = result.error.errors
+        .map((err) => `${err.path.join(".")} - ${err.message}`)
+        .join(", ");
+      toast({
+        title: "Error",
+        description: errorMessages,
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
     console.log(inputText);
+    //api call
+    try{
+      const user = await api.post("/auth/register", inputText);
+    if (user) {
+      toast({
+        title: "Success",
+        description: "Registered successfully",
+      });
+      navigate("/");
+    }
+    } catch (error: any) {
+      console.error(error.message);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+
     setInputText({ name: "", email: "", password: "", confirmPassword: "" });
+    setIsSubmitting(false);
   };
 
   return (
@@ -82,8 +127,8 @@ export const  RegisterForm=({
             onChange={handleChange}
           />
         </div>
-        <Button type="button" className="w-full" onClick={handleClick}>
-          Create Account
+        <Button type="button" className="w-full" onClick={handleSubmit}>
+          {isSubmitting ? <Loader2 /> : "Create Account"}
         </Button>
         <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
           <span className="relative z-10 bg-background px-2 text-muted-foreground">
@@ -102,4 +147,4 @@ export const  RegisterForm=({
       </div>
     </form>
   );
-}
+};
