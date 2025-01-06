@@ -56,7 +56,7 @@ export default function MarketplacePage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [nfts, setNfts] = useState<NFT[]>([]);
   const [saleNfts, setSaleNfts] = useState<NFT[]>([]);
-  const [type, setType] = useState<"auction" | "sale">("auction");
+  const [type, setType] = useState<"auction" | "sale">("sale");
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
@@ -97,7 +97,7 @@ export default function MarketplacePage() {
   );
 
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+    <div className="min-h-screen text-black relative overflow-hidden">
       <video
         autoPlay
         loop
@@ -120,7 +120,7 @@ export default function MarketplacePage() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
                   placeholder="Search by credit type"
-                  className="pl-10 bg-gray-900 border-gray-800 text-white w-full"
+                  className="pl-10 border-gray-800 text-white w-full"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -129,7 +129,7 @@ export default function MarketplacePage() {
 
             <div className="flex items-center gap-4">
               <Select value={type} onValueChange={(value) => setType(value as "auction" | "sale")}>
-                <SelectTrigger className="w-[180px] bg-gray-900 border-gray-800 text-white">
+                <SelectTrigger className="w-[180px] border-gray-800 text-black">
                   <SelectValue placeholder="Filter by type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -140,15 +140,15 @@ export default function MarketplacePage() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`p-2 rounded-lg ${viewMode === "grid" ? "bg-gray-800" : "hover:bg-gray-900"}`}
+                className={`p-2 rounded-lg ${viewMode === "grid" ? "bg-gray-300" : "hover:bg-gray-200"}`}
                 onClick={() => setViewMode("grid")}
               >
-                <Grid className="h-5 w-5" />
+                <Grid className="h-5 w-5 text-black" />
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`p-2 rounded-lg ${viewMode === "list" ? "bg-gray-800" : "hover:bg-gray-900"}`}
+                className={`p-2 rounded-lg ${viewMode === "list" ? "bg-gray-300" : "hover:bg-gray-200"}`}
                 onClick={() => setViewMode("list")}
               >
                 <List className="h-5 w-5" />
