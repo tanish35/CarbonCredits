@@ -79,14 +79,6 @@ export const RegisterForm = ({
       });
     }
 
-    setInputText({
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      phNumber: "",
-      address: "",
-    });
     setIsSubmitting(false);
   };
 
