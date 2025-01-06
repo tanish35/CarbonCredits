@@ -5,10 +5,10 @@ import sendMail from './mail/sendMail';
 
 const contractAddress = process.env.MARKETPLACE_CONTRACT_ADDRESS;
 
-let web3Instance;
+let web3Instance: Web3;
 let contract: any;
 
-// Initialize Web3 and contract
+// Initialize Web3 and Contract
 const initializeWeb3 = () => {
   const provider = new Web3.providers.WebsocketProvider('wss://api.avax-test.network/ext/bc/C/ws');
 
@@ -38,16 +38,14 @@ const reconnect = () => {
   }, backoffTime);
 };
 
-// Helper to send emails if the email exists
+// Helper to send emails
 const safeSendMail = async (htmlContent: string, walletAddress: string | null, subject: string) => {
-  if (!walletAddress) return; // Skip if no wallet address
+  if (!walletAddress) return;
   try {
-    console.log("walletAddress", walletAddress, "htmlContent", htmlContent, "subject", subject);
     const userEmail = await prisma.wallet.findUnique({
       where: { address: walletAddress },
       select: { user: { select: { email: true } } },
     });
-    // @ts-ignore: Accessing nested email safely
     if (userEmail?.user?.email) {
       await sendMail(htmlContent, userEmail.user.email, subject);
     }
@@ -56,88 +54,84 @@ const safeSendMail = async (htmlContent: string, walletAddress: string | null, s
   }
 };
 
+// Event Handlers
+const handleAuctionCreated = async (event: any) => {
+  console.log("Auction Created!");
+  const { tokenId, createrId, basePrice, endTime } = event.returnValues;
+  const htmlContent = `
+    <h1>New Auction Created</h1>
+    <p>Token ID: ${tokenId}</p>
+    <p>Starting Price: ${basePrice}</p>
+    <p>Auction End Time: ${new Date(Number(endTime) * 1000)}</p>
+  `;
+  await safeSendMail(htmlContent, createrId, 'New Auction Created');
+};
+
+const handleAuctionEnded = async (event: any) => {
+  console.log("Auction Ended!");
+  const { tokenId, auctionStarter, winner, price } = event.returnValues;
+  const htmlContent = `
+    <h1>Auction Ended</h1>
+    <p>Token ID: ${tokenId}</p>
+    <p>Winning Bid: ${price}</p>
+    <p>Winner Address: ${winner}</p>
+  `;
+  await prisma.nFT.update({
+    where: { tokenId: String(tokenId) },
+    data: { isAuction: false },
+  });
+  await safeSendMail(htmlContent, auctionStarter, 'Auction Ended');
+  await safeSendMail(htmlContent, winner, 'Auction Ended');
+};
+
+const handleAuctionCancelled = async (event: any) => {
+  console.log("Auction Cancelled!");
+  const { tokenId, auctionStarter, lastBidder } = event.returnValues;
+  const htmlContent = `
+    <h1>Auction Cancelled</h1>
+    <p>Token ID: ${tokenId}</p>
+    <p>Auction Starter: ${auctionStarter}</p>
+    <p>Last Bidder: ${lastBidder}</p>
+  `;
+  await prisma.nFT.update({
+    where: { tokenId: String(tokenId) },
+    data: { isAuction: false },
+  });
+  await safeSendMail(htmlContent, auctionStarter, 'Auction Cancelled');
+  await safeSendMail(htmlContent, lastBidder, 'Auction Cancelled');
+};
+
+const handleAuctionOutBid = async (event: any) => {
+  console.log("Auction OutBid!");
+  const { tokenId, outBidder, amount } = event.returnValues;
+  const htmlContent = `
+    <h1>Auction OutBid</h1>
+    <p>Token ID: ${tokenId}</p>
+    <p>You have been outbid</p>
+    <p>Current Auction Price: ${amount}</p>
+  `;
+  await safeSendMail(htmlContent, outBidder, 'Auction OutBid');
+};
+
+const handleBidPlaced = async (event: any) => {
+  console.log("Bid Placed!");
+  const { tokenId, bidder, price } = event.returnValues;
+  const htmlContent = `
+    <h1>Bid Placed</h1>
+    <p>Token ID: ${tokenId}</p>
+    <p>Your bid has been placed</p>
+    <p>Current Auction Price: ${price}</p>
+  `;
+  await safeSendMail(htmlContent, bidder, 'Bid Placed');
+};
+
 // Subscribe to events
 const subscribeToEvents = () => {
-  contract.events.AuctionCreated({ fromBlock: 'latest' })
-    .on('data', async (event: any) => {
-      console.log("Auction Created!");
-      const { tokenId, createrAddress, startingPrice, auctionEndTime } = event.returnValues;
-      const htmlContent = `
-        <h1>New Auction Created</h1>
-        <p>Token ID: ${tokenId}</p>
-        <p>Starting Price: ${startingPrice}</p>
-        <p>Auction End Time: ${new Date(Number(auctionEndTime) * 1000)}</p>
-      `;
-      await safeSendMail(htmlContent, createrAddress, 'New Auction Created');
-    });
-
-  contract.events.AuctionEnded({ fromBlock: 'latest' })
-    .on('data', async (event: any) => {
-      console.log("Auction Ended!");
-      const { tokenId, createrAddress, winnerAddress, winningBid } = event.returnValues;
-      const htmlContent = `
-        <h1>Auction Ended</h1>
-        <p>Token ID: ${tokenId}</p>
-        <p>Winning Bid: ${winningBid}</p>
-        <p>Winner Address: ${winnerAddress}</p>
-      `;
-      const upd = await prisma.nFT.update({
-        where: {
-          tokenId: String(tokenId),
-        },
-        data: {
-          isAuction: false,
-        },
-      })
-      await safeSendMail(htmlContent, createrAddress, 'Auction Ended');
-      await safeSendMail(htmlContent, winnerAddress, 'Auction Ended');
-    });
-
-  contract.events.AuctionCancelled({ fromBlock: 'latest' })
-    .on('data', async (event: any) => {
-      console.log("Auction Cancelled!");
-      const { tokenId, auctionStarter, lastBidder } = event.returnValues;
-      const htmlContent = `
-        <h1>Auction Cancelled</h1>
-        <p>Token ID: ${tokenId}</p>
-        <p>Auction Starter: ${auctionStarter}</p>
-        <p>Last Bidder: ${lastBidder}</p>
-      `;
-      const upd = await prisma.nFT.update({
-        where: {
-          tokenId: String(tokenId),
-        },
-        data: {
-          isAuction: false,
-        },
-      })
-      await safeSendMail(htmlContent, auctionStarter, 'Auction Cancelled');
-      await safeSendMail(htmlContent, lastBidder, 'Auction Cancelled');
-    });
-
-  contract.events.AuctionOutBid({ fromBlock: 'latest' })
-    .on('data', async (event: any) => {
-      const { tokenId, outBidder, amount } = event.returnValues;
-      const htmlContent = `
-        <h1>Auction OutBid</h1>
-        <p>Token ID: ${tokenId}</p>
-        <p>You have been outbid</p>
-        <p>Current Auction Price: ${amount}</p>
-      `;
-      await safeSendMail(htmlContent, outBidder, 'Auction OutBid');
-    });
-
-  contract.events.BidPlaced({ fromBlock: 'latest' })
-    .on('data', async (event: any) => {
-      const { tokenId, bidder, amount } = event.returnValues;
-      const htmlContent = `
-        <h1>Bid Placed</h1>
-        <p>Token ID: ${tokenId}</p>
-        <p>Your bid has been placed</p>
-        <p>Current Auction Price: ${amount}</p>
-      `;
-      await safeSendMail(htmlContent, bidder, 'Bid Placed');
-    });
+  contract.events.AuctionCreated({ fromBlock: 'latest' }).on('data', handleAuctionCreated);
+  contract.events.AuctionEnded({ fromBlock: 'latest' }).on('data', handleAuctionEnded);
+  contract.events.AuctionCancelled({ fromBlock: 'latest' }).on('data', handleAuctionCancelled);
+  contract.events.AuctionOutBid({ fromBlock: 'latest' }).on('data', handleAuctionOutBid);
+  contract.events.BidPlaced({ fromBlock: 'latest' }).on('data', handleBidPlaced);
 };
 
 // Initialize and subscribe
