@@ -12,6 +12,8 @@ import { Dashboard } from "./pages/Dashboard";
 import MarketplacePage from "./pages/Marketplace";
 import BuyPage from "./pages/BuyNFTPage";
 import NFTPage from "./pages/NFTPage";
+import AboutPage from "./pages/About";
+import TeamPage from "./pages/Contact";
 // import NFTAuctionPage from "./pages/NFTPage";
 
 function App() {
@@ -26,7 +28,9 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             {/* <Route path="/mint" element={<MintPage />} /> */}
             <Route path="/my-nft" element={<MyNFTPage />} />
-          <Route path="/nft/:id" element={<NFTPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/nft/:id" element={<NFTPage />} />
+            <Route path="/contact" element={<TeamPage />} />
           </Route>
           {/* <Route path="/nft/:id" element={<NFTDetailsPage />} /> */}
           <Route path="/marketplace" element={<MarketplacePage />} />
