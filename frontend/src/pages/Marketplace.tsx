@@ -1,10 +1,9 @@
-'use client'
-
 import { useState, useEffect } from "react";
-import { Search, Grid, List } from 'lucide-react';
+import { Search, Grid, List } from "lucide-react";
+import { Loader } from "@/components/Loader";
 import { motion, AnimatePresence } from "framer-motion";
-import Header from "../components/Header";
-import CarbonCreditCard from "../components/CarbonCreditCard";
+import Header from "@/components/Header";
+import CarbonCreditCard from "@/components/CarbonCreditCard";
 import {
   Select,
   SelectContent,
@@ -14,6 +13,8 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
+import { Navigate } from "react-router-dom";
+import { useUser } from "@/hooks/useUser";
 
 interface NFT {
   id: string;
@@ -37,8 +38,7 @@ const fetchIPFSData = async (uri: string): Promise<{ image?: string; description
     const response = await fetch(ipfsURL);
 
     if (!response.ok) {
-      console.error(`Failed to fetch IPFS data from: ${ipfsURL}`);
-      return {};
+      throw new Error(`Failed to fetch IPFS data from: ${ipfsURL}`);
     }
 
     const metadata = await response.json();
@@ -58,6 +58,7 @@ export default function MarketplacePage() {
   const [saleNfts, setSaleNfts] = useState<NFT[]>([]);
   const [type, setType] = useState<"auction" | "sale">("sale");
   const [searchTerm, setSearchTerm] = useState("");
+  const { loadingUser, userDetails } = useUser();
 
   useEffect(() => {
     getAllNFTs();
@@ -65,24 +66,17 @@ export default function MarketplacePage() {
 
   async function getAllNFTs() {
     try {
-      const response = await axios.get("nft/getAllNFTs", { withCredentials: true });
+      const response = await axios.get("/nft/getAllNFTs", { withCredentials: true });
       const allNfts: NFT[] = response.data;
 
-      const auctionNfts = allNfts.filter((nft) => nft.isAuction);
-      const sellNfts = allNfts.filter((nft) => nft.isDirectSale);
+      const [auctionNfts, sellNfts] = [allNfts.filter((n) => n.isAuction), allNfts.filter((n) => n.isDirectSale)];
 
       const updatedAuctionNfts = await Promise.all(
-        auctionNfts.map(async (nft) => {
-          const { image, description } = await fetchIPFSData(nft.certificateURI);
-          return { ...nft, image, description };
-        })
+        auctionNfts.map(async (nft) => ({ ...nft, ...(await fetchIPFSData(nft.certificateURI)) }))
       );
 
       const updatedSaleNfts = await Promise.all(
-        sellNfts.map(async (nft) => {
-          const { image, description } = await fetchIPFSData(nft.certificateURI);
-          return { ...nft, image, description };
-        })
+        sellNfts.map(async (nft) => ({ ...nft, ...(await fetchIPFSData(nft.certificateURI)) }))
       );
 
       setNfts(updatedAuctionNfts);
@@ -95,6 +89,14 @@ export default function MarketplacePage() {
   const filteredNFTs = (type === "auction" ? nfts : saleNfts).filter((nft) =>
     nft.typeofCredit.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (loadingUser) {
+    return <Loader isLoading={loadingUser} />;
+  }
+
+  if (!userDetails) {
+    return <Navigate to="/login" />;
+  }
 
   return (
     <div className="min-h-screen text-black relative overflow-hidden">
@@ -120,13 +122,12 @@ export default function MarketplacePage() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
                   placeholder="Search by credit type"
-                  className="pl-10 border-gray-800 text-white w-full"
+                  className="pl-10 border-gray-800 text-black w-full"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
             </div>
-
             <div className="flex items-center gap-4">
               <Select value={type} onValueChange={(value) => setType(value as "auction" | "sale")}>
                 <SelectTrigger className="w-[180px] border-gray-800 text-black">
@@ -151,7 +152,7 @@ export default function MarketplacePage() {
                 className={`p-2 rounded-lg ${viewMode === "list" ? "bg-gray-300" : "hover:bg-gray-200"}`}
                 onClick={() => setViewMode("list")}
               >
-                <List className="h-5 w-5" />
+                <List className="h-5 w-5 text-black" />
               </motion.button>
             </div>
           </motion.div>
@@ -184,4 +185,3 @@ export default function MarketplacePage() {
     </div>
   );
 }
-
