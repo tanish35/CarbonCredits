@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Mail, Edit2, Phone, MapPin } from "lucide-react";
+import { User, Mail, Edit2, Phone, MapPin, User2, Calendar } from "lucide-react";
+import { Badge } from "../ui/badge";
+import { format } from "date-fns";
 
 interface UserProps {
   user: {
@@ -20,45 +22,59 @@ export function UserDetails({ user }: UserProps) {
   const email = user.email || "Not provided";
   const phone = user.phone || "Not provided";
   const address = user.address || "Not provided";
+  const joinedDate = format(new Date(user.createdAt), 'MMMM dd, yyyy');
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="border-b bg-muted/50 space-y-1">
-        <CardTitle className="text-lg font-medium">User Details</CardTitle>
-        <p className="text-sm text-muted-foreground">Your personal information</p>
+    <Card className="w-full shadow-lg">
+      <CardHeader className="border-b bg-gradient-to-r from-muted/50 to-muted/30 space-y-1 flex flex-row justify-between items-center p-6">
+        <div>
+          <CardTitle className="text-2xl font-semibold">
+            User Details
+          </CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            Manage your personal information
+          </p>
+        </div>
+        <Badge variant={"outline"} className="p-2 bg-background/80 backdrop-blur-sm">
+          <User2 className="h-5 w-5" />
+        </Badge>
       </CardHeader>
-      <CardContent className="p-6 space-y-6">
-        <div className="space-y-3">
-          <div className="flex items-center space-x-4">
-            <User className="h-4 w-4 text-muted-foreground" />
-            <div className="space-y-0.5">
-              <p className="text-sm font-medium">Name</p>
-              <p className="text-sm text-muted-foreground">{name}</p>
+      <CardContent className="p-6 space-y-2">
+        <div className="grid gap-5 md:grid-cols-2">
+          <div className="flex items-center space-x-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+            <User className="h-5 w-5 text-primary" />
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Name</p>
+              <p className="text-base">{name}</p>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <Mail className="h-4 w-4 text-muted-foreground" />
-            <div className="space-y-0.5">
-              <p className="text-sm font-medium">Email</p>
-              <p className="text-sm text-muted-foreground">{email}</p>
+          <div className="flex items-center space-x-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+            <Mail className="h-5 w-5 text-primary" />
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Email</p>
+              <p className="text-base">{email}</p>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <Phone className="h-4 w-4 text-muted-foreground" />
-            <div className="space-y-0.5">
-              <p className="text-sm font-medium">Phone</p>
-              <p className="text-sm text-muted-foreground">{phone}</p>
+          <div className="flex items-center space-x-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+            <Phone className="h-5 w-5 text-primary" />
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Phone</p>
+              <p className="text-base">{phone}</p>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <div className="space-y-0.5">
-              <p className="text-sm font-medium">Address</p>
-              <p className="text-sm text-muted-foreground">{address}</p>
+          <div className="flex items-center space-x-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+            <MapPin className="h-5 w-5 text-primary" />
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Address</p>
+              <p className="text-base">{address}</p>
             </div>
           </div>
         </div>
-        <Button variant="outline" size="sm" className="w-full">
+        <div className="flex items-center space-x-4 border-t pt-2 pb-4">
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">Joined on {joinedDate}</p>
+        </div>
+        <Button size="lg" className="w-full mt-6 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary">
           <Edit2 className="mr-2 h-4 w-4" />
           Edit Profile
         </Button>

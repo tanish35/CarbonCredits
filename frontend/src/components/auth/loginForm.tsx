@@ -58,7 +58,9 @@ export function LoginForm({
           description: "Logged in successfully",
         });
         console.log(user.data);
-        navigate("/");
+        setTimeout(() => {
+          navigate("/");
+        }, 2000);
       }
     } catch (err) {
       console.log(err);
