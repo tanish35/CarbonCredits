@@ -6,7 +6,7 @@ import { RewardCard } from "@/components/dashboard/RewardCard";
 import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { Loader } from "@/components/Loader";
-import { GreenProjectDetail } from "@/components/dashboard/ProjectDetails";
+import { CarbonCreditsDisplay } from "@/components/dashboard/ProjectDetails";
 import axios from "axios";
 
 interface NFTMetadata {
@@ -108,15 +108,23 @@ export const Dashboard = () => {
   return (
     <>
       {isLoading && <Loader isLoading />}
+      {user && <div className="flex flex-col gap-2 md:p-6">
+        <h1 className="text-3xl font-bold tracking-tight">
+          {user.name}'s Dashboard
+        </h1>
+        <p className="text-muted-foreground">
+          Manage your sales and NFTs
+        </p>
+      </div>}
       <Wallet onWalletChange={setWalletAddress} />
       {!isLoading && role === "buyer" && user && (
         <BuyerDashboard user={user} nfts={nftMetaDataArray} />
       )}
       {!isLoading && role === "seller" && user && (
-        <SellerDashboard user={user} nfts={nftMetaDataArray} />
+        <SellerDashboard user={user} nfts={nftMetaDataArray} wallet={walletAddress!}/>
       )}
       {!isLoading && role === "admin" && (
-        <AdminDashboard nfts={nftMetaDataArray} />
+        <AdminDashboard nfts={nftMetaDataArray} wallet={walletAddress!}/>
       )}
     </>
   );
@@ -131,14 +139,7 @@ const BuyerDashboard = ({
 }) => {
   return (
     <div className="space-y-6 p-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">
-          {user.name}'s Dashboard
-        </h1>
-        <p className="text-muted-foreground">
-          Manage your green projects and NFTs
-        </p>
-      </div>
+      
       <div className="grid gap-6 md:grid-cols-2">
         <div className="flex flex-col gap-6">
           <UserDetails user={user} />
@@ -154,22 +155,19 @@ const BuyerDashboard = ({
 const SellerDashboard = ({
   user,
   nfts,
+  wallet,
 }: {
   user: User;
   nfts: NFTMetadata[];
+  wallet:string;
 }) => {
   return (
     <div className="space-y-6 p-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">
-          {user.name}'s Dashboard
-        </h1>
-        <p className="text-muted-foreground">Manage your sales and NFTs</p>
-      </div>
       <Card className="p-6 space-y-5">
         <div className="grid gap-6 md:grid-cols-2">
           <div className="flex flex-col gap-6">
-            <GreenProjectDetail />
+            <CarbonCreditsDisplay walletAddress={wallet}/>
+          <VerifyProject />
             <RewardCard />
           </div>
           <div className="flex flex-col gap-6">
@@ -182,7 +180,7 @@ const SellerDashboard = ({
   );
 };
 
-const AdminDashboard = ({ nfts }: { nfts: NFTMetadata[] }) => {
+const AdminDashboard = ({ nfts , wallet}: { nfts: NFTMetadata[], wallet:string }) => {
   const user = {
     id: "1",
     email: "ECOX@ECOX.com",
@@ -205,7 +203,7 @@ const AdminDashboard = ({ nfts }: { nfts: NFTMetadata[] }) => {
           <Card className="p-6">
             <UserDetails user={user} />
           </Card>
-          <GreenProjectDetail />
+          <CarbonCreditsDisplay walletAddress={wallet} />
         </div>
         <Card className="p-6">
           <NFTGrid nfts={nfts} />

@@ -50,7 +50,7 @@ export const Wallet: React.FC<WalletProps> = ({ onWalletChange }) => {
           <Separator className="mb-4" />
           <CardContent>
             <div className="flex items-center">
-              <p>Wallet Connected: {address}</p>
+              <p>Wallet Connected: {address!.slice(0, 6)}...{address!.slice(-4)}</p>
               <button
                 onClick={() => handleCopy(address!)}
                 className="ml-2 px-2 py-1 text-sm text-blue-500 border border-blue-500 rounded"

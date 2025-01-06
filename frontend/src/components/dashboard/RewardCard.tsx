@@ -22,25 +22,29 @@ const rewards: Reward[] = [
   {
     id: "1",
     name: "Green Pioneer",
-    description: "Achieved significant reduction in carbon footprint. This award recognizes individuals or organizations that have made substantial efforts to minimize their carbon emissions through innovative practices and technologies.",
+    description:
+      "Achieved significant reduction in carbon footprint. This award recognizes individuals or organizations that have made substantial efforts to minimize their carbon emissions through innovative practices and technologies.",
     icon: <Leaf className="h-6 w-6" />,
   },
   {
     id: "2",
     name: "Water Saver",
-    description: "Successfully implemented water conservation measures. This award honors those who have effectively reduced water usage and promoted sustainable water management practices.",
+    description:
+      "Successfully implemented water conservation measures. This award honors those who have effectively reduced water usage and promoted sustainable water management practices.",
     icon: <Droplets className="h-6 w-6" />,
   },
   {
     id: "3",
     name: "Energy Expert",
-    description: "Demonstrated excellence in energy efficiency. This award is given to those who have excelled in optimizing energy use and integrating renewable energy sources.",
+    description:
+      "Demonstrated excellence in energy efficiency. This award is given to those who have excelled in optimizing energy use and integrating renewable energy sources.",
     icon: <Zap className="h-6 w-6" />,
   },
   {
     id: "4",
     name: "Air Champion",
-    description: "Contributed to improving air quality standards. This award acknowledges efforts in reducing air pollution and enhancing air quality through various initiatives.",
+    description:
+      "Contributed to improving air quality standards. This award acknowledges efforts in reducing air pollution and enhancing air quality through various initiatives.",
     icon: <Wind className="h-6 w-6" />,
   },
 ];
@@ -64,14 +68,22 @@ export function RewardCard() {
                   {companyName}'s Achievements
                 </span>
               </CardTitle>
-              <div className="flex flex-col items-center gap-3">
+              <div className="flex flex-col items-center gap-3 relative">
                 <Badge variant="outline" className="px-3 py-1">
                   Eco-Champion
                 </Badge>
-                <Button variant="outline" size="sm" className="p-4">
-                  <Gift className="mr-2 h-4 w-4" />
-                  View All
-                </Button>
+                <div className="relative group">
+                  <Button variant="outline" size="sm" className="p-4">
+                    <Gift className="mr-2 h-4 w-4" />
+                    View All
+                  </Button>
+                  <div
+                    className="absolute bottom-full mb-2 hidden w-max px-3 py-2 rounded-lg bg-gray-800 text-white text-sm shadow-lg group-hover:block"
+                    role="tooltip"
+                  >
+                    We don't support it currently
+                  </div>
+                </div>
               </div>
             </div>
             <CardDescription className="text-muted-foreground text-base">

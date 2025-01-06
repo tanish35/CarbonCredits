@@ -80,7 +80,7 @@ export function NFTGrid({ nfts }: { nfts: NFT[] }) {
   {updatedNFTs.map((nft) => (
     <div
       key={nft.tokenId}
-      className={`group relative aspect-square rounded-lg border-primary bg-muted/50 p-2 transition-colors hover:bg-muted ${
+      className={`group relative aspect-square rounded-lg border-primary bg-muted/50 p-2 transition-all duration-300 transform hover:scale-90 hover:shadow-lg ${
         nft.image ? "bg-cover bg-center bg-no-repeat" : ""
       }`}
       style={{
@@ -110,6 +110,7 @@ export function NFTGrid({ nfts }: { nfts: NFT[] }) {
     </div>
   ))}
 </div>
+
 
       </CardContent>
     </Card>
