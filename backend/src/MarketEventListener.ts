@@ -78,6 +78,14 @@ const subscribeToEvents = () => {
         <p>Winning Bid: ${winningBid}</p>
         <p>Winner Address: ${winnerAddress}</p>
       `;
+      const upd = await prisma.nFT.update({
+        where: {
+          tokenId: String(tokenId),
+        },
+        data: {
+          isAuction: false,
+        },
+      })
       await safeSendMail(htmlContent, createrAddress, 'Auction Ended');
       await safeSendMail(htmlContent, winnerAddress, 'Auction Ended');
     });
@@ -91,6 +99,14 @@ const subscribeToEvents = () => {
         <p>Auction Starter: ${auctionStarter}</p>
         <p>Last Bidder: ${lastBidder}</p>
       `;
+      const upd = await prisma.nFT.update({
+        where: {
+          tokenId: String(tokenId),
+        },
+        data: {
+          isAuction: false,
+        },
+      })
       await safeSendMail(htmlContent, auctionStarter, 'Auction Cancelled');
       await safeSendMail(htmlContent, lastBidder, 'Auction Cancelled');
     });
