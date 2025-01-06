@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,11 @@ interface SellOptionsProps {
   onComplete: () => void;
   NFT_CONTRACT_ADDRESS: `0x${string}`;
   MARKETPLACE_ADDRESS: `0x${string}`;
+}
+
+interface AuctionData {
+  active: boolean;
+  currentBidder: `0x${string}`;
 }
 
 export const SellOptions: React.FC<SellOptionsProps> = ({
@@ -30,12 +35,33 @@ export const SellOptions: React.FC<SellOptionsProps> = ({
   const { writeContract } = useWriteContract();
 
   const { data: isApproved } = useReadContract({
-    //@ts-ignore
     address: NFT_CONTRACT_ADDRESS,
     abi,
     functionName: "isApprovedForAll",
     args: [address, MARKETPLACE_ADDRESS],
   });
+
+  const { data: owner } = useReadContract({
+    address: NFT_CONTRACT_ADDRESS,
+    abi,
+    functionName: "ownerOf",
+    args: [BigInt(tokenId)],
+  }) as { data: string };
+
+  const { data: auctionData } = useReadContract({
+    address: MARKETPLACE_ADDRESS,
+    abi: abi_marketplace,
+    functionName: "auctions",
+    args: [BigInt(tokenId)],
+  });
+  useEffect(() => {
+    console.log(auctionData);
+  }, [auctionData]);
+
+  //@ts-ignore
+  const isAuctionActive = auctionData && auctionData[5];
+  const isOwner =
+    address && owner && owner.toLowerCase() === address.toLowerCase();
 
   const handleChooseSellOption = async (type: "auction" | "directSell") => {
     setSellType(type);
@@ -89,19 +115,55 @@ export const SellOptions: React.FC<SellOptionsProps> = ({
     }
   };
 
+  const handleCancelAuction = async () => {
+    try {
+      writeContract({
+        address: MARKETPLACE_ADDRESS,
+        abi: abi_marketplace,
+        functionName: "cancelAuction",
+        args: [BigInt(tokenId)],
+      });
+      onComplete();
+    } catch (error) {
+      console.error("Error cancelling auction:", error);
+    }
+  };
+
   if (!isApproved) {
     return (
-      <Button onClick={handleApproval}>Approve NFT for Marketplace</Button>
+      <Button onClick={handleApproval} className="w-full">
+        Approve NFT for Marketplace
+      </Button>
+    );
+  }
+
+  if (isAuctionActive && isOwner) {
+    return (
+      <div className="space-y-4">
+        <Button
+          onClick={handleCancelAuction}
+          variant="destructive"
+          className="w-full"
+        >
+          Cancel Auction
+        </Button>
+      </div>
     );
   }
 
   if (!sellType) {
     return (
-      <div className="space-y-2">
-        <Button onClick={() => handleChooseSellOption("auction")}>
+      <div className="space-y-4">
+        <Button
+          onClick={() => handleChooseSellOption("auction")}
+          className="w-full"
+        >
           Create Auction
         </Button>
-        <Button onClick={() => handleChooseSellOption("directSell")}>
+        <Button
+          onClick={() => handleChooseSellOption("directSell")}
+          className="w-full"
+        >
           Set Direct Sell Price
         </Button>
       </div>
@@ -130,7 +192,7 @@ export const SellOptions: React.FC<SellOptionsProps> = ({
           />
         </div>
       )}
-      <Button onClick={handleSetPrice}>
+      <Button onClick={handleSetPrice} className="w-full">
         {sellType === "auction" ? "Start Auction" : "Set Price"}
       </Button>
     </div>

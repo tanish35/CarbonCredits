@@ -64,38 +64,67 @@ const NFTPage: React.FC = () => {
   });
 
   useEffect(() => {
-    console.log(basePrice1);
+    // console.log(basePrice1);
     setBasePrice(Number(basePrice1));
   }, [basePrice1]);
+
+  // useEffect(() => {
+  //   console.log(creditData);
+  // }, [creditData]);
 
   useEffect(() => {
     const fetchData = async () => {
       if (creditData) {
-        const { typeofcredit, quantity, certificateURI, expiryDate, retired } =
-          creditData;
-        // console.log(creditData);
-        setCreditDetails({
-          id: TOKEN_ID,
-          typeofcredit: typeofcredit as string,
-          quantity: BigInt(quantity),
-          certificateURI: certificateURI as string,
-          expiryDate: BigInt(expiryDate),
-          retired: retired as boolean,
-        });
+        try {
+          const certificateURI = `https://${creditData.certificateURI.replace(
+            /^ipfs:\/\//,
+            ""
+          )}.ipfs.dweb.link/`;
+
+          let updatedCertificateURI = certificateURI;
+          let metadata = null;
+
+          try {
+            const response = await axios.get(certificateURI, {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            });
+
+            const imageURI = response.data?.image;
+            updatedCertificateURI = `https://${imageURI.replace(
+              /^ipfs:\/\//,
+              ""
+            )}.ipfs.dweb.link/`;
+            metadata = response.data;
+          } catch (error) {
+            console.error("Error fetching metadata for certificateURI:", error);
+          }
+
+          const { typeofcredit, quantity, expiryDate, retired } = creditData;
+
+          setCreditDetails({
+            id: TOKEN_ID,
+            typeofcredit: typeofcredit as string,
+            quantity: BigInt(quantity),
+            certificateURI: updatedCertificateURI as string,
+            expiryDate: BigInt(expiryDate),
+            retired: retired as boolean,
+          });
+        } catch (error) {
+          console.error("Error processing creditData:", error);
+        }
       }
 
       setIsOwner(nftOwner === address);
 
       try {
-        // console.log(TOKEN_ID);
-        const response = await axios.post("/nft/getNFTStatus", {
+        let response = await axios.post("/nft/getNFTStatus", {
           tokenId: TOKEN_ID,
         });
         setIsAuction(response.data.isAuction);
         setIsDirectSelling(response.data.isDirectSale);
-        setShowSellOptions(
-          !response.data.isAuction && !response.data.isDirectSale && isOwner
-        );
+        setShowSellOptions(isOwner);
       } catch (error) {
         console.error("Error fetching selling status:", error);
       }
@@ -106,8 +135,11 @@ const NFTPage: React.FC = () => {
     }
 
     fetchData();
-    // console.log(creditData);
   }, [creditData, nftOwner, address, id, isOwner, auctionData]);
+
+  useEffect(() => {
+    console.log(nftOwner, address);
+  }, [nftOwner, address]);
 
   // useEffect(() => {
   //   console.log(creditDetails);

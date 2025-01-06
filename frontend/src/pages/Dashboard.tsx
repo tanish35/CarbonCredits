@@ -81,7 +81,10 @@ export const Dashboard = () => {
             description: nft.description || "NFT Description unavailable",
           }))
         )
-        .filter((nft:NFTMetadata) => nft.walletAddress.toLowerCase() === walletAddress.toLowerCase());
+        .filter(
+          (nft: NFTMetadata) =>
+            nft.walletAddress.toLowerCase() === walletAddress.toLowerCase()
+        );
 
       return ownedNFTs;
     } catch (error) {
@@ -92,7 +95,9 @@ export const Dashboard = () => {
 
   async function getUser(): Promise<User> {
     try {
-      const response = await axios.get("/user/details", { withCredentials: true });
+      const response = await axios.get("/user/details", {
+        withCredentials: true,
+      });
       return response.data;
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -104,25 +109,40 @@ export const Dashboard = () => {
     <>
       {isLoading && <Loader isLoading />}
       <Wallet onWalletChange={setWalletAddress} />
-      {!isLoading && role === "buyer" && user && <BuyerDashboard user={user} nfts={nftMetaDataArray} />}
-      {!isLoading && role === "seller" && user && <SellerDashboard user={user} nfts={nftMetaDataArray} />}
-      {!isLoading && role === "admin" && <AdminDashboard nfts={nftMetaDataArray} />}
+      {!isLoading && role === "buyer" && user && (
+        <BuyerDashboard user={user} nfts={nftMetaDataArray} />
+      )}
+      {!isLoading && role === "seller" && user && (
+        <SellerDashboard user={user} nfts={nftMetaDataArray} />
+      )}
+      {!isLoading && role === "admin" && (
+        <AdminDashboard nfts={nftMetaDataArray} />
+      )}
     </>
   );
 };
 
-const BuyerDashboard = ({ user, nfts }: { user: User; nfts: NFTMetadata[] }) => {
+const BuyerDashboard = ({
+  user,
+  nfts,
+}: {
+  user: User;
+  nfts: NFTMetadata[];
+}) => {
   return (
     <div className="space-y-6 p-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">{user.name}'s Dashboard</h1>
-        <p className="text-muted-foreground">Manage your green projects and NFTs</p>
+        <h1 className="text-3xl font-bold tracking-tight">
+          {user.name}'s Dashboard
+        </h1>
+        <p className="text-muted-foreground">
+          Manage your green projects and NFTs
+        </p>
       </div>
       <div className="grid gap-6 md:grid-cols-2">
         <div className="flex flex-col gap-6">
           <UserDetails user={user} />
-          <Card className="p-6">
-          </Card>
+          <Card className="p-6"></Card>
           <VerifyProject />
         </div>
         <NFTGrid nfts={nfts.length > 0 ? nfts : []} />
@@ -131,11 +151,19 @@ const BuyerDashboard = ({ user, nfts }: { user: User; nfts: NFTMetadata[] }) => 
   );
 };
 
-const SellerDashboard = ({ user, nfts }: { user: User; nfts: NFTMetadata[] }) => {
+const SellerDashboard = ({
+  user,
+  nfts,
+}: {
+  user: User;
+  nfts: NFTMetadata[];
+}) => {
   return (
     <div className="space-y-6 p-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">{user.name}'s Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          {user.name}'s Dashboard
+        </h1>
         <p className="text-muted-foreground">Manage your sales and NFTs</p>
       </div>
       <Card className="p-6 space-y-5">
@@ -163,8 +191,8 @@ const AdminDashboard = ({ nfts }: { nfts: NFTMetadata[] }) => {
     address: "ECOX,India",
     phone: "+123456789",
     createdAt: new Date(),
-    updatedAt: new Date()
-  }
+    updatedAt: new Date(),
+  };
   return (
     <div className="space-y-6 p-6">
       <div className="flex flex-col gap-2">
@@ -173,10 +201,9 @@ const AdminDashboard = ({ nfts }: { nfts: NFTMetadata[] }) => {
       </div>
       <div className="grid gap-6 md:grid-cols-2">
         <div className="flex flex-col gap-6">
+          <Card className="p-6"></Card>
           <Card className="p-6">
-          </Card>
-          <Card className="p-6">
-            <UserDetails user={user}/>
+            <UserDetails user={user} />
           </Card>
           <GreenProjectDetail />
         </div>

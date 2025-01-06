@@ -9,7 +9,7 @@ import {
   useReadContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
-import {abi} from "../lib/abi";
+import { abi } from "../lib/abi";
 import axios from "axios";
 
 interface NFTDetailsProps {
@@ -87,13 +87,15 @@ const NFTDetailsPage: React.FC = () => {
     useWaitForTransactionReceipt({ hash });
 
   async function getOwnedNFTs() {
-    const ownedNFTS = await axios.get("/api/nft/getOwnedNFTs", {
+    const ownedNFTS = await axios.get("/nft/getOwnedNFTs", {
       withCredentials: true,
     });
     // @ts-ignore
-    ownedNFTS.wallets.map((wallet:any)=> {
-      wallet.nfts.map((nft:NFTMetadata) => {setNftMetaDataArray(nftMetaDataArray => [...nftMetaDataArray, nft])})
-    })
+    ownedNFTS.wallets.map((wallet: any) => {
+      wallet.nfts.map((nft: NFTMetadata) => {
+        setNftMetaDataArray((nftMetaDataArray) => [...nftMetaDataArray, nft]);
+      });
+    });
   }
 
   useEffect(() => {
@@ -201,11 +203,13 @@ const NFTDetailsPage: React.FC = () => {
               <Button
                 className="w-full mt-4"
                 onClick={
-                  (approvedAddress!=address && approvedAddress!=null) ? handleRemoveApproval : handleApproval
+                  approvedAddress != address && approvedAddress != null
+                    ? handleRemoveApproval
+                    : handleApproval
                 }
                 disabled={isConfirming}
               >
-                {(approvedAddress!=address && approvedAddress!=null)
+                {approvedAddress != address && approvedAddress != null
                   ? isConfirming
                     ? "Removing Approval..."
                     : "Remove Approval"
