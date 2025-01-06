@@ -6,8 +6,8 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { registrationSchema } from "@/validators/auth.validator";
 import { Loader2 } from "lucide-react";
-import { api } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export const RegisterForm = ({
   className,
@@ -54,12 +54,14 @@ export const RegisterForm = ({
     console.log(inputText);
     //api call
     try {
-      const user = await api.post("/user/register", {
+      const user = await axios.post("/user/register", {
         email: inputText.email,
         password: inputText.password,
         name: inputText.name,
         address: inputText.address,
         phone: inputText.phNumber,
+      }, {
+        withCredentials: true,
       });
       if (user) {
         toast({

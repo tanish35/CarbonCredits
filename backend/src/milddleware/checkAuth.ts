@@ -12,10 +12,10 @@ async function requireAuth(req, res, next) {
     // @ts-ignore
     const decoded = jwt.verify(token, process.env.SECRET);
     // @ts-ignore
-    if (Date.now() >= decoded.exp) {
-      res.sendStatus(410);
-      return;
-    }
+    // if (Date.now() >= decoded.exp) {
+    //   res.sendStatus(410);
+    //   return;
+    // }
     const userId = decoded.sub;
     if (!userId) {
       console.log("3");

@@ -15,7 +15,7 @@ export const Wallet: React.FC<WalletProps> = ({ onWalletChange }) => {
   const { isConnected, address } = useAccount();
   const { data: balance, isError, isLoading } = useBalance({ address });
   async function updateWallet(address: String) {
-    const wallet = await api.put('/api/user/walletUpdate', {
+    const wallet = await api.put('/user/walletUpdate', {
       wallet_address: address
     })
     console.log(wallet);

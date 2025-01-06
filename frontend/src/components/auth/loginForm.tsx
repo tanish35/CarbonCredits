@@ -68,7 +68,6 @@ export function LoginForm({
         variant: "destructive",
       });
     }
-    setInputText({ email: "", password: "" });
     setIsSubmitting(false);
   };
 
@@ -81,7 +80,10 @@ export function LoginForm({
     const response = await axios.post("/api/user/google", {
       email: result.user.email,
       name: result.user.displayName,
-    });
+    }, {
+      withCredentials: true,
+    }
+  );
     console.log(response.data);
     setIsSubmitting(false);
     navigate("/");

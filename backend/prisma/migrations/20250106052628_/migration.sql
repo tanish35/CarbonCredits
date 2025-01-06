@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "NFT" ADD COLUMN     "isAuction" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "isDirectSale" BOOLEAN NOT NULL DEFAULT false;

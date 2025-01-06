@@ -12,6 +12,7 @@ const router = express.Router();
 router.route("/register").post(registerUser);
 router.route("/login").post(loginUser);
 router.get("/me", requireAuth, getUserDetails);
+router.get("/details", requireAuth, getUserDetails);
 router.put("/walletUpdate", requireAuth, updateUserWallet);
 router.post("/google", googleLogin);
 

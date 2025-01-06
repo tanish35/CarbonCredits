@@ -72,7 +72,7 @@ const subscribeToEvents = () => {
     .on("data", async (event: any) => {
       try {
         const { from, to, tokenId, amount } = event.returnValues;
-        console.log({ from, to, tokenId, amount });
+        console.log({ from, to, tokenId: Number(tokenId), amount });
         const fromWallet = await prisma.wallet.findUnique({
           where: { address: String(from) },
         });
@@ -82,8 +82,9 @@ const subscribeToEvents = () => {
         if (!fromWallet || !toWallet) {
           throw new Error("One or both wallets not found");
         }
-        const nft = await prisma.nFT.findUnique({
-          where: { id: String(tokenId) },
+
+        const nft = await prisma.nFT.findFirst({
+          where: { tokenId: String(tokenId) },
         });
 
         if (!nft) {
@@ -91,40 +92,27 @@ const subscribeToEvents = () => {
         }
 
         await prisma.$transaction(async (prisma) => {
-          await prisma.wallet.update({
-            where: { address: String(to) },
-            data: {
-              nfts: {
-                connect: { id: String(tokenId) },
-              },
-            },
-          });
-
-          await prisma.wallet.update({
-            where: { address: String(from) },
-            data: {
-              nfts: {
-                disconnect: { id: String(tokenId) },
-              },
-            },
-          });
-          await prisma.transaction.create({
-            data: {
-              buyerWallet: String(to),
-              sellerWallet: String(from),
-              nftId: String(tokenId),
-              price: String(amount),
-            },
-          });
           await prisma.nFT.update({
-            where: { id: String(tokenId) },
+            where: { tokenId: String(tokenId) },
             data: {
-              walletAddress: String(to),
+              walletAddress: String(to), 
               isAuction: false,
               isDirectSale: false,
             },
           });
-        });
+        
+          // Log the transaction
+          await prisma.transaction.create({
+            data: {
+              buyerWallet: String(to),
+              sellerWallet: String(from),
+              nft: {
+                connect: { tokenId: String(tokenId) },
+              },
+              price: String(amount),
+            },
+          });
+        });        
 
         console.log("CreditTransferred:", { from, to, tokenId, amount });
       } catch (error) {
@@ -145,7 +133,7 @@ const subscribeToEvents = () => {
           certificateURI,
           expiryDate,
         } = event.returnValues;
-        await prisma.nFT.create({
+        const nft = await prisma.nFT.create({
           data: {
             tokenId: String(tokenId),
             price: String(price),
@@ -156,7 +144,8 @@ const subscribeToEvents = () => {
             quantity: String(quantity),
           },
         });
-        // console.log(event.returnValues);
+        console.log(event.returnValues);
+        console.log("CreditMinted:", nft);
       } catch (error) {
         console.error("Error handling CreditMinted event:", error);
       }

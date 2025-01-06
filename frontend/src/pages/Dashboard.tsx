@@ -68,7 +68,7 @@ export const Dashboard = () => {
 
   async function getOwnedNFTs(walletAddress: string): Promise<NFTMetadata[]> {
     try {
-      const response = await axios.get("/api/nft/getOwnedNFTs", {
+      const response = await axios.get("/nft/getOwnedNFTs", {
         withCredentials: true,
       });
 
@@ -92,7 +92,7 @@ export const Dashboard = () => {
 
   async function getUser(): Promise<User> {
     try {
-      const response = await axios.get("/api/user/me", { withCredentials: true });
+      const response = await axios.get("/user/details", { withCredentials: true });
       return response.data;
     } catch (error) {
       console.error("Error fetching user:", error);
