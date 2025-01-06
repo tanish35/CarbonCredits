@@ -157,7 +157,7 @@ const subscribeToEvents = () => {
       try {
         const { owner, tokenId } = event.returnValues;
         await prisma.$transaction(async (prisma) => {
-          await prisma.nFT.delete({ where: { id: String(tokenId) } });
+          await prisma.nFT.delete({ where: { tokenId: String(tokenId) } });
           await prisma.creditRetirement.create({
             data: {
               nftId: String(tokenId),
