@@ -26,11 +26,11 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             {/* <Route path="/mint" element={<MintPage />} /> */}
             <Route path="/my-nft" element={<MyNFTPage />} />
+          <Route path="/nft/:id" element={<NFTPage />} />
           </Route>
           {/* <Route path="/nft/:id" element={<NFTDetailsPage />} /> */}
           <Route path="/marketplace" element={<MarketplacePage />} />
           <Route path="/buy" element={<BuyPage />} />
-          <Route path="/nft/:id" element={<NFTPage />} />
           {/* <Route path="/auction" element={<NFTAuctionPage />} /> */}
         </Routes>
       </Router>

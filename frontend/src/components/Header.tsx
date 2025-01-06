@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Clipboard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Logo } from "./Logo";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -29,16 +30,18 @@ const Header = () => {
       <div className="container mx-auto px-4 md:px-8 lg:px-12 max-w-7xl">
         <div className="flex h-16 items-center justify-between">
           <a href="/" className="flex items-center gap-2">
-            <img src="/logo.svg" alt="Logo" className="h-8 w-auto" />
-            <span className="text-xl font-bold text-primary">My Dapp</span>
+            {/* <img src="/logo.svg" alt="Logo" className="h-8 w-auto" /> */}
+            <Logo />
+            {/* <span className="text-xl font-bold text-primary">My Dapp</span> */}
           </a>
           <nav className="hidden md:flex space-x-6">
-            <a href="/about" className="text-gray-500 hover:text-gray-700">
-              About
+            <a href="/marketplace" className="text-gray-500 hover:text-gray-700">
+              MarketPlace
             </a>
             <a href="/contact" className="text-gray-500 hover:text-gray-700">
               Contact
             </a>
+            <a href="/about" className="text-gray-500 hover:text-gray-700">About </a>
           </nav>
           <div className="flex-row items-center hidden md:flex gap-4">
             {!accountConnected ? (

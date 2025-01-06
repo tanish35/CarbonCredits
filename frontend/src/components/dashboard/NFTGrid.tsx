@@ -76,43 +76,41 @@ export function NFTGrid({ nfts }: { nfts: NFT[] }) {
         <p className="text-sm text-muted-foreground">Your collection of green NFTs</p>
       </CardHeader>
       <CardContent className="p-6">
-        <div className="grid grid-cols-2 gap-4">
-          {updatedNFTs.map((nft) => (
-            <div
-              key={nft.tokenId}
-              className={`group relative aspect-square rounded-lg border-primary bg-muted/50 p-2 transition-colors hover:bg-muted ${
-                nft.image ? "bg-cover bg-center bg-no-repeat" : ""
-              }`}
-              style={{
-                backgroundImage: nft.image ? `url(${nft.image})` : "none",
-              }}
-              onClick={() => navigator(`/nft/${nft.tokenId}`)}
-            >
-              <div className="flex h-full flex-col justify-between rounded p-2">
-                <div className="flex items-center justify-between">
-                  <Badge variant="outline" className="bg-background">
-                    #{nft.tokenId}
-                  </Badge>
-                  <Badge
-                    variant="outline"
-                    className={`bg-background ${
-                      isExpired(nft.expiryDate) ? "bg-red-500" : "bg-green-500"
-                    }`}
-                  >
-                    {isExpired(nft.expiryDate) ? "Expired" : "Valid"}
-                  </Badge>
-                </div>
-                <div className="space-y-1 bg-secondary/50 rounded p-2">
-                  <p className="text-xs font-medium text-secondary-foreground-600">Details</p>
-                  <p className="text-sm font-semibold">{nft.price} AVAX</p>
-                  {nft.quantity && <p className="text-sm font-semibold">{nft.quantity} Tons</p>}
-                  <p className="text-sm font-semibold">{formatDate(nft.expiryDate)}</p>
-                  {nft.description && <p className="text-sm">{nft.description}</p>}
-                </div>
-              </div>
-            </div>
-          ))}
+      <div className="grid grid-cols-2 gap-4 overflow-y-auto max-h-[calc(100vh-100px)]">
+  {updatedNFTs.map((nft) => (
+    <div
+      key={nft.tokenId}
+      className={`group relative aspect-square rounded-lg border-primary bg-muted/50 p-2 transition-colors hover:bg-muted ${
+        nft.image ? "bg-cover bg-center bg-no-repeat" : ""
+      }`}
+      style={{
+        backgroundImage: nft.image ? `url(${nft.image})` : "none",
+      }}
+      onClick={() => navigator(`/nft/${nft.tokenId}`)}
+    >
+      <div className="flex h-full flex-col justify-between rounded p-2">
+        <div className="flex items-center justify-between">
+          <Badge variant="outline" className="bg-background">
+            #{nft.tokenId}
+          </Badge>
+          <Badge
+            variant="outline"
+            className={`bg-background ${
+              isExpired(nft.expiryDate) ? "bg-red-500" : "bg-green-500"
+            }`}
+          >
+            {isExpired(nft.expiryDate) ? "Expired" : "Valid"}
+          </Badge>
         </div>
+        <div className="space-y-1 bg-secondary/50 rounded p-2">
+          <p className="text-sm font-semibold">{nft.price} AVAX</p>
+          {nft.quantity && <p className="text-sm font-semibold">{nft.quantity} Tons</p>}
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
+
       </CardContent>
     </Card>
   );
