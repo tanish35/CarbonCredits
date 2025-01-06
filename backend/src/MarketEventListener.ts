@@ -42,6 +42,7 @@ const reconnect = () => {
 const safeSendMail = async (htmlContent: string, walletAddress: string | null, subject: string) => {
   if (!walletAddress) return; // Skip if no wallet address
   try {
+    console.log("walletAddress", walletAddress, "htmlContent", htmlContent, "subject", subject);
     const userEmail = await prisma.wallet.findUnique({
       where: { address: walletAddress },
       select: { user: { select: { email: true } } },
@@ -59,6 +60,7 @@ const safeSendMail = async (htmlContent: string, walletAddress: string | null, s
 const subscribeToEvents = () => {
   contract.events.AuctionCreated({ fromBlock: 'latest' })
     .on('data', async (event: any) => {
+      console.log("Auction Created!");
       const { tokenId, createrAddress, startingPrice, auctionEndTime } = event.returnValues;
       const htmlContent = `
         <h1>New Auction Created</h1>
@@ -71,6 +73,7 @@ const subscribeToEvents = () => {
 
   contract.events.AuctionEnded({ fromBlock: 'latest' })
     .on('data', async (event: any) => {
+      console.log("Auction Ended!");
       const { tokenId, createrAddress, winnerAddress, winningBid } = event.returnValues;
       const htmlContent = `
         <h1>Auction Ended</h1>
@@ -92,6 +95,7 @@ const subscribeToEvents = () => {
 
   contract.events.AuctionCancelled({ fromBlock: 'latest' })
     .on('data', async (event: any) => {
+      console.log("Auction Cancelled!");
       const { tokenId, auctionStarter, lastBidder } = event.returnValues;
       const htmlContent = `
         <h1>Auction Cancelled</h1>

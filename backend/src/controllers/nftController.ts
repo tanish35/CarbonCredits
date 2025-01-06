@@ -105,6 +105,11 @@ export const getNFT = asyncHandler(async (req: Request, res: Response) => {
   res.json(nft);
 });
 
+export const getAllNFTs = asyncHandler(async (_req: Request, res: Response) => {
+  const nfts = await prisma.nFT.findMany();
+  res.json(nfts);
+});
+
 // export const createNFT = asyncHandler(async (req: Request, res: Response) => {
 //   const {
 //     tokenId,

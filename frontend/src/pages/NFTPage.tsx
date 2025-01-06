@@ -188,7 +188,7 @@ const NFTPage: React.FC = () => {
                     {Number(auctionDetails[2]) / 1e18} ETH
                   </p>
                   <p>
-                    <strong>Current Bidder:</strong> {auctionDetails[3]}
+                    <strong>Current Bidder:</strong> {auctionDetails[3]=='0x0000000000000000000000000000000000000000' ? 'No one bidded before' : auctionDetails[3]}
                   </p>
                   <p>
                     <strong>Auction Ends:</strong>{" "}
