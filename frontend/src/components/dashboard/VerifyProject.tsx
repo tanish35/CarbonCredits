@@ -7,11 +7,15 @@ import { Label } from "@/components/ui/label";
 import { ArrowRight, Upload, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
-
-export function VerifyProject() {
+import axios from "axios";
+interface CarbonCreditsDisplayProps {
+  walletAddress: string;
+}
+export function VerifyProject({ walletAddress }: CarbonCreditsDisplayProps) {
   const [verificationOpen, setVerificationOpen] = useState(false);
   const [mintingOpen, setMintingOpen] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [carbonTons, setCarbonTons] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const { toast } = useToast();
@@ -55,20 +59,29 @@ export function VerifyProject() {
     }, 2000);  // Simulate a 2-second verification delay
   };
 
-  const handleMinting = () => {
-    if (!carbonTons || isNaN(Number(carbonTons)) || Number(carbonTons) <= 0) {
+  const handleMinting = async () => {
+    try {
+      setIsLoading(true);
+      await axios.post("/nft/mintNFT", {ownerId:walletAddress},{
+        withCredentials: true,
+      });
+      setIsLoading(false);
+      toast({
+        title: "Minting Successful",
+        description: `100 tons of carbon credits have been minted as NFTs.`,
+      });
+    } catch (error) {
+      console.error("Error minting NFTs:", error);
+      setIsLoading(false);
       toast({
         variant: "destructive",
-        title: "Invalid input",
-        description: "Please enter a valid number of carbon tons to mint.",
+        title: "Minting Failed",
+        description: "An error occurred while minting NFTs.",
       });
       return;
     }
     
-    toast({
-      title: "Minting Successful",
-      description: `${carbonTons} tons of carbon credits have been minted as NFTs.`,
-    });
+    
 
     setMintingOpen(false);
     setVerificationOpen(false);
@@ -109,7 +122,7 @@ export function VerifyProject() {
               >
                 <Upload className="h-8 w-8 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground text-center">
-                {file ? file.name : "Click to upload or drag and drop"}
+                  {file ? file.name : "Click to upload or drag and drop"}
                 </p>
                 <input
                   id="certificate"
@@ -148,22 +161,26 @@ export function VerifyProject() {
           <DialogHeader>
             <DialogTitle>Mint Carbon Credit NFTs</DialogTitle>
             <DialogDescription>
-              Enter the amount of carbon credits (in tons) you want to mint as NFTs.
+              Verification Successfully Completed. Click the mint button to mint NFTs to your wallet.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="carbon-tons">Tons of Carbon Credits</Label>
-              <Input
-                id="carbon-tons"
-                type="number"
-                placeholder="Enter amount in tons"
-                value={carbonTons}
-                onChange={(e) => setCarbonTons(e.target.value)}
-              />
             </div>
             <Button onClick={handleMinting} className="w-full">
-              Mint NFTs
+              {
+                isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Minting...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
+                    Mint NFTs
+                  </>
+                )
+              }
             </Button>
           </div>
         </DialogContent>

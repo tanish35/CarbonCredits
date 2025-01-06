@@ -144,7 +144,7 @@ const BuyerDashboard = ({
         <div className="flex flex-col gap-6">
           <UserDetails user={user} />
           <Card className="p-6"></Card>
-          <VerifyProject />
+          {/* <VerifyProject  /> */}
         </div>
         <NFTGrid nfts={nfts.length > 0 ? nfts : []} />
       </div>
@@ -167,7 +167,7 @@ const SellerDashboard = ({
         <div className="grid gap-6 md:grid-cols-2">
           <div className="flex flex-col gap-6">
             <CarbonCreditsDisplay walletAddress={wallet}/>
-          <VerifyProject />
+          <VerifyProject walletAddress={wallet} />
             <RewardCard />
           </div>
           <div className="flex flex-col gap-6">
