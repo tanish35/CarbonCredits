@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 interface NFT {
   id: string;
@@ -47,7 +48,7 @@ const fetchIPFSData = async (uri: string): Promise<{ image?: string; description
 
 export function NFTGrid({ nfts }: { nfts: NFT[] }) {
   const [updatedNFTs, setUpdatedNFTs] = useState<NFT[]>([]);
-
+  const navigator = useNavigate();
   useEffect(() => {
     const fetchNFTData = async () => {
       const updated = await Promise.all(
@@ -78,18 +79,19 @@ export function NFTGrid({ nfts }: { nfts: NFT[] }) {
         <div className="grid grid-cols-2 gap-4">
           {updatedNFTs.map((nft) => (
             <div
-              key={nft.id}
+              key={nft.tokenId}
               className={`group relative aspect-square rounded-lg border-primary bg-muted/50 p-2 transition-colors hover:bg-muted ${
                 nft.image ? "bg-cover bg-center bg-no-repeat" : ""
               }`}
               style={{
                 backgroundImage: nft.image ? `url(${nft.image})` : "none",
               }}
+              onClick={() => navigator(`/nft/${nft.tokenId}`)}
             >
               <div className="flex h-full flex-col justify-between rounded p-2">
                 <div className="flex items-center justify-between">
                   <Badge variant="outline" className="bg-background">
-                    #{nft.id}
+                    #{nft.tokenId}
                   </Badge>
                   <Badge
                     variant="outline"

@@ -8,6 +8,7 @@ import { abi_marketplace } from "@/lib/abi_marketplace";
 import { SellOptions } from "@/components/SellOptions";
 import { AuctionBidComponent } from "@/components/AuctionBidComponent";
 import { DirectBuyComponent } from "@/components/DirectBuyComponent";
+import { Loader } from "@/components/Loader";
 
 const NFT_CONTRACT_ADDRESS = "0x1A33A6F1A7D001A5767Cd9303831Eb3B9b916AEA";
 const MARKETPLACE_ADDRESS = "0x79298aF4e4F51c746dEeE692a40a3141C9b142ef";
@@ -19,6 +20,7 @@ interface Credit {
   certificateURI: string;
   expiryDate: bigint;
   retired: boolean;
+  description?: string;
 }
 
 type Auction = [bigint, bigint, bigint, string, bigint, boolean];
@@ -34,6 +36,7 @@ const NFTPage: React.FC = () => {
   const [isOwner, setIsOwner] = useState(false);
   const [basePrice, setBasePrice] = useState(0);
   const [auctionDetails, setAuctionDetails] = useState<Auction | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const { data: nftOwner } = useReadContract({
     address: NFT_CONTRACT_ADDRESS,
@@ -58,95 +61,74 @@ const NFTPage: React.FC = () => {
 
   const { data: basePrice1 } = useReadContract({
     address: NFT_CONTRACT_ADDRESS,
-    abi: abi,
+    abi,
     functionName: "getRate",
     args: [BigInt(TOKEN_ID)],
   });
 
-  useEffect(() => {
-    // console.log(basePrice1);
-    setBasePrice(Number(basePrice1));
-  }, [basePrice1]);
+  const fetchIPFSData = async (uri: string): Promise<{ image?: string; description?: string }> => {
+    try {
+      const ipfsURL = uri.replace("ipfs://", "https://ipfs.io/ipfs/");
+      const response = await axios.get(ipfsURL);
 
-  // useEffect(() => {
-  //   console.log(creditData);
-  // }, [creditData]);
+      if (response.status === 200) {
+        const metadata = response.data;
+        return {
+          image: metadata.image ? metadata.image.replace("ipfs://", "https://ipfs.io/ipfs/") : undefined,
+          description: metadata.description || undefined,
+        };
+      }
+    } catch (error) {
+      console.error("Error fetching IPFS data:", error);
+    }
+    return {};
+  };
+
+  useEffect(() => {
+    if (basePrice1) setBasePrice(Number(basePrice1));
+  }, [basePrice1]);
 
   useEffect(() => {
     const fetchData = async () => {
-      if (creditData) {
-        try {
-          const certificateURI = `https://${creditData.certificateURI.replace(
-            /^ipfs:\/\//,
-            ""
-          )}.ipfs.dweb.link/`;
-
-          let updatedCertificateURI = certificateURI;
-          let metadata = null;
-
-          try {
-            const response = await axios.get(certificateURI, {
-              headers: {
-                "Content-Type": "application/json",
-              },
-            });
-
-            const imageURI = response.data?.image;
-            updatedCertificateURI = `https://${imageURI.replace(
-              /^ipfs:\/\//,
-              ""
-            )}.ipfs.dweb.link/`;
-            metadata = response.data;
-          } catch (error) {
-            console.error("Error fetching metadata for certificateURI:", error);
-          }
-
-          const { typeofcredit, quantity, expiryDate, retired } = creditData;
+      try {
+        if (creditData) {
+          const { typeofcredit, quantity, expiryDate, retired, certificateURI } = creditData;
+          const { image, description } = await fetchIPFSData(certificateURI);
 
           setCreditDetails({
             id: TOKEN_ID,
             typeofcredit: typeofcredit as string,
             quantity: BigInt(quantity),
-            certificateURI: updatedCertificateURI as string,
+            certificateURI: image || certificateURI,
             expiryDate: BigInt(expiryDate),
             retired: retired as boolean,
+            description,
           });
-        } catch (error) {
-          console.error("Error processing creditData:", error);
         }
-      }
 
-      setIsOwner(nftOwner === address);
+        if (nftOwner) setIsOwner(nftOwner === address);
 
-      try {
-        let response = await axios.post("/nft/getNFTStatus", {
+        if (auctionData) setAuctionDetails(auctionData as Auction);
+
+        const statusResponse = await axios.post("/nft/getNFTStatus", {
           tokenId: TOKEN_ID,
         });
-        setIsAuction(response.data.isAuction);
-        setIsDirectSelling(response.data.isDirectSale);
-        setShowSellOptions(isOwner);
+
+        setIsAuction(statusResponse.data.isAuction);
+        setIsDirectSelling(statusResponse.data.isDirectSale);
+        setShowSellOptions(nftOwner === address);
       } catch (error) {
-        console.error("Error fetching selling status:", error);
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (auctionData) {
-      setAuctionDetails(auctionData as Auction);
-    }
-
     fetchData();
-  }, [creditData, nftOwner, address, id, isOwner, auctionData]);
+  }, [creditData, nftOwner, address, auctionData]);
 
-  useEffect(() => {
-    console.log(nftOwner, address);
-  }, [nftOwner, address]);
-
-  // useEffect(() => {
-  //   console.log(creditDetails);
-  // }, [creditDetails]);
-
-  if (!creditData) {
-    return <div>Loading...</div>;
+  if (loading) {
+    return <Loader isLoading />;
   }
 
   if (!creditDetails) {
@@ -161,8 +143,8 @@ const NFTPage: React.FC = () => {
             {isAuction
               ? "Carbon Credit NFT Auction"
               : isDirectSelling
-                ? "Carbon Credit NFT Direct Sale"
-                : "Carbon Credit NFT"}
+              ? "Carbon Credit NFT Direct Sale"
+              : "Carbon Credit NFT"}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -173,48 +155,49 @@ const NFTPage: React.FC = () => {
                 alt="Certificate"
                 className="w-full h-auto"
               />
+              {creditDetails.description && (
+                <p className="mt-2 italic">{creditDetails.description}</p>
+              )}
             </div>
             <div className="space-y-4">
-              <div className="space-y-2">
+              <p>
+                <strong>Credit Type:</strong> {creditDetails.typeofcredit}
+              </p>
+              <p>
+                <strong>Quantity:</strong> {creditDetails.quantity.toString()}
+              </p>
+              <p>
+                <strong>Expiry Date:</strong>{" "}
+                {new Date(
+                  Number(creditDetails.expiryDate) * 1000
+                ).toLocaleDateString()}
+              </p>
+              <p>
+                <strong>Retired:</strong>{" "}
+                {creditDetails.retired ? "Yes" : "No"}
+              </p>
+              {basePrice && (
                 <p>
-                  <strong>Credit Type:</strong> {creditDetails.typeofcredit}
+                  <strong>Base Price:</strong> {Number(basePrice) / 1e18} ETH
                 </p>
-                <p>
-                  <strong>Quantity:</strong> {creditDetails.quantity.toString()}
-                </p>
-                <p>
-                  <strong>Expiry Date:</strong>{" "}
-                  {new Date(
-                    Number(creditDetails.expiryDate) * 1000
-                  ).toLocaleDateString()}
-                </p>
-                <p>
-                  <strong>Retired:</strong>{" "}
-                  {creditDetails.retired ? "Yes" : "No"}
-                </p>
-                {basePrice && (
+              )}
+              {auctionDetails && auctionDetails[5] && (
+                <>
                   <p>
-                    <strong>Base Price:</strong> {Number(basePrice) / 1e18} ETH
+                    <strong>Current Price:</strong>{" "}
+                    {Number(auctionDetails[2]) / 1e18} ETH
                   </p>
-                )}
-                {auctionDetails && auctionDetails[5] && (
-                  <div className="space-y-2">
-                    <p>
-                      <strong>Current Price:</strong>{" "}
-                      {Number(auctionDetails[2]) / 1e18} ETH
-                    </p>
-                    <p>
-                      <strong>Current Bidder:</strong> {auctionDetails[3]}
-                    </p>
-                    <p>
-                      <strong>Auction Ends:</strong>{" "}
-                      {new Date(
-                        Number(auctionDetails[4]) * 1000
-                      ).toLocaleString()}
-                    </p>
-                  </div>
-                )}
-              </div>
+                  <p>
+                    <strong>Current Bidder:</strong> {auctionDetails[3]}
+                  </p>
+                  <p>
+                    <strong>Auction Ends:</strong>{" "}
+                    {new Date(
+                      Number(auctionDetails[4]) * 1000
+                    ).toLocaleString()}
+                  </p>
+                </>
+              )}
 
               {showSellOptions && (
                 <SellOptions
