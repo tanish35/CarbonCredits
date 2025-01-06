@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "../ui/separator";
 import { api } from "@/lib/api";
+import { WalletIcon } from "lucide-react";
 
 interface WalletProps {
   onWalletChange: (address: string | null) => void;
@@ -41,7 +42,12 @@ export const Wallet: React.FC<WalletProps> = ({ onWalletChange }) => {
   return (
     <div className="container">
       {!isConnected ? (
-        <p className="text-muted">No wallet connected</p>
+        <Card className="w-full h-full bg-gradient-to-br from-muted/5 to-muted/20 hover:shadow-lg transition-all duration-300">
+        <CardContent className="flex flex-col items-center justify-center h-48 gap-4">
+          <WalletIcon className="h-12 w-12 text-muted-foreground/50" />
+          <p className="text-muted-foreground text-lg">Connect your wallet to continue</p>
+        </CardContent>
+      </Card>
       ) : (
         <Card>
           <CardHeader>

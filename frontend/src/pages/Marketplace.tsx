@@ -99,7 +99,7 @@ export default function MarketplacePage() {
   }
 
   return (
-    <div className="min-h-screen text-black relative overflow-hidden">
+    <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
       <video
         autoPlay
         loop
@@ -122,7 +122,7 @@ export default function MarketplacePage() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
                   placeholder="Search by credit type"
-                  className="pl-10 border-gray-800 text-black w-full"
+                  className="pl-10 border-muted text-foreground w-full"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -130,7 +130,7 @@ export default function MarketplacePage() {
             </div>
             <div className="flex items-center gap-4">
               <Select value={type} onValueChange={(value) => setType(value as "auction" | "sale")}>
-                <SelectTrigger className="w-[180px] border-gray-800 text-black">
+              <SelectTrigger className="w-[180px] bg-muted/50 border-muted text-foreground">
                   <SelectValue placeholder="Filter by type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -141,7 +141,7 @@ export default function MarketplacePage() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`p-2 rounded-lg ${viewMode === "grid" ? "bg-gray-300" : "hover:bg-gray-200"}`}
+                className={`p-2 rounded-lg ${viewMode === "grid" ? "bg-secondary" : "hover:bg-primary"}`}
                 onClick={() => setViewMode("grid")}
               >
                 <Grid className="h-5 w-5 text-black" />
@@ -149,7 +149,7 @@ export default function MarketplacePage() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`p-2 rounded-lg ${viewMode === "list" ? "bg-gray-300" : "hover:bg-gray-200"}`}
+                className={`p-2 rounded-lg ${viewMode === "list" ? "bg-secondary" : "hover:bg-primary"}`}
                 onClick={() => setViewMode("list")}
               >
                 <List className="h-5 w-5 text-black" />
