@@ -41,12 +41,12 @@ export const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [nftMetaDataArray, setNftMetaDataArray] = useState<NFTMetadata[]>([]);
   const [user, setUser] = useState<User | null>({
-    id: "404 Not Found",
-    email: "404 Not Found",
-    password: "404 Not Found",
-    name: "404 Not Found",
-    address: "404 Not Found",
-    phone: "404 Not Found",
+    id: "12334578",
+    email: "user@email.com",
+    password: "123456",
+    name: "user",
+    address: "user address",
+    phone: "12345678",
     createdAt: new Date(),
     updatedAt: new Date(),
   });
@@ -148,19 +148,28 @@ export const Dashboard = () => {
           <p className="text-muted-foreground">Manage your sales and NFTs</p>
         </div>
       )}
-      <Wallet onWalletChange={setWalletAddress} />
+
       {!isLoading && role === "buyer" && user && (
-        <BuyerDashboard user={user} nfts={nftMetaDataArray} />
+        <BuyerDashboard
+          user={user}
+          nfts={nftMetaDataArray}
+          onWalletChange={setWalletAddress}
+        />
       )}
       {!isLoading && role === "seller" && user && (
         <SellerDashboard
           user={user}
           nfts={nftMetaDataArray}
           wallet={walletAddress!}
+          onWalletChange={setWalletAddress}
         />
       )}
       {!isLoading && role === "admin" && (
-        <AdminDashboard nfts={nftMetaDataArray} wallet={walletAddress!} />
+        <AdminDashboard
+          nfts={nftMetaDataArray}
+          wallet={walletAddress!}
+          onWalletChange={setWalletAddress}
+        />
       )}
     </div>
   );
@@ -169,13 +178,16 @@ export const Dashboard = () => {
 const BuyerDashboard = ({
   user,
   nfts,
+  onWalletChange,
 }: {
   user: User;
   nfts: NFTMetadata[];
+  onWalletChange: (wallet:any) => void;
 }) => (
   <div className="space-y-6">
     <div className="grid gap-6 md:grid-cols-2">
       <div className="flex flex-col gap-6">
+        <Wallet onWalletChange={onWalletChange} />
         <UserDetails user={user} />
       </div>
       <NFTGrid nfts={nfts} />
@@ -184,37 +196,40 @@ const BuyerDashboard = ({
 );
 
 const SellerDashboard = ({
+  user,
   nfts,
   wallet,
+  onWalletChange,
 }: {
   user: User;
   nfts: NFTMetadata[];
   wallet: string;
+  onWalletChange: (wallet: any) => void;
 }) => (
   <div className="space-y-6">
-    <Card className="p-6 space-y-5">
       <div className="grid gap-6 md:grid-cols-2">
         <div className="flex flex-col gap-6">
+          <Wallet onWalletChange={onWalletChange} />
           <CarbonCreditsDisplay walletAddress={wallet} />
-          <VerifyProject walletAddress={wallet} />
           <RewardCard />
         </div>
         <div className="flex flex-col gap-6">
-          {/* <UserDetails user={user} /> */}
-          {/* Fix this user details stuff */}
+          <UserDetails user={user} />
+          <VerifyProject walletAddress={wallet} />
           <NFTGrid nfts={nfts} />
         </div>
       </div>
-    </Card>
   </div>
 );
 
 const AdminDashboard = ({
   nfts,
   wallet,
+  onWalletChange,
 }: {
   nfts: NFTMetadata[];
   wallet: string;
+  onWalletChange: (wallet:any) => void
 }) => {
   const adminUser: User = {
     id: "1",
@@ -235,6 +250,7 @@ const AdminDashboard = ({
       </div>
       <div className="grid gap-6 md:grid-cols-2">
         <div className="flex flex-col gap-6">
+          <Wallet onWalletChange={onWalletChange} />
           <UserDetails user={adminUser} />
           <CarbonCreditsDisplay walletAddress={wallet} />
         </div>

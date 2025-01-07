@@ -1,13 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useAccount, useBalance, useDisconnect } from "wagmi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
 import { Button } from "../ui/button";
 import { Power, Wallet as WalletIcon, CircleDollarSign } from "lucide-react";
 import { formatAddress } from "@/lib/utils";
 import { Separator } from "../ui/separator";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
+
 interface WalletProps {
   onWalletChange: (address: string | null) => void;
 }
@@ -16,19 +20,51 @@ export const Wallet: React.FC<WalletProps> = ({ onWalletChange }) => {
   const { isConnected, address } = useAccount();
   const { data: balance, isError, isLoading } = useBalance({ address });
   const { disconnect } = useDisconnect();
-  const toast = useToast();
+  const {toast} = useToast();
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const truncatedAddress = address ? formatAddress(address) : "";
 
   async function updateWallet(address: String) {
-    await api.put("/user/walletUpdate", {
-      wallet_address: address,
-    });
+    try {
+      setIsUpdating(true);
+      await api.put("/user/walletUpdate", {
+        wallet_address: address,
+      });
+      toast({
+        title: "Wallet Updated",
+        description: "Your wallet has been successfully connected",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update wallet",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
   }
 
   const handleDisconnect = () => {
     disconnect();
     onWalletChange(null);
+  };
+
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "Address copied",
+        description: "Wallet address copied to clipboard",
+      });
+    } catch (err) {
+      toast({
+        title: "Failed to copy",
+        description: "Could not copy address to clipboard",
+        variant: "destructive",
+      });
+    }
   };
 
   useEffect(() => {
@@ -41,7 +77,12 @@ export const Wallet: React.FC<WalletProps> = ({ onWalletChange }) => {
   }, [isConnected, address, onWalletChange]);
 
   return (
-    <div className="container">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="container"
+    >
       {!isConnected ? (
         <Card className="w-full h-full bg-gradient-to-br from-muted/5 to-muted/20 hover:shadow-lg transition-all duration-300">
           <CardContent className="flex flex-col items-center justify-center h-48 gap-4">
@@ -52,54 +93,70 @@ export const Wallet: React.FC<WalletProps> = ({ onWalletChange }) => {
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>Wallet Information</CardTitle>
-          </CardHeader>
-          <Separator className="mb-4" />
-          <CardContent>
-            <div className="flex items-center">
-              <p>
-                Wallet Connected: {address!.slice(0, 6)}...{address!.slice(-4)}
-              </p>
-              {/* <button
-                onClick={() => handleCopy(address!)}
-                className="ml-2 px-2 py-1 text-sm text-blue-500 border border-blue-500 rounded"
-              >
-                Copy
-              </button> */}
+        <Card className="relative overflow-hidden">
+          {isUpdating && (
+            <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-50">
+              <div className="loading-spinner" />
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleDisconnect}
-              className="text-red-500 hover:bg-red-500/10 hover:text-red-600 transition-colors"
-            >
-              <Power className="h-5 w-5" />
-            </Button>
-          </CardContent>
+          )}
+          <CardHeader className="border-b bg-gradient-to-r from-muted/50 to-muted/30 space-y-1 flex flex-row justify-between items-center p-6">
+            <div>
+              <CardTitle className="text-2xl font-semibold">
+                Wallet Information
+              </CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Manage your wallet details
+              </p>
+            </div>
+            <Badge variant={"outline"} className="p-2 bg-background/80 backdrop-blur-sm">
+              <WalletIcon className="h-5 w-5" />
+            </Badge>
+          </CardHeader>
+          <Separator />
           <CardContent className="pt-6 space-y-6">
             <div className="grid gap-6">
-              <div className="flex items-center justify-between p-6 bg-gradient-to-br from-muted/20 to-muted/10 rounded-xl hover:shadow-sm transition-all">
+              <motion.div 
+                whileHover={{ scale: 1.01 }}
+                className="flex items-center justify-between p-6 bg-gradient-to-br from-muted/20 to-muted/10 rounded-xl hover:shadow-md transition-all duration-200"
+              >
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-muted-foreground">
                     Connected Address
                   </p>
                   <div className="flex items-center gap-3">
-                    <span className="font-mono text-lg">
+                    <span className="font-mono text-lg select-all">
                       {truncatedAddress}
                     </span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCopy(address!)}
+                          className="px-2 py-1 h-auto text-xs hover:bg-muted/80"
+                        >
+                          Copy
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Copy Address</TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-medium text-muted-foreground">
                     Network
                   </p>
-                  <p className="font-medium text-primary mt-1">Avalanche</p>
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-green-500" />
+                    <p className="font-medium text-primary mt-1">Avalanche</p>
+                  </div>
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="p-6 bg-gradient-to-br from-muted/20 to-muted/10 rounded-xl hover:shadow-sm transition-all">
+              <motion.div 
+                whileHover={{ scale: 1.01 }}
+                className="p-6 bg-gradient-to-br from-muted/20 to-muted/10 rounded-xl hover:shadow-md transition-all"
+              >
                 <div className="flex items-center gap-2 mb-4">
                   <CircleDollarSign className="h-5 w-5 text-primary/80" />
                   <p className="text-sm font-medium text-muted-foreground">
@@ -121,11 +178,11 @@ export const Wallet: React.FC<WalletProps> = ({ onWalletChange }) => {
                     <span className="text-xl">{balance?.symbol}</span>
                   </div>
                 )}
-              </div>
+              </motion.div>
             </div>
           </CardContent>
         </Card>
       )}
-    </div>
+    </motion.div>
   );
 };

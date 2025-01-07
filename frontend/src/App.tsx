@@ -15,30 +15,34 @@ import NFTPage from "./pages/NFTPage";
 import AboutPage from "./pages/About";
 import TeamPage from "./pages/Contact";
 // import NFTAuctionPage from "./pages/NFTPage";
+import React from "react";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-      <Router>
-        <Routes>
-          <Route path="*" element={<NotFound />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/" element={<Layout />}>
-            <Route path="/" element={<Dashboard />} />
-            {/* <Route path="/mint" element={<MintPage />} /> */}
-            <Route path="/my-nft" element={<MyNFTPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/nft/:id" element={<NFTPage />} />
-            <Route path="/contact" element={<TeamPage />} />
-          </Route>
-          {/* <Route path="/nft/:id" element={<NFTDetailsPage />} /> */}
-          <Route path="/marketplace" element={<MarketplacePage />} />
-          <Route path="/buy" element={<BuyPage />} />
-          {/* <Route path="/auction" element={<NFTAuctionPage />} /> */}
-        </Routes>
-      </Router>
-    </ThemeProvider>
+    <TooltipProvider>
+      <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+        <Router>
+          <Routes>
+            <Route path="*" element={<NotFound />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/" element={<Layout />}>
+              <Route path="/" element={<Dashboard />} />
+              {/* <Route path="/mint" element={<MintPage />} /> */}
+              <Route path="/my-nft" element={<MyNFTPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/nft/:id" element={<NFTPage />} />
+              <Route path="/contact" element={<TeamPage />} />
+            </Route>
+            {/* <Route path="/nft/:id" element={<NFTDetailsPage />} /> */}
+            <Route path="/marketplace" element={<MarketplacePage />} />
+            <Route path="/buy" element={<BuyPage />} />
+            {/* <Route path="/auction" element={<NFTAuctionPage />} /> */}
+          </Routes>
+        </Router>
+      </ThemeProvider>
+    </TooltipProvider>
   );
 }
 
