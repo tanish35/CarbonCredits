@@ -13,10 +13,12 @@ const initializeWeb3 = () => {
   const provider = new Web3.providers.WebsocketProvider('wss://api.avax-test.network/ext/bc/C/ws');
 
   provider.on('connect', () => console.log('WebSocket connected'));
+  //@ts-ignore
   provider.on('error', (error: any) => {
     console.error('WebSocket error:', error);
     reconnect();
   });
+  //@ts-ignore
   provider.on('end', (error: any) => {
     console.error('WebSocket connection ended:', error);
     reconnect();

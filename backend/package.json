@@ -3,19 +3,20 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev:main": "nodemon --exec ts-node src/index.ts",
-    "server1": "nodemon --watch server1 --exec ts-node ./src/MarketEventListener.ts",
-    "server2": "nodemon --watch server2 --exec ts-node ./src/NftEventListener.ts",
-    "dev": "concurrently \"npm run dev:main\" \"npm run server1\" \"npm run server2\""
+    "dev": "nodemon",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "server1": "nodemon --watch server1 src/MarketEventListener.ts",
+    "server2": "nodemon --watch server2 src/NftEventListener.ts",
+    "dev:all": "concurrently \"npm run dev\" \"npm run server1\" \"npm run server2\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "description": "",
   "dependencies": {
     "@avalabs/avalanchejs": "^4.1.1",
+    "@google/generative-ai": "^0.21.0",
     "@prisma/client": "^6.1.0",
     "@prisma/extension-accelerate": "^1.2.1",
     "@types/bcrypt": "^5.0.2",
@@ -28,17 +29,22 @@
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "ethers": "^6.13.4",
     "express": "^4.21.2",
     "express-async-handler": "^1.2.0",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.16",
     "prisma": "^6.1.0",
-    "ts-node": "^10.9.2",
     "web3": "^4.16.0"
   },
   "devDependencies": {
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.10.5",
     "concurrently": "^9.1.2",
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
   }
 }
