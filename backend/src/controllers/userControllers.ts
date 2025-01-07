@@ -169,3 +169,8 @@ export const getUserDetails = asyncHandler(async (req: Request, res: Response) =
   res.json(req.user);
 })
 
+export const signOut = asyncHandler(async (req: Request, res: Response) => {
+  res.clearCookie("token");
+  res.json({ message: "Signed out successfully" });
+});
+

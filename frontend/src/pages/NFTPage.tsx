@@ -10,9 +10,13 @@ import { SellOptions } from "@/components/SellOptions";
 import { AuctionBidComponent } from "@/components/AuctionBidComponent";
 import { DirectBuyComponent } from "@/components/DirectBuyComponent";
 import { Loader } from "@/components/Loader";
-import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { AlertCircle, Clock, Coins, User } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { AlertCircle, Clock, Coins, User } from "lucide-react";
 import { formatEther } from "viem";
 
 const NFT_CONTRACT_ADDRESS = "0x1A33A6F1A7D001A5767Cd9303831Eb3B9b916AEA";
@@ -72,7 +76,9 @@ const NFTPage: React.FC = () => {
     args: [BigInt(TOKEN_ID)],
   });
 
-  const fetchIPFSData = async (uri: string): Promise<{ image?: string; description?: string }> => {
+  const fetchIPFSData = async (
+    uri: string
+  ): Promise<{ image?: string; description?: string }> => {
     try {
       const ipfsURL = uri.replace("ipfs://", "https://ipfs.io/ipfs/");
       const response = await axios.get(ipfsURL);
@@ -80,7 +86,9 @@ const NFTPage: React.FC = () => {
       if (response.status === 200) {
         const metadata = response.data;
         return {
-          image: metadata.image ? metadata.image.replace("ipfs://", "https://ipfs.io/ipfs/") : undefined,
+          image: metadata.image
+            ? metadata.image.replace("ipfs://", "https://ipfs.io/ipfs/")
+            : undefined,
           description: metadata.description || undefined,
         };
       }
@@ -99,7 +107,13 @@ const NFTPage: React.FC = () => {
     const fetchData = async () => {
       try {
         if (creditData) {
-          const { typeofcredit, quantity, expiryDate, retired, certificateURI } = creditData;
+          const {
+            typeofcredit,
+            quantity,
+            expiryDate,
+            retired,
+            certificateURI,
+          } = creditData;
           const { image, description } = await fetchIPFSData(certificateURI);
 
           setCreditDetails({
@@ -162,8 +176,8 @@ const NFTPage: React.FC = () => {
               {isAuction
                 ? "Carbon Credit NFT Auction"
                 : isDirectSelling
-                ? "Carbon Credit NFT Direct Sale"
-                : "Carbon Credit NFT"}
+                  ? "Carbon Credit NFT Direct Sale"
+                  : "Carbon Credit NFT"}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -192,17 +206,29 @@ const NFTPage: React.FC = () => {
                 >
                   <h3 className="text-xl font-semibold mb-4">NFT Details</h3>
                   <div className="grid grid-cols-2 gap-4">
-                    <InfoItem label="Credit Type" value={creditDetails.typeofcredit} />
-                    <InfoItem label="Quantity" value={creditDetails.quantity.toString()} />
+                    <InfoItem
+                      label="Credit Type"
+                      value={creditDetails.typeofcredit}
+                    />
+                    <InfoItem
+                      label="Quantity"
+                      value={creditDetails.quantity.toString()}
+                    />
                     <InfoItem
                       label="Expiry Date"
-                      value={new Date(Number(creditDetails.expiryDate) * 1000).toLocaleDateString()}
+                      value={new Date(
+                        Number(creditDetails.expiryDate) * 1000
+                      ).toLocaleDateString()}
                       icon={<Clock className="w-4 h-4" />}
                     />
                     <InfoItem
                       label="Retired"
                       value={creditDetails.retired ? "Yes" : "No"}
-                      valueClass={creditDetails.retired ? "text-red-500" : "text-green-500"}
+                      valueClass={
+                        creditDetails.retired
+                          ? "text-red-500"
+                          : "text-green-500"
+                      }
                     />
                   </div>
                 </motion.div>
@@ -228,7 +254,9 @@ const NFTPage: React.FC = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: 0.6 }}
                   >
-                    <h3 className="text-xl font-semibold mb-4">Auction Details</h3>
+                    <h3 className="text-xl font-semibold mb-4">
+                      Auction Details
+                    </h3>
                     <div className="grid grid-cols-2 gap-4">
                       <InfoItem
                         label="Current Price"
@@ -238,15 +266,18 @@ const NFTPage: React.FC = () => {
                       <InfoItem
                         label="Current Bidder"
                         value={
-                          auctionDetails[3] === '0x0000000000000000000000000000000000000000'
-                            ? 'No bids yet'
+                          auctionDetails[3] ===
+                          "0x0000000000000000000000000000000000000000"
+                            ? "No bids yet"
                             : `${auctionDetails[3].slice(0, 6)}...${auctionDetails[3].slice(-4)}`
                         }
                         icon={<User className="w-4 h-4" />}
                       />
                       <InfoItem
                         label="Auction Ends"
-                        value={new Date(Number(auctionDetails[4]) * 1000).toLocaleString()}
+                        value={new Date(
+                          Number(auctionDetails[4]) * 1000
+                        ).toLocaleString()}
                         icon={<Clock className="w-4 h-4" />}
                       />
                     </div>
@@ -304,11 +335,13 @@ const InfoItem: React.FC<{
         <div className="flex items-center space-x-2">
           {icon && <span className="text-gray-500">{icon}</span>}
           <span className="font-medium">{label}:</span>
-          <span className={`${valueClass || 'text-gray-700'}`}>{value}</span>
+          <span className={`${valueClass || "text-gray-700"}`}>{value}</span>
         </div>
       </TooltipTrigger>
       <TooltipContent>
-        <p>{label}: {value}</p>
+        <p>
+          {label}: {value}
+        </p>
       </TooltipContent>
     </Tooltip>
   </TooltipProvider>

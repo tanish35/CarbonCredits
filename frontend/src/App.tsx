@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 // import MintPage from "./pages/MintPage";
 import MyNFTPage from "./pages/MyNFTPage";
-import NFTDetailsPage from "./pages/NFTDetailsPage";
+// import NFTDetailsPage from "./pages/NFTDetailsPage";
 import { RegisterPage } from "./pages/Register";
 import { LoginPage } from "./pages/Login";
 import { ThemeProvider } from "./components/theme-provider";

@@ -1,10 +1,9 @@
-'use client'
-
 import { useState, useEffect } from "react";
-import { Search, Grid, List } from 'lucide-react';
+import { Search, Grid, List } from "lucide-react";
+import { Loader } from "@/components/Loader";
 import { motion, AnimatePresence } from "framer-motion";
-import Header from "../components/Header";
-import CarbonCreditCard from "../components/CarbonCreditCard";
+import Header from "@/components/Header";
+import CarbonCreditCard from "@/components/CarbonCreditCard";
 import {
   Select,
   SelectContent,
@@ -14,6 +13,8 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
+import { Navigate } from "react-router-dom";
+import { useUser } from "@/hooks/useUser";
 
 interface NFT {
   id: string;
@@ -31,19 +32,22 @@ interface NFT {
   description?: string;
 }
 
-const fetchIPFSData = async (uri: string): Promise<{ image?: string; description?: string }> => {
+const fetchIPFSData = async (
+  uri: string
+): Promise<{ image?: string; description?: string }> => {
   try {
     const ipfsURL = uri.replace("ipfs://", "https://ipfs.io/ipfs/");
     const response = await fetch(ipfsURL);
 
     if (!response.ok) {
-      console.error(`Failed to fetch IPFS data from: ${ipfsURL}`);
-      return {};
+      throw new Error(`Failed to fetch IPFS data from: ${ipfsURL}`);
     }
 
     const metadata = await response.json();
     return {
-      image: metadata.image ? metadata.image.replace("ipfs://", "https://ipfs.io/ipfs/") : undefined,
+      image: metadata.image
+        ? metadata.image.replace("ipfs://", "https://ipfs.io/ipfs/")
+        : undefined,
       description: metadata.description || undefined,
     };
   } catch (error) {
@@ -56,8 +60,9 @@ export default function MarketplacePage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [nfts, setNfts] = useState<NFT[]>([]);
   const [saleNfts, setSaleNfts] = useState<NFT[]>([]);
-  const [type, setType] = useState<"auction" | "sale">("auction");
+  const [type, setType] = useState<"auction" | "sale">("sale");
   const [searchTerm, setSearchTerm] = useState("");
+  const { loadingUser, userDetails } = useUser();
 
   useEffect(() => {
     getAllNFTs();
@@ -65,24 +70,28 @@ export default function MarketplacePage() {
 
   async function getAllNFTs() {
     try {
-      const response = await axios.get("nft/getAllNFTs", { withCredentials: true });
+      const response = await axios.get("/nft/getAllNFTs", {
+        withCredentials: true,
+      });
       const allNfts: NFT[] = response.data;
 
-      const auctionNfts = allNfts.filter((nft) => nft.isAuction);
-      const sellNfts = allNfts.filter((nft) => nft.isDirectSale);
+      const [auctionNfts, sellNfts] = [
+        allNfts.filter((n) => n.isAuction),
+        allNfts.filter((n) => n.isDirectSale),
+      ];
 
       const updatedAuctionNfts = await Promise.all(
-        auctionNfts.map(async (nft) => {
-          const { image, description } = await fetchIPFSData(nft.certificateURI);
-          return { ...nft, image, description };
-        })
+        auctionNfts.map(async (nft) => ({
+          ...nft,
+          ...(await fetchIPFSData(nft.certificateURI)),
+        }))
       );
 
       const updatedSaleNfts = await Promise.all(
-        sellNfts.map(async (nft) => {
-          const { image, description } = await fetchIPFSData(nft.certificateURI);
-          return { ...nft, image, description };
-        })
+        sellNfts.map(async (nft) => ({
+          ...nft,
+          ...(await fetchIPFSData(nft.certificateURI)),
+        }))
       );
 
       setNfts(updatedAuctionNfts);
@@ -95,6 +104,14 @@ export default function MarketplacePage() {
   const filteredNFTs = (type === "auction" ? nfts : saleNfts).filter((nft) =>
     nft.typeofCredit.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (loadingUser) {
+    return <Loader isLoading={loadingUser} />;
+  }
+
+  if (!userDetails) {
+    return <Navigate to="/login" />;
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
@@ -126,9 +143,11 @@ export default function MarketplacePage() {
                 />
               </div>
             </div>
-
             <div className="flex items-center gap-4">
-              <Select value={type} onValueChange={(value) => setType(value as "auction" | "sale")}>
+              <Select
+                value={type}
+                onValueChange={(value) => setType(value as "auction" | "sale")}
+              >
                 <SelectTrigger className="w-[180px] bg-muted/50 border-muted text-foreground">
                   <SelectValue placeholder="Filter by type" />
                 </SelectTrigger>
@@ -143,7 +162,7 @@ export default function MarketplacePage() {
                 className={`p-2 rounded-lg ${viewMode === "grid" ? "bg-secondary" : "hover:bg-primary"}`}
                 onClick={() => setViewMode("grid")}
               >
-                <Grid className="h-5 w-5" />
+                <Grid className="h-5 w-5 text-black" />
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -151,7 +170,7 @@ export default function MarketplacePage() {
                 className={`p-2 rounded-lg ${viewMode === "list" ? "bg-secondary" : "hover:bg-primary"}`}
                 onClick={() => setViewMode("list")}
               >
-                <List className="h-5 w-5" />
+                <List className="h-5 w-5 text-black" />
               </motion.button>
             </div>
           </motion.div>
@@ -164,7 +183,9 @@ export default function MarketplacePage() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
               className={`grid ${
-                viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-4" : "grid-cols-1"
+                viewMode === "grid"
+                  ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+                  : "grid-cols-1"
               } gap-6`}
             >
               {filteredNFTs.map((nft, index) => (
@@ -184,4 +205,3 @@ export default function MarketplacePage() {
     </div>
   );
 }
-

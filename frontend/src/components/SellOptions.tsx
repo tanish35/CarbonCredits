@@ -14,11 +14,6 @@ interface SellOptionsProps {
   MARKETPLACE_ADDRESS: `0x${string}`;
 }
 
-interface AuctionData {
-  active: boolean;
-  currentBidder: `0x${string}`;
-}
-
 export const SellOptions: React.FC<SellOptionsProps> = ({
   tokenId,
   onComplete,

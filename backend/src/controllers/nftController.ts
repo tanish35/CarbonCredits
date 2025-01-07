@@ -2,7 +2,8 @@ import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import prisma from "../lib/prisma";
 import { ethers } from "ethers";
-import { abi } from "../abi/abi_old";
+import { abi } from "../abi/abi";
+
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 if (!PRIVATE_KEY) {
@@ -110,6 +111,49 @@ export const getAllNFTs = asyncHandler(async (_req: Request, res: Response) => {
   res.json(nfts);
 });
 
+export const NFTMint = asyncHandler(async (req: Request, res: Response) => {
+  const { ownerId } = req.body;
+  if (!ownerId) {
+    res.status(400).json({ message: "Please provide an owner id" });
+    return;
+  }
+
+  try {
+    // Define the parameters for the minting process
+    const creditType = "Renewable Energy";
+    const quantity = 100;
+    const certificateURI = "ipfs://bafkreid5nywbwq3mujctdoz3ilxhncbvglmqe5m3jswg5qk5hn3mzqhnxq"; // Replace with actual URI if needed
+    const expiryDate = Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60; // Expiry set to 1 year from now
+    const rate = 8000000; // Replace with actual rate if needed
+
+    // Perform minting
+    const tx = await contract.mint(
+      ownerId,
+      creditType,
+      BigInt(quantity),
+      certificateURI,
+      expiryDate,
+      rate
+    );
+
+    // Wait for the transaction to be mined
+    const receipt = await tx.wait();
+
+    
+
+    // Return success response with transaction details
+    res.status(200).json({
+      success: true,
+      transactionHash: receipt.transactionHash,
+      blockNumber: receipt.blockNumber,
+      to: ownerId,
+      quantity,
+    });
+  } catch (error) {
+    console.error("Error minting NFT:", error);
+    res.status(500).json({ error: "Failed to mint NFT" });
+  }
+});
 // export const createNFT = asyncHandler(async (req: Request, res: Response) => {
 //   const {
 //     tokenId,
