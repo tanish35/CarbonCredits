@@ -41,67 +41,66 @@ export const getEmissionReduction = expressAsyncHandler(async (req, res) => {
     { name: "certificate", maxCount: 1 },
     { name: "companyLogo", maxCount: 1 },
   ])(req, res, async (err) => {
-    const {ownerId} = req.body;
     if (err) {
       console.error("Multer Error:", err);
       return res.status(500).json("Error uploading files");
     }
-  
-  
 
-  let emissionReduction = await getEmissionReductionData();
-  let certificateURI = await uploadToPinata(
-    // @ts-ignore
-    emissionReduction.companyName,
-    // @ts-ignore
-    emissionReduction.emission
-  );
-  certificateURI = `ipfs://${certificateURI}`;
-  // @ts-ignore
-  emissionReduction = emissionReduction.emission;
-  // @ts-ignore
-  if (!ownerId) {
-    res.status(400).json({ message: "Please provide an owner id" });
-    return;
-  }
+    const { ownerId, name } = req.body;
+    if (!ownerId || !name) {
+      res.status(400).json({ message: "Please provide an owner ID and credit type" });
+      return;
+    }
 
-  try {
-    // Define the parameters for the minting process
-    const creditType = "Renewable Energy";
-    const quantity  = 
+    const multipler = BigInt(1e13);
 
-      emissionReduction.toString().replace(/,/g, "");
-    const expiryDate = Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60; // Expiry set to 1 year from now
-    const rate = 8000000; // Replace with actual rate if needed
+    try {
+      let emissionReduction = await getEmissionReductionData();
+      let certificateURI = await uploadToPinata(
+        // @ts-ignore
+        emissionReduction.companyName,
+        // @ts-ignore
 
-    // Perform minting
-    const tx = await contract.mint(
-      ownerId,
-      creditType,
-      // @ts-ignore
-      BigInt(quantity),
-      certificateURI,
-      expiryDate,
-      rate
-    );
+        emissionReduction.emission
+      );
+      certificateURI = `ipfs://${certificateURI}`;
+        // @ts-ignore
 
-    // Wait for the transaction to be mined
-    const receipt = await tx.wait();
+      emissionReduction = emissionReduction.emission.toString().replace(/,/g, "");
 
-    
+      // Convert emissionReduction to BigInt for consistency
+        // @ts-ignore
 
-    // Return success response with transaction details
-    res.status(200).json({
-      success: true,
-      transactionHash: receipt.transactionHash,
-      blockNumber: receipt.blockNumber,
-      to: ownerId,
-      quantity,
-    });
-  } catch (error) {
-    console.error("Error minting NFT:", error);
-    res.status(500).json({ error: "Failed to mint NFT" });
-  }
-}
-)}
-);
+      const quantity = BigInt(emissionReduction);
+
+      const creditType = String(name); // Ensuring creditType is correctly defined
+      const expiryDate = Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60; // 1 year in seconds
+      const rate = quantity * multipler; // Using BigInt for precision
+
+      // Perform minting
+      const tx = await contract.mint(
+        ownerId,
+        creditType,
+        quantity,
+        certificateURI,
+        expiryDate,
+        rate
+      );
+
+      // Wait for the transaction to be mined
+      const receipt = await tx.wait();
+
+      // Return success response with transaction details
+      res.status(200).json({
+        success: true,
+        transactionHash: receipt.transactionHash,
+        blockNumber: receipt.blockNumber,
+        to: ownerId,
+        quantity: quantity.toString(),
+      });
+    } catch (error) {
+      console.error("Error minting NFT:", error);
+      res.status(500).json({ error: "Failed to mint NFT" });
+    }
+  });
+});

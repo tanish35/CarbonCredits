@@ -122,7 +122,7 @@ export const NFTMint = asyncHandler(async (req: Request, res: Response) => {
     // Define the parameters for the minting process
     const creditType = "Renewable Energy";
     const quantity = 100;
-    const certificateURI = "ipfs://bafkreid5nywbwq3mujctdoz3ilxhncbvglmqe5m3jswg5qk5hn3mzqhnxq"; // Replace with actual URI if needed
+    const certificateURI = "ipfs://bafkreia7beck5t6nhonoycmmdfhrefrgnu5c2rru42ad5qog3nlpu7nfs4"; // Replace with actual URI if needed
     const expiryDate = Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60; // Expiry set to 1 year from now
     const rate = 8000000; // Replace with actual rate if needed
 
