@@ -15,60 +15,89 @@ import {
   Upload,
   Loader2,
   CheckCircle2,
-  XCircle,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import axios from "axios";
+
 interface CarbonCreditsDisplayProps {
   walletAddress: string;
 }
+
 export function VerifyProject({ walletAddress }: CarbonCreditsDisplayProps) {
   const [verificationOpen, setVerificationOpen] = useState(false);
   const [mintingOpen, setMintingOpen] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [carbonTons, setCarbonTons] = useState("");
-  const [file, setFile] = useState<File | null>(null);
+  const [certificate, setCertificate] = useState<File | null>(null);
+  const [nftImage, setNftImage] = useState<File | null>(null);
+  const [nftName, setNftName] = useState("");
   const { toast } = useToast();
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: "certificate" | "nftImage"
+  ) => {
     const selectedFile = e.target.files?.[0];
 
     if (selectedFile) {
-      if (selectedFile.size > 1048576) {
-        toast({
-          variant: "destructive",
-          title: "File too large",
-          description: "Please upload a file smaller than 1MB",
-        });
-        return;
-      }
-
-      if (selectedFile.type !== "application/pdf") {
+      if (!["image/jpeg", "image/png"].includes(selectedFile.type)) {
         toast({
           variant: "destructive",
           title: "Invalid file type",
-          description: "Please upload a PDF file",
+          description: "Please upload a JPG or PNG image",
         });
         return;
       }
 
-      setFile(selectedFile);
-      // setVerificationResult({ status: null, message: "" });
+      if (type === "certificate") {
+        setCertificate(selectedFile);
+      } else {
+        setNftImage(selectedFile);
+      }
     }
   };
 
-  // Handle the "Verify Certificate" button click
-  const handleVerification = () => {
+  const handleVerification = async () => {
+    if (!certificate || !nftImage || !nftName) {
+      toast({
+        variant: "destructive",
+        title: "Missing Information",
+        description: "Please provide all required fields.",
+      });
+      return;
+    }
+
     setIsVerifying(true);
 
-    // Simulate the verification process with a delay
-    setTimeout(() => {
+    const formData = new FormData();
+    formData.append("certificate", certificate);
+    formData.append("companyLogo", nftImage);
+    formData.append("name", nftName);
+    formData.append("ownerId", walletAddress);
+
+    try {
+      const response = await axios.post("/emission", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       setIsVerifying(false);
-      setVerificationOpen(false); // Close verification dialog
-      setMintingOpen(true); // Open minting dialog
-    }, 2000); // Simulate a 2-second verification delay
+      if (response) {
+        toast({
+          title: "Verification and Minting Successful",
+          description: "Your project has been successfully verified and NFT minted.",
+        });
+        setMintingOpen(true);
+      }
+    } catch (error) {
+      setIsVerifying(false);
+      toast({
+        variant: "destructive",
+        title: "Verification Failed",
+        description: "An error occurred during verification.",
+      });
+    }
   };
 
   const handleMinting = async () => {
@@ -76,7 +105,10 @@ export function VerifyProject({ walletAddress }: CarbonCreditsDisplayProps) {
       setIsLoading(true);
       await axios.post(
         "/nft/mintNFT",
-        { ownerId: walletAddress },
+        {
+          ownerId: walletAddress,
+          nftName,
+        },
         {
           withCredentials: true,
         }
@@ -99,7 +131,9 @@ export function VerifyProject({ walletAddress }: CarbonCreditsDisplayProps) {
 
     setMintingOpen(false);
     setVerificationOpen(false);
-    setCarbonTons("");
+    setNftName("");
+    setCertificate(null);
+    setNftImage(null);
   };
 
   return (
@@ -132,31 +166,57 @@ export function VerifyProject({ walletAddress }: CarbonCreditsDisplayProps) {
       <Dialog open={verificationOpen} onOpenChange={setVerificationOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Upload Government Certificate</DialogTitle>
+            <DialogTitle>Upload Certificate & NFT Image</DialogTitle>
             <DialogDescription>
-              Please upload your government-verified certificate (PDF, max 1MB)
+              Please upload your certificate and NFT image (JPG/PNG, max 1MB)
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-6">
-            <div className="flex flex-col items-center gap-4">
+            <div className="flex flex-col gap-4">
+              <Label htmlFor="certificate">Certificate Image</Label>
               <label
                 htmlFor="certificate"
                 className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center gap-2 cursor-pointer hover:border-primary transition-colors"
               >
                 <Upload className="h-8 w-8 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground text-center">
-                  {file ? file.name : "Click to upload or drag and drop"}
+                  {certificate ? certificate.name : "Click to upload or drag and drop"}
                 </p>
                 <input
                   id="certificate"
                   type="file"
                   className="hidden"
-                  accept=".pdf"
-                  onChange={handleFileChange}
+                  accept=".jpeg,.png"
+                  onChange={(e) => handleFileChange(e, "certificate")}
                 />
               </label>
 
-              {/* Loader button */}
+              <Label htmlFor="nftImage">NFT Image</Label>
+              <label
+                htmlFor="nftImage"
+                className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center gap-2 cursor-pointer hover:border-primary transition-colors"
+              >
+                <Upload className="h-8 w-8 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground text-center">
+                  {nftImage ? nftImage.name : "Click to upload or drag and drop"}
+                </p>
+                <input
+                  id="nftImage"
+                  type="file"
+                  className="hidden"
+                  accept=".jpeg,.png"
+                  onChange={(e) => handleFileChange(e, "nftImage")}
+                />
+              </label>
+
+              <Label htmlFor="nftName">NFT Name</Label>
+              <Input
+                id="nftName"
+                value={nftName}
+                onChange={(e) => setNftName(e.target.value)}
+                placeholder="Enter NFT name"
+              />
+
               <Button
                 onClick={handleVerification}
                 disabled={isVerifying}
@@ -168,7 +228,7 @@ export function VerifyProject({ walletAddress }: CarbonCreditsDisplayProps) {
                     Verifying...
                   </>
                 ) : (
-                  "Verify Certificate"
+                  "Verify"
                 )}
               </Button>
 
@@ -176,7 +236,7 @@ export function VerifyProject({ walletAddress }: CarbonCreditsDisplayProps) {
                 <div className="w-full space-y-2">
                   <Progress value={66} />
                   <p className="text-sm text-center text-muted-foreground">
-                    Analyzing certificate...
+                    Verifying certificate and image...
                   </p>
                 </div>
               )}
@@ -195,7 +255,6 @@ export function VerifyProject({ walletAddress }: CarbonCreditsDisplayProps) {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2"></div>
             <Button onClick={handleMinting} className="w-full">
               {isLoading ? (
                 <>
