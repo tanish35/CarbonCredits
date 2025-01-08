@@ -14,7 +14,7 @@ async function uploadToPinata(companyName: string, emissionAmount: string) {
       "../../public/certificate/companyLogo.jpeg"
     );
     const logoFile = new File([fs.readFileSync(logoPath)], "companyLogo.jpeg", {
-      type: "image/jpg",
+      type: "image/jpeg",
     });
     const logoUpload = await pinata.upload.file(logoFile);
     fs.unlinkSync(logoPath);

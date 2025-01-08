@@ -3,7 +3,6 @@ import { VerifyProject } from "@/components/dashboard/VerifyProject";
 import { UserDetails } from "@/components/dashboard/UserDetail";
 import { NFTGrid } from "@/components/dashboard/NFTGrid";
 import { RewardCard } from "@/components/dashboard/RewardCard";
-import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { Loader } from "@/components/Loader";
 import { CarbonCreditsDisplay } from "@/components/dashboard/ProjectDetails";
@@ -156,18 +155,18 @@ export const Dashboard = () => {
           onWalletChange={setWalletAddress}
         />
       )}
-      {!isLoading && role === "seller" && user && (
+      {!isLoading && role === "seller" && user && walletAddress && (
         <SellerDashboard
           user={user}
           nfts={nftMetaDataArray}
-          wallet={walletAddress!}
+          wallet={walletAddress}
           onWalletChange={setWalletAddress}
         />
       )}
-      {!isLoading && role === "admin" && (
+      {!isLoading && role === "admin" && walletAddress && (
         <AdminDashboard
           nfts={nftMetaDataArray}
-          wallet={walletAddress!}
+          wallet={walletAddress}
           onWalletChange={setWalletAddress}
         />
       )}
@@ -182,7 +181,7 @@ const BuyerDashboard = ({
 }: {
   user: User;
   nfts: NFTMetadata[];
-  onWalletChange: (wallet:any) => void;
+  onWalletChange: (wallet: any) => void;
 }) => (
   <div className="space-y-6">
     <div className="grid gap-6 md:grid-cols-2">
@@ -207,18 +206,18 @@ const SellerDashboard = ({
   onWalletChange: (wallet: any) => void;
 }) => (
   <div className="space-y-6">
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="flex flex-col gap-6">
-          <Wallet onWalletChange={onWalletChange} />
-          <CarbonCreditsDisplay walletAddress={wallet} />
-          <RewardCard />
-        </div>
-        <div className="flex flex-col gap-6">
-          <UserDetails user={user} />
-          <VerifyProject walletAddress={wallet} />
-          <NFTGrid nfts={nfts} />
-        </div>
+    <div className="grid gap-6 md:grid-cols-2">
+      <div className="flex flex-col gap-6">
+        <Wallet onWalletChange={onWalletChange} />
+        <CarbonCreditsDisplay walletAddress={wallet} />
+        <RewardCard />
       </div>
+      <div className="flex flex-col gap-6">
+        <UserDetails user={user} />
+        <VerifyProject walletAddress={wallet} />
+        <NFTGrid nfts={nfts} />
+      </div>
+    </div>
   </div>
 );
 
@@ -229,7 +228,7 @@ const AdminDashboard = ({
 }: {
   nfts: NFTMetadata[];
   wallet: string;
-  onWalletChange: (wallet:any) => void
+  onWalletChange: (wallet: any) => void;
 }) => {
   const adminUser: User = {
     id: "1",

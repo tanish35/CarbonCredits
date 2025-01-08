@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import router from "./routes/userRoutes";
 import NFTrouter from "./routes/nftRoutes";
 import verifyCert from "./routes/verifyCert";
+import secrets from "./secrets";
 const app = express();
 
 app.use(express.json());
@@ -29,6 +30,6 @@ app.use("/api/user", router);
 app.use("/api/nft", NFTrouter);
 app.use("/api/emission", verifyCert);
 
-app.listen(3001, () => {
-  console.log("🚀 Server is running on http://localhost:3001");
+app.listen(secrets.PORT, () => {
+  console.log("🚀 Server is running on http://localhost:" + secrets.PORT);
 });

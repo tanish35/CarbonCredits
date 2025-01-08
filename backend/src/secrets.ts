@@ -3,6 +3,7 @@ config();
 
 console.log("🗝️  Loading environment variables...");
 const secrets = {
+  PORT: process.env.PORT!,
   DATABASE_URL: process.env.DATABASE_URL!,
   PULSE_API_KEY: process.env.PULSE_API_KEY!,
   SECRET: process.env.SECRET!,

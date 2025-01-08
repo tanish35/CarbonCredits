@@ -35,7 +35,7 @@ const getEmissionReductionData = async (): Promise<Object> => {
       },
     },
   ]);
-
+  
   const responseText = result.response.text();
   console.log("Response text:", responseText);
   const parts = responseText.split("|");
