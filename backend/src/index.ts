@@ -30,5 +30,5 @@ app.use("/api/nft", NFTrouter);
 app.use("/api/emission", verifyCert);
 
 app.listen(3001, () => {
-  console.log("Server is running on http://localhost:3001");
+  console.log("🚀 Server is running on http://localhost:3001");
 });

@@ -10,7 +10,11 @@ const storage = multer.diskStorage({
     cb(null, "./public/certificate");
   },
   filename: (req, file, cb) => {
-    cb(null, `${file.originalname}`);
+    if (file.fieldname === "certificate") {
+      cb(null, "cert.jpeg");
+    } else if (file.fieldname === "companyLogo") {
+      cb(null, "companyLogo.jpeg");
+    }
   },
 });
 
