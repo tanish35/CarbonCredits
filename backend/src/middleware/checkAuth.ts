@@ -5,7 +5,7 @@ async function requireAuth(req, res, next) {
   try {
     const token = req.cookies?.token;
     if (!token) {
-      console.log("4");
+      // console.log("4");
       res.sendStatus(401);
       return;
     }
@@ -18,7 +18,7 @@ async function requireAuth(req, res, next) {
     // }
     const userId = decoded.sub;
     if (!userId) {
-      console.log("3");
+      // console.log("3");
       res.sendStatus(401);
       return;
     }
@@ -36,7 +36,7 @@ async function requireAuth(req, res, next) {
     req.user = user;
     next();
   } catch (err) {
-    console.log("1",err);
+    // console.log("1",err);
     res.sendStatus(401);
     return;
   }

@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "nodemon",
     "build": "tsc",
+    "migrate": "prisma migrate deploy",
     "start": "node dist/index.js",
     "server1": "nodemon --watch server1 src/MarketEventListener.ts",
     "server2": "nodemon --watch server2 src/NftEventListener.ts",
