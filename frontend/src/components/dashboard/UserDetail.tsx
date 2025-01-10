@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Mail, Edit2, Phone, MapPin, User2, Calendar } from "lucide-react";
+import { User, Mail, Edit2, Phone, MapPin, User2, Calendar, LogOut } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { format } from "date-fns";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import axios from "axios";
+import { toast } from "@/hooks/use-toast";
+import { Navigate, useNavigate } from "react-router-dom";
 
 interface UserProps {
   user: {
@@ -24,7 +27,25 @@ export function UserDetails({ user }: UserProps) {
   const phone = user.phone || "Not provided";
   const address = user.address || "Not provided";
   const joinedDate = format(new Date(user.createdAt), 'MMMM dd, yyyy');
-
+  const navigate = useNavigate();
+  async function handleSignOut() {
+    try {
+      await axios.post("/user/signout",{},{withCredentials: true});
+      toast({
+        title: "Success",
+        description: "Signed out successfully",
+      });
+      navigate("/login");
+    }
+    catch(err) {
+      console.error(err);
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive",
+      })
+    }
+  }
   return (
     <Card className="w-full shadow-lg rounded-lg overflow-hidden">
       <CardHeader className="border-b bg-gradient-to-r from-muted/50 to-muted/30 space-y-1 flex flex-row justify-between items-center p-6">
@@ -103,6 +124,10 @@ export function UserDetails({ user }: UserProps) {
         <Button size="lg" className="w-full mt-6 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/80 hover:to-primary/80 transition-transform transform hover:scale-105">
           <Edit2 className="mr-2 h-4 w-4" />
           Edit Profile
+        </Button>
+        <Button size="lg" variant="destructive" onClick={()=>handleSignOut()} className="w-full mt-6 bg-gradient-to-r from-destructive to-destructive/90 hover:from-destructive/80 hover:to-destructive/80 transition-transform transform hover:scale-105">
+          <LogOut className="mr-2 h-4 w-4" />
+          Sign Out
         </Button>
       </CardContent>
     </Card>

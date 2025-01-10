@@ -170,6 +170,7 @@ export const getUserDetails = asyncHandler(
 );
 
 export const signOut = asyncHandler(async (req: Request, res: Response) => {
-  res.clearCookie("token");
+  res.clearCookie("token", { path: "/", httpOnly: true, secure: true });
+
   res.json({ message: "Signed out successfully" });
 });

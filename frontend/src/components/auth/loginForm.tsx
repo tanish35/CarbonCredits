@@ -79,7 +79,7 @@ export function LoginForm({
     e.preventDefault();
     setIsSubmitting(true);
     const result = await signInWithPopup(auth, googleProvider);
-    const response = await axios.post("/api/user/google", {
+    const response = await axios.post("/user/google", {
       email: result.user.email,
       name: result.user.displayName,
     }, {
