@@ -7,7 +7,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { auth, googleProvider } from "@/firebase";
 import { signInWithPopup } from "firebase/auth";
 import { FcGoogle } from "react-icons/fc";
-import axios from "axios";
 import { api } from "@/lib/api";
 import { loginSchema } from "@/validators/auth.validator";
 import { useToast } from "@/hooks/use-toast";
@@ -19,77 +18,100 @@ export function LoginForm({
 }: React.ComponentPropsWithoutRef<"form">) {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [inputText, setInputText] = useState({
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setInputText((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    //zod validation
-    const result = loginSchema.safeParse(inputText);
-    if (!result.success) {
-      const errorMessages = result.error.errors
-        .map((err) => `${err.path.join(".")} - ${err.message}`)
-        .join(", ");
-      toast({
-        title: "Error",
-        description: errorMessages,
-        variant: "destructive",
-      });
-      setIsSubmitting(false);
-      return;
-    }
-
-    console.log(inputText);
-    //api call
+  const handleGoogleLogin = async () => {
     try {
-      const user = await api.post("/user/login", inputText);
-      if (user) {
-        toast({
-          title: "Success",
-          description: "Logged in successfully",
-        });
-        console.log(user.data);
-        setTimeout(() => {
-          navigate("/");
-        }, 2000);
-      }
-    } catch (err) {
-      console.log(err);
+      setIsSubmitting(true);
+      const result = await signInWithPopup(auth, googleProvider); // Google login via popup
+      const user = result.user;
+
+      // Send the user data to the backend if needed
+      await api.post(
+        "/user/google",
+        {
+          email: user.email,
+          name: user.displayName,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
+      toast({
+        title: "Success",
+        description: "Logged in with Google successfully",
+      });
+      navigate("/"); // Redirect after successful login
+    } catch (error) {
+      console.error("Google sign-in error:", error);
       toast({
         title: "Error",
-        description: "Invalid credentials",
+        description: "Failed to login with Google",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
   };
 
-  const handleGoogleLogin = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleEmailLogin = async (e: React.MouseEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    const result = await signInWithPopup(auth, googleProvider);
-    const response = await axios.post("/user/google", {
-      email: result.user.email,
-      name: result.user.displayName,
-    }, {
-      withCredentials: true,
+
+    try {
+      const validatedData = loginSchema.safeParse(formData);
+
+      if (!validatedData.success) {
+        const errorMessages = validatedData.error.errors
+          .map((err) => `${err.path.join(".")} - ${err.message}`)
+          .join(", ");
+        throw new Error(errorMessages);
+      }
+
+      await api.post("/user/login", formData);
+
+      toast({
+        title: "Success",
+        description: "Logged in successfully",
+      });
+
+      navigate("/");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Invalid credentials",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-  );
-    console.log(response.data);
-    setIsSubmitting(false);
-    navigate("/");
   };
+
+  // const handleGoogleLogin = async () => {
+  //   try {
+  //     setIsSubmitting(true);
+  //     await signInWithRedirect(auth, googleProvider);
+  //   } catch (error) {
+  //     console.error("Google sign-in error:", error);
+  //     toast({
+  //       title: "Error",
+  //       description: "Failed to initiate Google login",
+  //       variant: "destructive",
+  //     });
+  //     setIsSubmitting(false);
+  //   }
+  // };
 
   return (
     <form className={cn("flex flex-col gap-6", className)} {...props}>
@@ -103,6 +125,7 @@ export function LoginForm({
           </p>
         </div>
       </div>
+
       <div className="grid gap-6">
         <div className="grid gap-2">
           <Label htmlFor="email">Email</Label>
@@ -111,45 +134,59 @@ export function LoginForm({
             type="email"
             name="email"
             placeholder="elon@x.com"
-            value={inputText.email}
-            onChange={handleChange}
+            value={formData.email}
+            onChange={handleInputChange}
+            disabled={isSubmitting}
           />
         </div>
+
         <div className="grid gap-2">
           <div className="flex items-center">
             <Label htmlFor="password">Password</Label>
-            <a
-              href=""
+            <Link
+              to="/forgot-password"
               className="ml-auto text-sm underline-offset-4 hover:underline"
             >
               Forgot your password?
-            </a>
+            </Link>
           </div>
           <Input
             id="password"
             type="password"
             name="password"
-            value={inputText.password}
-            onChange={handleChange}
+            value={formData.password}
+            onChange={handleInputChange}
+            disabled={isSubmitting}
           />
         </div>
-        <Button type="button" className="w-full" onClick={handleSubmit}>
-          {isSubmitting ? <Loader2 /> : "Login"}
+
+        <Button
+          type="button"
+          className="w-full"
+          onClick={handleEmailLogin}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? <Loader2 className="animate-spin mr-2" /> : "Login"}
         </Button>
+
         <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
           <span className="relative z-10 bg-background px-2 text-muted-foreground">
             Or continue with
           </span>
         </div>
+
         <Button
           variant="outline"
           className="w-full"
-          onClick={(e) => handleGoogleLogin(e)}
+          onClick={handleGoogleLogin}
+          disabled={isSubmitting}
+          type="button"
         >
-          <FcGoogle />
+          <FcGoogle className="mr-2" />
           Login with Google
         </Button>
       </div>
+
       <div className="text-center text-sm">
         Don't have an account?{" "}
         <Link to="/register" className="underline underline-offset-4">

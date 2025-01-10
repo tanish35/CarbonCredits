@@ -83,6 +83,12 @@
   }
 }
 
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -118,4 +124,3 @@
     @apply transition-all duration-200 ease-in-out;
   }
 }
-

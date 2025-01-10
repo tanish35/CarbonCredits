@@ -8,6 +8,9 @@ import { registrationSchema } from "@/validators/auth.validator";
 import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { auth, googleProvider } from "@/firebase";
+import { signInWithPopup } from "firebase/auth";
+import { api } from "@/lib/api";
 
 export const RegisterForm = ({
   className,
@@ -32,6 +35,40 @@ export const RegisterForm = ({
     setInputText((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleGoogleLogin = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    try {
+      e.preventDefault();
+      setIsSubmitting(true);
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      await api.post(
+        "/user/google",
+        {
+          email: user.email,
+          name: user.displayName,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
+      toast({
+        title: "Success",
+        description: "Logged in with Google successfully",
+      });
+      navigate("/");
+    } catch (error) {
+      console.error("Google sign-in error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to login with Google",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSubmit = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
@@ -54,15 +91,19 @@ export const RegisterForm = ({
     console.log(inputText);
     //api call
     try {
-      const user = await axios.post("/user/register", {
-        email: inputText.email,
-        password: inputText.password,
-        name: inputText.name,
-        address: inputText.address,
-        phone: inputText.phNumber,
-      }, {
-        withCredentials: true,
-      });
+      const user = await axios.post(
+        "/user/register",
+        {
+          email: inputText.email,
+          password: inputText.password,
+          name: inputText.name,
+          address: inputText.address,
+          phone: inputText.phNumber,
+        },
+        {
+          withCredentials: true,
+        }
+      );
       if (user) {
         toast({
           title: "Success",
@@ -169,7 +210,13 @@ export const RegisterForm = ({
             Or continue with
           </span>
         </div>
-        <Button variant="outline" className="w-full">
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={(e) => {
+            handleGoogleLogin(e);
+          }}
+        >
           Sign up with Google
         </Button>
       </div>

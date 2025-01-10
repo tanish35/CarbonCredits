@@ -6,7 +6,6 @@ import uploadToPinata from "./pinataController";
 import { ethers } from "ethers";
 import { abi } from "../abi/abi";
 
-
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 if (!PRIVATE_KEY) {
   throw new Error("Please provide a private key");
@@ -48,7 +47,9 @@ export const getEmissionReduction = expressAsyncHandler(async (req, res) => {
 
     const { ownerId, name } = req.body;
     if (!ownerId || !name) {
-      res.status(400).json({ message: "Please provide an owner ID and credit type" });
+      res
+        .status(400)
+        .json({ message: "Please provide an owner ID and credit type" });
       return;
     }
 
@@ -64,12 +65,16 @@ export const getEmissionReduction = expressAsyncHandler(async (req, res) => {
         emissionReduction.emission
       );
       certificateURI = `ipfs://${certificateURI}`;
-        // @ts-ignore
+      // @ts-ignore
 
-      emissionReduction = emissionReduction.emission.toString().replace(/,/g, "");
+      emissionReduction = emissionReduction.emission
+        .toString()
+        .replace(/,/g, "");
+
+      console.log("Emission Reduction:", emissionReduction);
 
       // Convert emissionReduction to BigInt for consistency
-        // @ts-ignore
+      // @ts-ignore
 
       const quantity = BigInt(emissionReduction);
 
@@ -89,6 +94,7 @@ export const getEmissionReduction = expressAsyncHandler(async (req, res) => {
 
       // Wait for the transaction to be mined
       const receipt = await tx.wait();
+      console.log("Transaction receipt:", receipt);
 
       // Return success response with transaction details
       res.status(200).json({

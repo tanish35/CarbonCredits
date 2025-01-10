@@ -98,9 +98,9 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const googleLogin = asyncHandler(async (req: Request, res: Response) => {
-  const { email } = req.body;
+  const { name, email } = req.body;
 
-  if (!email) {
+  if (!email || !name) {
     res.status(400).json({ message: "Please provide an email" });
     return;
   }
@@ -112,6 +112,7 @@ export const googleLogin = asyncHandler(async (req: Request, res: Response) => {
   if (!user) {
     user = await prisma.user.create({
       data: {
+        name,
         email,
         password: "",
       },
@@ -120,6 +121,19 @@ export const googleLogin = asyncHandler(async (req: Request, res: Response) => {
 
   const exp = Math.floor(Date.now() / 1000) + 60 * 60; // Token valid for 1 hour
   const token = jwt.sign({ sub: user.id, exp }, process.env.SECRET!);
+  res.cookie("token", token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: true,
+  });
+
+  res.status(201).json({
+    message: "User registered successfully",
+    user: {
+      id: user.id,
+      email: user.email,
+    },
+  });
 });
 // Update User Wallet
 export const updateUserWallet = asyncHandler(
