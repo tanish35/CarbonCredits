@@ -47,7 +47,7 @@ const NFTPage: React.FC = () => {
   const [auctionDetails, setAuctionDetails] = useState<Auction | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [expired, setExpired] = useState(false);
   const { data: nftOwner } = useReadContract({
     address: NFT_CONTRACT_ADDRESS,
     abi,
@@ -105,7 +105,9 @@ const NFTPage: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+
       try {
+        setLoading(true);
         if (creditData) {
           const {
             typeofcredit,
@@ -125,6 +127,10 @@ const NFTPage: React.FC = () => {
             retired: retired as boolean,
             description,
           });
+          if (BigInt(expiryDate) < Date.now() / 1000) {
+            setExpired(true);
+          }
+          setLoading(false);
         }
 
         if (nftOwner) setIsOwner(nftOwner === address);
@@ -153,7 +159,7 @@ const NFTPage: React.FC = () => {
     return <Loader isLoading />;
   }
 
-  if (error || !creditDetails) {
+  if (error) {
     return (
       <div className="container mx-auto p-4 text-center">
         <AlertCircle className="mx-auto text-red-500 w-16 h-16 mb-4" />
@@ -161,6 +167,10 @@ const NFTPage: React.FC = () => {
         <p>{error || "Failed to load NFT data"}</p>
       </div>
     );
+  }
+
+  if (!creditDetails) {
+    return <Loader isLoading />;
   }
 
   return (
@@ -289,7 +299,7 @@ const NFTPage: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.8 }}
                 >
-                  {showSellOptions && (
+                  {!expired && showSellOptions && (
                     <SellOptions
                       tokenId={TOKEN_ID}
                       onComplete={() => setShowSellOptions(false)}

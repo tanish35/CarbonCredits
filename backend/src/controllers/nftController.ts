@@ -111,49 +111,49 @@ export const getAllNFTs = asyncHandler(async (_req: Request, res: Response) => {
   res.json(nfts);
 });
 
-export const NFTMint = asyncHandler(async (req: Request, res: Response) => {
-  const { ownerId } = req.body;
-  if (!ownerId) {
-    res.status(400).json({ message: "Please provide an owner id" });
-    return;
-  }
+// export const NFTMint = asyncHandler(async (req: Request, res: Response) => {
+//   const { ownerId } = req.body;
+//   if (!ownerId) {
+//     res.status(400).json({ message: "Please provide an owner id" });
+//     return;
+//   }
 
-  try {
-    // Define the parameters for the minting process
-    const creditType = "Renewable Energy";
-    const quantity = 100;
-    const certificateURI = "ipfs://bafkreia7beck5t6nhonoycmmdfhrefrgnu5c2rru42ad5qog3nlpu7nfs4"; // Replace with actual URI if needed
-    const expiryDate = Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60; // Expiry set to 1 year from now
-    const rate = 8000000; // Replace with actual rate if needed
+//   try {
+//     // Define the parameters for the minting process
+//     const creditType = "Renewable Energy";
+//     const quantity = 100;
+//     const certificateURI = "ipfs://bafkreia7beck5t6nhonoycmmdfhrefrgnu5c2rru42ad5qog3nlpu7nfs4"; // Replace with actual URI if needed
+//     const expiryDate = Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60; // Expiry set to 1 year from now
+//     const rate = 8000000; // Replace with actual rate if needed
 
-    // Perform minting
-    const tx = await contract.mint(
-      ownerId,
-      creditType,
-      BigInt(quantity),
-      certificateURI,
-      expiryDate,
-      rate
-    );
+//     // Perform minting
+//     const tx = await contract.mint(
+//       ownerId,
+//       creditType,
+//       BigInt(quantity),
+//       certificateURI,
+//       expiryDate,
+//       rate
+//     );
 
-    // Wait for the transaction to be mined
-    const receipt = await tx.wait();
+//     // Wait for the transaction to be mined
+//     const receipt = await tx.wait();
 
     
 
-    // Return success response with transaction details
-    res.status(200).json({
-      success: true,
-      transactionHash: receipt.transactionHash,
-      blockNumber: receipt.blockNumber,
-      to: ownerId,
-      quantity,
-    });
-  } catch (error) {
-    console.error("Error minting NFT:", error);
-    res.status(500).json({ error: "Failed to mint NFT" });
-  }
-});
+//     // Return success response with transaction details
+//     res.status(200).json({
+//       success: true,
+//       transactionHash: receipt.transactionHash,
+//       blockNumber: receipt.blockNumber,
+//       to: ownerId,
+//       quantity,
+//     });
+//   } catch (error) {
+//     console.error("Error minting NFT:", error);
+//     res.status(500).json({ error: "Failed to mint NFT" });
+//   }
+// });
 // export const createNFT = asyncHandler(async (req: Request, res: Response) => {
 //   const {
 //     tokenId,

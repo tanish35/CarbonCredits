@@ -88,7 +88,6 @@ export function VerifyProject({ walletAddress }: CarbonCreditsDisplayProps) {
           title: "Verification and Minting Successful",
           description: "Your project has been successfully verified and NFT minted.",
         });
-        setMintingOpen(true);
       }
     } catch (error) {
       setIsVerifying(false);
@@ -228,7 +227,7 @@ export function VerifyProject({ walletAddress }: CarbonCreditsDisplayProps) {
                     Verifying...
                   </>
                 ) : (
-                  "Verify"
+                  "Verify and Mint"
                 )}
               </Button>
 
