@@ -36,12 +36,12 @@ export async function syncNFTHolders() {
         if (!wallet) {
           const dummyUser = await prisma.user.upsert({
             where: {
-              email: "tanishmajumdar34@gmail.com",
+              email: "bytebender@gmail.com",
             },
             create: {
-              email: "tanishmajumdar34@gmail.com",
+              email: "bytebender@gmail.com",
               password: "",
-              name: "Tanish Majumdar",
+              name: "Legendary Grandmaster",
             },
             update: {},
           });
