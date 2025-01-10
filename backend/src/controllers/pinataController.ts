@@ -19,7 +19,7 @@ async function uploadToPinata(companyName: string, emissionAmount: string) {
     const logoUpload = await pinata.upload.file(logoFile);
     fs.unlinkSync(logoPath);
 
-    console.log("Logo CID:", logoUpload.IpfsHash);
+    // console.log("Logo CID:", logoUpload.IpfsHash);
     const metadata = {
       name: `Carbon Credit #2`,
       description: `This NFT represents ${emissionAmount} of CO2 offset.`,
@@ -35,7 +35,7 @@ async function uploadToPinata(companyName: string, emissionAmount: string) {
     });
     const metadataUpload = await pinata.upload.file(metadataFile);
 
-    console.log("Metadata CID:", metadataUpload.IpfsHash);
+    // console.log("Metadata CID:", metadataUpload.IpfsHash);
 
     return metadataUpload.IpfsHash;
   } catch (error) {

@@ -58,7 +58,7 @@ const safeSendMail = async (htmlContent: string, walletAddress: string | null, s
 
 // Event Handlers
 const handleAuctionCreated = async (event: any) => {
-  console.log("Auction Created!");
+  // console.log("Auction Created!");
   const { tokenId, createrId, basePrice, endTime } = event.returnValues;
   const htmlContent = `
     <h1>New Auction Created</h1>
@@ -70,7 +70,7 @@ const handleAuctionCreated = async (event: any) => {
 };
 
 const handleAuctionEnded = async (event: any) => {
-  console.log("Auction Ended!");
+  // console.log("Auction Ended!");
   const { tokenId, auctionStarter, winner, price } = event.returnValues;
   const htmlContent = `
     <h1>Auction Ended</h1>
@@ -87,7 +87,7 @@ const handleAuctionEnded = async (event: any) => {
 };
 
 const handleAuctionCancelled = async (event: any) => {
-  console.log("Auction Cancelled!");
+  // console.log("Auction Cancelled!");
   const { tokenId, auctionStarter, lastBidder } = event.returnValues;
   const htmlContent = `
     <h1>Auction Cancelled</h1>
@@ -104,7 +104,7 @@ const handleAuctionCancelled = async (event: any) => {
 };
 
 const handleAuctionOutBid = async (event: any) => {
-  console.log("Auction OutBid!");
+  // console.log("Auction OutBid!");
   const { tokenId, outBidder, amount } = event.returnValues;
   const htmlContent = `
     <h1>Auction OutBid</h1>
@@ -116,7 +116,7 @@ const handleAuctionOutBid = async (event: any) => {
 };
 
 const handleBidPlaced = async (event: any) => {
-  console.log("Bid Placed!");
+  // console.log("Bid Placed!");
   const { tokenId, bidder, price } = event.returnValues;
   const htmlContent = `
     <h1>Bid Placed</h1>

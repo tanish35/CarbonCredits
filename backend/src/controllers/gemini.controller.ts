@@ -19,9 +19,9 @@ const getEmissionReductionData = async (): Promise<Object> => {
     }
   );
 
-  console.log(
-    `Uploaded file ${uploadResult.file.displayName} as: ${uploadResult.file.uri}`
-  );
+  // console.log(
+  //   `Uploaded file ${uploadResult.file.displayName} as: ${uploadResult.file.uri}`
+  // );
 
   const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -37,7 +37,7 @@ const getEmissionReductionData = async (): Promise<Object> => {
   ]);
 
   const responseText = result.response.text();
-  console.log("Response text:", responseText);
+  // console.log("Response text:", responseText);
   const parts = responseText.split("|");
   const data = {
     emission: parts[0],

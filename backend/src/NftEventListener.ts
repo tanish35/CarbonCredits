@@ -101,7 +101,7 @@ const handleCreditTransferred = async (event: any) => {
       });
     });
 
-    console.log('CreditTransferred:', { from, to, tokenId, amount });
+    // console.log('CreditTransferred:', { from, to, tokenId, amount });
   } catch (error) {
     console.error('Error handling CreditTransferred event:', error);
   }
@@ -130,8 +130,8 @@ const handleCreditMinted = async (event: any) => {
         quantity: String(quantity),
       },
     });
-    console.log(event.returnValues);
-    console.log('CreditMinted:', nft);
+    // console.log(event.returnValues);
+    // console.log('CreditMinted:', nft);
   } catch (error) {
     console.error('Error handling CreditMinted event:', error);
   }
@@ -150,7 +150,7 @@ const handleCreditRetired = async (event: any) => {
         },
       });
     });
-    console.log('CreditRetired:', { owner, tokenId });
+    // console.log('CreditRetired:', { owner, tokenId });
   } catch (error) {
     console.error('Error handling CreditRetired event:', error);
   }
