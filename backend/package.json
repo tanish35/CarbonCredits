@@ -9,7 +9,7 @@
     "start": "node dist/index.js",
     "server1": "nodemon --watch server1 src/MarketEventListener.ts",
     "server2": "nodemon --watch server2 src/NftEventListener.ts",
-    "dev:all": "concurrently \"node dist/index.js\" \"node dist/NftEventListener\" \"node dist/MarketEventListener\""
+    "dev:all": "concurrently \"npx prisma generate\" \"node dist/index.js\" \"node dist/NftEventListener\" \"node dist/MarketEventListener\""
   },
   "keywords": [],
   "author": "",
