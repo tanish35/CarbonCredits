@@ -2,22 +2,24 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useAccount, useReadContract } from "wagmi";
-import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion, AnimatePresence } from "framer-motion";
+import { AlertCircle, Clock } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { abi } from "@/lib/abi";
 import { abi_marketplace } from "@/lib/abi_marketplace";
 import { SellOptions } from "@/components/SellOptions";
 import { AuctionBidComponent } from "@/components/AuctionBidComponent";
 import { DirectBuyComponent } from "@/components/DirectBuyComponent";
 import { Loader } from "@/components/Loader";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { AlertCircle, Clock, Coins, User } from "lucide-react";
-import { formatEther } from "viem";
+import { cn } from "@/lib/utils";
 
 const NFT_CONTRACT_ADDRESS = "0x1A33A6F1A7D001A5767Cd9303831Eb3B9b916AEA";
 const MARKETPLACE_ADDRESS = "0x79298aF4e4F51c746dEeE692a40a3141C9b142ef";
@@ -44,6 +46,7 @@ const NFTPage: React.FC = () => {
   const [showSellOptions, setShowSellOptions] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [basePrice, setBasePrice] = useState(0);
+  const [basePriceAvax, setBasePriceAvax] = useState(0);
   const [auctionDetails, setAuctionDetails] = useState<Auction | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -100,12 +103,15 @@ const NFTPage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (basePrice1) setBasePrice(Number(basePrice1));
+    if (basePrice1) {
+      const basePriceEth = Number(basePrice1) / 10 ** 18;
+      setBasePrice(basePriceEth);
+      setBasePriceAvax(basePriceEth);
+    }
   }, [basePrice1]);
 
   useEffect(() => {
     const fetchData = async () => {
-
       try {
         setLoading(true);
         if (creditData) {
@@ -155,176 +161,176 @@ const NFTPage: React.FC = () => {
     fetchData();
   }, [creditData, nftOwner, address, auctionData, TOKEN_ID]);
 
-  if (loading) {
-    return <Loader isLoading />;
-  }
-
+  if (loading) return <Loader isLoading />;
   if (error) {
     return (
-      <div className="container mx-auto p-4 text-center">
-        <AlertCircle className="mx-auto text-red-500 w-16 h-16 mb-4" />
-        <h2 className="text-2xl font-bold mb-2">Error</h2>
-        <p>{error || "Failed to load NFT data"}</p>
-      </div>
+      <Card className="mx-auto max-w-md p-6 text-center">
+        <CardContent>
+          <AlertCircle className="mx-auto text-destructive w-16 h-16 mb-4" />
+          <CardTitle className="mb-2">Error</CardTitle>
+          <CardDescription>
+            {error || "Failed to load NFT data"}
+          </CardDescription>
+        </CardContent>
+      </Card>
     );
   }
-
-  if (!creditDetails) {
-    return <Loader isLoading />;
-  }
+  if (!creditDetails) return <Loader isLoading />;
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-12 px-4 sm:px-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
+        className="container max-w-7xl mx-auto"
       >
-        <Card className="mt-4 overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-            <CardTitle className="text-2xl md:text-3xl">
-              {isAuction
-                ? "Carbon Credit NFT Auction"
-                : isDirectSelling
-                  ? "Carbon Credit NFT Direct Sale"
-                  : "Carbon Credit NFT"}
-            </CardTitle>
+        <Card className="overflow-hidden border-2 shadow-lg backdrop-blur-sm bg-card/95">
+          <CardHeader className="space-y-2 border-b bg-muted/10 p-6">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                Carbon Credit #{TOKEN_ID}
+              </CardTitle>
+              <div className="flex gap-2">
+                {isAuction ? (
+                  <Badge className="animate-pulse bg-primary/90">
+                    Active Auction
+                  </Badge>
+                ) : isDirectSelling ? (
+                  <Badge variant="secondary" className="bg-secondary/90">
+                    Direct Sale
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="border-2">
+                    Not Listed
+                  </Badge>
+                )}
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid lg:grid-cols-2 gap-8">
+              {/* Image Section */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="space-y-6"
               >
-                <img
-                  src={creditDetails.certificateURI}
-                  alt="Certificate"
-                  className="w-full h-auto rounded-lg shadow-lg"
-                />
+                <AspectRatio
+                  ratio={1}
+                  className="overflow-hidden rounded-2xl border-2"
+                >
+                  <img
+                    src={creditDetails.certificateURI}
+                    alt="Carbon Credit Certificate"
+                    className="object-cover h-full w-full transition-transform duration-500 hover:scale-105"
+                  />
+                </AspectRatio>
                 {creditDetails.description && (
-                  <p className="mt-4 italic text-gray-600 bg-gray-100 p-4 rounded-md">
-                    {creditDetails.description}
-                  </p>
+                  <Card className="bg-muted/30 backdrop-blur-sm">
+                    <CardContent className="p-4">
+                      <p className="text-sm leading-relaxed text-muted-foreground">
+                        {creditDetails.description}
+                      </p>
+                    </CardContent>
+                  </Card>
                 )}
               </motion.div>
-              <div className="space-y-6">
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                  <h3 className="text-xl font-semibold mb-4">NFT Details</h3>
+
+              {/* Details Section */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+                className="space-y-8"
+              >
+                <div className="space-y-6">
+                  <h2 className="text-xl font-semibold text-foreground/90">
+                    Credit Details
+                  </h2>
                   <div className="grid grid-cols-2 gap-4">
-                    <InfoItem
+                    <DetailCard
                       label="Credit Type"
                       value={creditDetails.typeofcredit}
+                      className="hover:border-primary/50 transition-colors duration-300"
                     />
-                    <InfoItem
+                    <DetailCard
                       label="Quantity"
                       value={creditDetails.quantity.toString()}
                     />
-                    <InfoItem
-                      label="Expiry Date"
+                    <DetailCard
+                      label="Expiry"
                       value={new Date(
                         Number(creditDetails.expiryDate) * 1000
                       ).toLocaleDateString()}
-                      icon={<Clock className="w-4 h-4" />}
+                      icon={<Clock className="h-4 w-4" />}
                     />
-                    <InfoItem
-                      label="Retired"
-                      value={creditDetails.retired ? "Yes" : "No"}
-                      valueClass={
-                        creditDetails.retired
-                          ? "text-red-500"
-                          : "text-green-500"
+                    <DetailCard
+                      label="Status"
+                      value={creditDetails.retired ? "Retired" : "Active"}
+                      variant={
+                        creditDetails.retired ? "destructive" : "default"
                       }
                     />
                   </div>
-                </motion.div>
+                </div>
 
+                {/* Price Card with enhanced styling */}
                 {basePrice && (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: 0.4 }}
-                  >
-                    <h3 className="text-xl font-semibold mb-4">Pricing</h3>
-                    <InfoItem
-                      label="Base Price"
-                      value={`${formatEther(BigInt(basePrice))} ETH`}
-                      icon={<Coins className="w-4 h-4" />}
-                    />
-                  </motion.div>
+                  <Card className="bg-gradient-to-br from-primary/80 via-primary to-primary/90 hover:shadow-lg transition-all duration-300">
+                    <CardContent className="p-6">
+                      <h3 className="text-primary-foreground/90 font-medium mb-2">
+                        Current Price
+                      </h3>
+                      <p className="text-4xl font-bold text-primary-foreground">
+                        {basePriceAvax} AVAX
+                      </p>
+                    </CardContent>
+                  </Card>
                 )}
 
-                {auctionDetails && auctionDetails[5] && (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: 0.6 }}
-                  >
-                    <h3 className="text-xl font-semibold mb-4">
-                      Auction Details
-                    </h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <InfoItem
-                        label="Current Price"
-                        value={`${formatEther(auctionDetails[2])} ETH`}
-                        icon={<Coins className="w-4 h-4" />}
-                      />
-                      <InfoItem
-                        label="Current Bidder"
-                        value={
-                          auctionDetails[3] ===
-                          "0x0000000000000000000000000000000000000000"
-                            ? "No bids yet"
-                            : `${auctionDetails[3].slice(0, 6)}...${auctionDetails[3].slice(-4)}`
-                        }
-                        icon={<User className="w-4 h-4" />}
-                      />
-                      <InfoItem
-                        label="Auction Ends"
-                        value={new Date(
-                          Number(auctionDetails[4]) * 1000
-                        ).toLocaleString()}
-                        icon={<Clock className="w-4 h-4" />}
-                      />
-                    </div>
-                  </motion.div>
-                )}
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.8 }}
-                >
+                {/* Action Buttons with enhanced animations */}
+                <AnimatePresence>
                   {!expired && showSellOptions && (
-                    <SellOptions
-                      tokenId={TOKEN_ID}
-                      onComplete={() => setShowSellOptions(false)}
-                      NFT_CONTRACT_ADDRESS={NFT_CONTRACT_ADDRESS}
-                      MARKETPLACE_ADDRESS={MARKETPLACE_ADDRESS}
-                    />
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                    >
+                      <SellOptions
+                        tokenId={TOKEN_ID}
+                        onComplete={() => setShowSellOptions(false)}
+                        NFT_CONTRACT_ADDRESS={NFT_CONTRACT_ADDRESS}
+                        MARKETPLACE_ADDRESS={MARKETPLACE_ADDRESS}
+                      />
+                    </motion.div>
                   )}
 
-                  {!isOwner && isAuction && basePrice && (
-                    <AuctionBidComponent
-                      tokenId={TOKEN_ID}
-                      basePrice={basePrice}
-                      MARKETPLACE_ADDRESS={MARKETPLACE_ADDRESS}
-                    />
+                  {!isOwner && (isAuction || isDirectSelling) && basePrice && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-4"
+                    >
+                      {isAuction && (
+                        <AuctionBidComponent
+                          tokenId={TOKEN_ID}
+                          basePrice={basePrice}
+                          MARKETPLACE_ADDRESS={MARKETPLACE_ADDRESS}
+                        />
+                      )}
+                      {isDirectSelling && (
+                        <DirectBuyComponent
+                          tokenId={TOKEN_ID}
+                          basePrice={basePrice}
+                          MARKETPLACE_ADDRESS={MARKETPLACE_ADDRESS}
+                        />
+                      )}
+                    </motion.div>
                   )}
-
-                  {!isOwner && isDirectSelling && basePrice && (
-                    <DirectBuyComponent
-                      tokenId={TOKEN_ID}
-                      basePrice={basePrice}
-                      MARKETPLACE_ADDRESS={MARKETPLACE_ADDRESS}
-                    />
-                  )}
-                </motion.div>
-              </div>
+                </AnimatePresence>
+              </motion.div>
             </div>
           </CardContent>
         </Card>
@@ -333,28 +339,45 @@ const NFTPage: React.FC = () => {
   );
 };
 
-const InfoItem: React.FC<{
+// Enhanced DetailCard component
+interface DetailCardProps {
   label: string;
   value: string;
   icon?: React.ReactNode;
-  valueClass?: string;
-}> = ({ label, value, icon, valueClass }) => (
-  <TooltipProvider>
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <div className="flex items-center space-x-2">
-          {icon && <span className="text-gray-500">{icon}</span>}
-          <span className="font-medium">{label}:</span>
-          <span className={`${valueClass || "text-gray-700"}`}>{value}</span>
-        </div>
-      </TooltipTrigger>
-      <TooltipContent>
-        <p>
-          {label}: {value}
-        </p>
-      </TooltipContent>
-    </Tooltip>
-  </TooltipProvider>
+  variant?: "default" | "destructive";
+  className?: string;
+}
+
+const DetailCard: React.FC<DetailCardProps> = ({
+  label,
+  value,
+  icon,
+  variant = "default",
+  className,
+}) => (
+  <Card
+    className={cn(
+      "bg-card/50 backdrop-blur-sm hover:bg-card/70 transition-all duration-300",
+      "border-2 hover:shadow-md",
+      className
+    )}
+  >
+    <CardContent className="p-4 space-y-2">
+      <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+        {icon}
+        {label}
+      </div>
+      <div
+        className={cn(
+          "font-semibold text-base",
+          variant === "destructive" && "text-destructive",
+          variant === "default" && "text-card-foreground"
+        )}
+      >
+        {value}
+      </div>
+    </CardContent>
+  </Card>
 );
 
 export default NFTPage;

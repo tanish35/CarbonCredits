@@ -6,37 +6,40 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { FaLinkedin } from "react-icons/fa";
 
-
 const teamMembers = [
   {
     name: "Tanish Majumdar",
     role: "Full Stack Developer",
-    bio: "Specialized in blockchain development and smart contracts",
+    bio: "Expert in blockchain development and smart contracts.",
     image: "https://i.ibb.co/41C7DM8/Screenshot-2025-01-06-at-8-31-46-PM.png",
     linkedin: "https://linkedin.com/in/tanish34",
   },
   {
     name: "Akash Das",
-    role: "Frontend Developer",
-    bio: "UI/UX specialist with expertise in React",
+    role: "Front-End Developer",
+    bio: "Focused on intuitive front-end interfaces and seamless full-stack integration.",
     image: "https://avatars.githubusercontent.com/u/151846726?v=4",
     linkedin: "https://linkedin.com/in/dasakash26",
   },
   {
     name: "Asmit Deb",
     role: "Backend Developer",
-    bio: "Database and API architecture expert",
+    bio: "Specialist in database optimization and API design.",
     image: "https://avatars.githubusercontent.com/u/47671715?v=4",
     linkedin: "https://www.linkedin.com/in/asmit-deb-bba35b201/",
   },
   {
     name: "Somnath Chattaraj",
     role: "Blockchain Developer",
-    bio: "Smart contract and Web3 integration specialist",
-    image: "https://avatars.githubusercontent.com/u/135858837?s=400&u=bbf94d2428e3bb79275a9a13120252d4ecf50663&v=4",
+    bio: "Experienced in smart contracts and Web3 integration.",
+    image:
+      "https://avatars.githubusercontent.com/u/135858837?s=400&u=bbf94d2428e3bb79275a9a13120252d4ecf50663&v=4",
     linkedin: "https://linkedin.com/in/somanth-chattaraj",
-  }
+  },
 ];
+
+
+
 
 export default function TeamPage() {
   return (

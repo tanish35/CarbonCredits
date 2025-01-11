@@ -64,7 +64,9 @@ export const Dashboard = () => {
       } catch (error) {
         console.error("Error fetching user details:", error);
       } finally {
-        setIsLoading(false);
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 500);
       }
     };
     fetchUserDetails();
@@ -181,7 +183,7 @@ const BuyerDashboard = ({
 }: {
   user: User;
   nfts: NFTMetadata[];
-  onWalletChange: (wallet:any) => void;
+  onWalletChange: (wallet: any) => void;
 }) => (
   <div className="space-y-6">
     <div className="grid gap-6 md:grid-cols-2">
@@ -206,18 +208,18 @@ const SellerDashboard = ({
   onWalletChange: (wallet: any) => void;
 }) => (
   <div className="space-y-6">
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="flex flex-col gap-6">
-          <Wallet onWalletChange={onWalletChange} />
-          <CarbonCreditsDisplay walletAddress={wallet} />
-          <RewardCard />
-        </div>
-        <div className="flex flex-col gap-6">
-          <UserDetails user={user} />
-          <VerifyProject walletAddress={wallet} />
-          <NFTGrid nfts={nfts} />
-        </div>
+    <div className="grid gap-6 md:grid-cols-2">
+      <div className="flex flex-col gap-6">
+        <Wallet onWalletChange={onWalletChange} />
+        <CarbonCreditsDisplay walletAddress={wallet} />
+        <RewardCard />
       </div>
+      <div className="flex flex-col gap-6">
+        <UserDetails user={user} />
+        <VerifyProject walletAddress={wallet} />
+        <NFTGrid nfts={nfts} />
+      </div>
+    </div>
   </div>
 );
 
@@ -228,7 +230,7 @@ const AdminDashboard = ({
 }: {
   nfts: NFTMetadata[];
   wallet: string;
-  onWalletChange: (wallet:any) => void
+  onWalletChange: (wallet: any) => void;
 }) => {
   const adminUser: User = {
     id: "1",

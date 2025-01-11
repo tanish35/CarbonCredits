@@ -1,44 +1,36 @@
 import { Logo } from "./Logo";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface LoaderProps {
   isLoading: boolean;
 }
 
-export function Loader({ isLoading }: LoaderProps) {
+export const Loader = React.memo(function Loader({ isLoading }: LoaderProps) {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    
-    if (isLoading) {
-      // Reset progress when loading starts
-      setProgress(0);
+    let timer: NodeJS.Timeout | undefined;
 
-      // Animate to 99% during loading with smaller, more frequent increments
+    if (isLoading) {
+      setProgress(0);
       timer = setInterval(() => {
         setProgress((prev) => {
-          const increment = Math.max(0.5, (99 - prev) * 0.1); // Dynamic increment
-          const nextProgress = prev + increment;
-          
-          if (nextProgress >= 99) {
+          if (prev >= 99) {
             clearInterval(timer);
             return 99;
           }
-          return nextProgress;
+          return prev + 4;
         });
-      }, 50);
-    } else if (progress >= 99) {
-      // Quick completion when loading is done
-      timer = setTimeout(() => {
+      }, 20);
+    } else {
+      setTimeout(() => {
         setProgress(100);
-      }, 200);
+      }, 500);
     }
 
     return () => {
-      clearInterval(timer);
-      clearTimeout(timer);
+      if (timer) clearInterval(timer);
     };
   }, [isLoading]);
 
@@ -57,12 +49,8 @@ export function Loader({ isLoading }: LoaderProps) {
             animate={{ scale: 1 }}
             transition={{ type: "spring", damping: 20, stiffness: 300 }}
           >
-            {/* Loader Ring */}
             <div className="relative w-40 h-40">
-              {/* Background ring */}
               <div className="absolute inset-0 rounded-full bg-primary/10" />
-
-              {/* Animated progress ring */}
               <svg className="absolute inset-0 w-full h-full -rotate-90">
                 <motion.circle
                   cx="80"
@@ -72,12 +60,10 @@ export function Loader({ isLoading }: LoaderProps) {
                   stroke="hsl(var(--primary))"
                   strokeWidth="8"
                   strokeLinecap="round"
-                  strokeDasharray={476.4} // 2 * π * r
+                  strokeDasharray={476.4}
                   strokeDashoffset={476.4 * (1 - progress / 100)}
                 />
               </svg>
-
-              {/* Logo */}
               <motion.div
                 className="absolute inset-0 grid place-items-center"
                 animate={{ scale: [1, 1.02, 1] }}
@@ -90,8 +76,6 @@ export function Loader({ isLoading }: LoaderProps) {
                 <Logo />
               </motion.div>
             </div>
-
-            {/* Progress Text */}
             <motion.div
               className="flex items-center gap-4 text-primary"
               animate={{ opacity: [0.5, 1, 0.5] }}
@@ -113,4 +97,4 @@ export function Loader({ isLoading }: LoaderProps) {
       )}
     </AnimatePresence>
   );
-}
+});
