@@ -16,8 +16,8 @@ app.use((0, cors_1.default)({
     origin: [
         "http://localhost:5173",
         "http://localhost:5174",
-        "ecox.somnathcodes.site",
-        "ecox.wedevelopers.online",
+        "https://ecox.somnathcodes.site",
+        "https://ecox.wedevelopers.online",
     ],
     credentials: true,
 }));
