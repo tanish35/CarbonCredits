@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/tooltip";
 import axios from "axios";
 import { toast } from "@/hooks/use-toast";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 interface UserProps {
   user: {
@@ -39,7 +39,11 @@ export function UserDetails({ user }: UserProps) {
   const email = user.email || "Not provided";
   const phone = user.phone || "Not provided";
   const address = user.address || "Not provided";
-  const joinedDate = format(new Date(user.createdAt), "MMMM dd, yyyy");
+
+  const joinedDate = user.createdAt
+    ? format(new Date(user.createdAt), "MMMM dd, yyyy")
+    : "Unknown date";
+
   const navigate = useNavigate();
   async function handleSignOut() {
     try {

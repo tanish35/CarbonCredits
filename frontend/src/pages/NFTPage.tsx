@@ -34,7 +34,6 @@ interface Credit {
   description?: string;
 }
 
-type Auction = [bigint, bigint, bigint, string, bigint, boolean];
 
 const NFTPage: React.FC = () => {
   const params = useParams();
@@ -47,7 +46,6 @@ const NFTPage: React.FC = () => {
   const [isOwner, setIsOwner] = useState(false);
   const [basePrice, setBasePrice] = useState(0);
   const [basePriceAvax, setBasePriceAvax] = useState(0);
-  const [auctionDetails, setAuctionDetails] = useState<Auction | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expired, setExpired] = useState(false);
@@ -140,8 +138,6 @@ const NFTPage: React.FC = () => {
         }
 
         if (nftOwner) setIsOwner(nftOwner === address);
-
-        if (auctionData) setAuctionDetails(auctionData as Auction);
 
         const statusResponse = await axios.post("/nft/getNFTStatus", {
           tokenId: TOKEN_ID,
