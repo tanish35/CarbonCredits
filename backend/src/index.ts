@@ -13,7 +13,6 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      "https://carboncredits-ug6q.onrender.com/",
     ],
     credentials: true,
   })
