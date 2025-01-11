@@ -12,8 +12,6 @@ import {
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 // import { format, parse } from "date-fns";
-import { Toaster, toaster } from "../components/ui/toaster";
-
 import {
   Box,
   Button,
@@ -23,6 +21,8 @@ import {
   Spinner,
   HStack,
 } from "@chakra-ui/react";
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 const abi = [
   {
@@ -100,7 +100,7 @@ function MintPage() {
   const [tokenId, setTokenId] = useState("");
   const [newMinter, setNewMinter] = useState("");
   const [rate, setRate] = useState("");
-
+  const {toast} = useToast();
   const [to, setTo] = useState("");
   const [typeofcredit, setTypeOfCredit] = useState("");
   const [quantity, setQuantity] = useState("");
@@ -157,11 +157,9 @@ function MintPage() {
     // console.log(expiryTimestamp);
 
     setIsPending(true);
-    toaster.create({
+    toast({
       title: "Minting NFT",
       description: "Please approve the transaction in your wallet",
-      type: "info",
-      duration: 5000,
     });
     writeContract({
       address: contractAddress,

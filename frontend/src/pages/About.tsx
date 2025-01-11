@@ -100,7 +100,10 @@ export default function AboutPage() {
             Why Choose Us?
           </motion.h2>
            
-          <motion.ul className="list-disc pl-6 mb-12 space-y-2" {...fadeIn}>
+          <motion.ul 
+            variants={fadeIn}
+            className="list-disc pl-6 mb-12 space-y-2"
+          >
             <li><strong>Transparency and Trust:</strong> With blockchain technology, all transactions and credit verifications are fully transparent and immutable, building trust in every step of the process.</li>
             <li><strong>Empowering Sustainability:</strong> We provide tools for individuals, businesses, and governments to actively contribute to a sustainable future.</li>
             <li><strong>Cutting-Edge Technology:</strong> By combining NFTs, smart contracts, and Chainlink automation, we redefine how carbon credits are managed and traded.</li>
