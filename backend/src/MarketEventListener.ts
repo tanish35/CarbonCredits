@@ -1,12 +1,9 @@
 import Web3 from "web3";
-import express from "express";
 import { abi_marketplace } from "./abi/abi_marketplace";
 import prisma from "./lib/prisma";
 import sendMail from "./mail/sendMail";
 
 const contractAddress = process.env.MARKETPLACE_CONTRACT_ADDRESS;
-const app = express();
-const PORT = 4000;
 
 let web3Instance: Web3;
 let contract: any;
@@ -161,11 +158,3 @@ const subscribeToEvents = () => {
 // Initialize and subscribe
 initializeWeb3();
 subscribeToEvents();
-
-app.get("/", (req, res) => {
-  res.send("Auction listener is running!");
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});

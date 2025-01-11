@@ -5,8 +5,6 @@ import prisma from "./lib/prisma";
 import sendMail from "./mail/sendMail";
 
 const contractAddress = process.env.CONTRACT_ADDRESS;
-const app = express();
-const PORT = 4001;
 let web3Instance: Web3;
 let contract: any;
 
@@ -183,11 +181,3 @@ const subscribeToEvents = () => {
 // Initialize and subscribe
 initializeWeb3();
 subscribeToEvents();
-
-app.get("/", (req, res) => {
-  res.send("Auction listener is running!");
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
