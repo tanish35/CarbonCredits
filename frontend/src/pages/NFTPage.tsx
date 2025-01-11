@@ -105,7 +105,6 @@ const NFTPage: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-
       try {
         setLoading(true);
         if (creditData) {
@@ -308,13 +307,17 @@ const NFTPage: React.FC = () => {
                     />
                   )}
 
-                  {!isOwner && isAuction && basePrice && (
-                    <AuctionBidComponent
-                      tokenId={TOKEN_ID}
-                      basePrice={basePrice}
-                      MARKETPLACE_ADDRESS={MARKETPLACE_ADDRESS}
-                    />
-                  )}
+                  {!isOwner &&
+                    isAuction &&
+                    auctionDetails &&
+                    auctionDetails[5] &&
+                    basePrice && (
+                      <AuctionBidComponent
+                        tokenId={TOKEN_ID}
+                        basePrice={basePrice}
+                        MARKETPLACE_ADDRESS={MARKETPLACE_ADDRESS}
+                      />
+                    )}
 
                   {!isOwner && isDirectSelling && basePrice && (
                     <DirectBuyComponent
