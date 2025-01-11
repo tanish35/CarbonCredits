@@ -1,26 +1,31 @@
-import Web3 from 'web3';
-import { abi_marketplace } from './abi/abi_marketplace';
-import prisma from './lib/prisma';
-import sendMail from './mail/sendMail';
+import Web3 from "web3";
+import express from "express";
+import { abi_marketplace } from "./abi/abi_marketplace";
+import prisma from "./lib/prisma";
+import sendMail from "./mail/sendMail";
 
-const contractAddress = process.env.MARKETPLACE_CONTRACT_ADDRESS?.trim() || '';
+const contractAddress = process.env.MARKETPLACE_CONTRACT_ADDRESS;
+const app = express();
+const PORT = 4000;
 
 let web3Instance: Web3;
 let contract: any;
 
 // Initialize Web3 and Contract
 const initializeWeb3 = () => {
-  const provider = new Web3.providers.WebsocketProvider('wss://api.avax-test.network/ext/bc/C/ws');
+  const provider = new Web3.providers.WebsocketProvider(
+    "wss://api.avax-test.network/ext/bc/C/ws"
+  );
 
-  provider.on('connect', () => console.log('WebSocket connected'));
+  provider.on("connect", () => console.log("WebSocket connected"));
   //@ts-ignore
-  provider.on('error', (error: any) => {
-    console.error('WebSocket error:', error);
+  provider.on("error", (error: any) => {
+    console.error("WebSocket error:", error);
     reconnect();
   });
   //@ts-ignore
-  provider.on('end', (error: any) => {
-    console.error('WebSocket connection ended:', error);
+  provider.on("end", (error: any) => {
+    console.error("WebSocket connection ended:", error);
     reconnect();
   });
 
@@ -41,7 +46,11 @@ const reconnect = () => {
 };
 
 // Helper to send emails
-const safeSendMail = async (htmlContent: string, walletAddress: string | null, subject: string) => {
+const safeSendMail = async (
+  htmlContent: string,
+  walletAddress: string | null,
+  subject: string
+) => {
   if (!walletAddress) return;
   try {
     const userEmail = await prisma.wallet.findUnique({
@@ -52,7 +61,10 @@ const safeSendMail = async (htmlContent: string, walletAddress: string | null, s
       await sendMail(htmlContent, userEmail.user.email, subject);
     }
   } catch (error) {
-    console.error(`Error fetching or sending email for wallet ${walletAddress}:`, error);
+    console.error(
+      `Error fetching or sending email for wallet ${walletAddress}:`,
+      error
+    );
   }
 };
 
@@ -66,7 +78,7 @@ const handleAuctionCreated = async (event: any) => {
     <p>Starting Price: ${basePrice}</p>
     <p>Auction End Time: ${new Date(Number(endTime) * 1000)}</p>
   `;
-  await safeSendMail(htmlContent, createrId, 'New Auction Created');
+  await safeSendMail(htmlContent, createrId, "New Auction Created");
 };
 
 const handleAuctionEnded = async (event: any) => {
@@ -82,8 +94,8 @@ const handleAuctionEnded = async (event: any) => {
     where: { tokenId: String(tokenId) },
     data: { isAuction: false },
   });
-  await safeSendMail(htmlContent, auctionStarter, 'Auction Ended');
-  await safeSendMail(htmlContent, winner, 'Auction Ended');
+  await safeSendMail(htmlContent, auctionStarter, "Auction Ended");
+  await safeSendMail(htmlContent, winner, "Auction Ended");
 };
 
 const handleAuctionCancelled = async (event: any) => {
@@ -99,8 +111,8 @@ const handleAuctionCancelled = async (event: any) => {
     where: { tokenId: String(tokenId) },
     data: { isAuction: false },
   });
-  await safeSendMail(htmlContent, auctionStarter, 'Auction Cancelled');
-  await safeSendMail(htmlContent, lastBidder, 'Auction Cancelled');
+  await safeSendMail(htmlContent, auctionStarter, "Auction Cancelled");
+  await safeSendMail(htmlContent, lastBidder, "Auction Cancelled");
 };
 
 const handleAuctionOutBid = async (event: any) => {
@@ -112,7 +124,7 @@ const handleAuctionOutBid = async (event: any) => {
     <p>You have been outbid</p>
     <p>Current Auction Price: ${amount}</p>
   `;
-  await safeSendMail(htmlContent, outBidder, 'Auction OutBid');
+  await safeSendMail(htmlContent, outBidder, "Auction OutBid");
 };
 
 const handleBidPlaced = async (event: any) => {
@@ -124,18 +136,36 @@ const handleBidPlaced = async (event: any) => {
     <p>Your bid has been placed</p>
     <p>Current Auction Price: ${price}</p>
   `;
-  await safeSendMail(htmlContent, bidder, 'Bid Placed');
+  await safeSendMail(htmlContent, bidder, "Bid Placed");
 };
 
 // Subscribe to events
 const subscribeToEvents = () => {
-  contract.events.AuctionCreated({ fromBlock: 'latest' }).on('data', handleAuctionCreated);
-  contract.events.AuctionEnded({ fromBlock: 'latest' }).on('data', handleAuctionEnded);
-  contract.events.AuctionCancelled({ fromBlock: 'latest' }).on('data', handleAuctionCancelled);
-  contract.events.AuctionOutBid({ fromBlock: 'latest' }).on('data', handleAuctionOutBid);
-  contract.events.BidPlaced({ fromBlock: 'latest' }).on('data', handleBidPlaced);
+  contract.events
+    .AuctionCreated({ fromBlock: "latest" })
+    .on("data", handleAuctionCreated);
+  contract.events
+    .AuctionEnded({ fromBlock: "latest" })
+    .on("data", handleAuctionEnded);
+  contract.events
+    .AuctionCancelled({ fromBlock: "latest" })
+    .on("data", handleAuctionCancelled);
+  contract.events
+    .AuctionOutBid({ fromBlock: "latest" })
+    .on("data", handleAuctionOutBid);
+  contract.events
+    .BidPlaced({ fromBlock: "latest" })
+    .on("data", handleBidPlaced);
 };
 
 // Initialize and subscribe
 initializeWeb3();
 subscribeToEvents();
+
+app.get("/", (req, res) => {
+  res.send("Auction listener is running!");
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
