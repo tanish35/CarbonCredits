@@ -13,7 +13,8 @@ import axios from "axios";
 //@ts-ignore
 globalThis.Buffer = Buffer;
 
-axios.defaults.baseURL = "http://localhost:3001/api";
+const API_URL = import.meta.env.VITE_API_URL; 
+axios.defaults.baseURL = API_URL;
 
 const queryClient = new QueryClient();
 
