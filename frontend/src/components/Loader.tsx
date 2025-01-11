@@ -1,5 +1,3 @@
-"use client";
-
 import { Logo } from "./Logo";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";

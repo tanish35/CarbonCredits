@@ -3,7 +3,6 @@ import { VerifyProject } from "@/components/dashboard/VerifyProject";
 import { UserDetails } from "@/components/dashboard/UserDetail";
 import { NFTGrid } from "@/components/dashboard/NFTGrid";
 import { RewardCard } from "@/components/dashboard/RewardCard";
-import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { Loader } from "@/components/Loader";
 import { CarbonCreditsDisplay } from "@/components/dashboard/ProjectDetails";
