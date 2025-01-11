@@ -32,6 +32,6 @@ app.use("/api/emission", verifyCert);
 
 // app.get("/api/syncNFTHolders", syncNFTHoldersHandler);
 
-app.listen(3001, () => {
-  console.log("🚀 Server is running on http://localhost:3001");
+app.listen(process.env.PORT, () => {
+  console.log(`🚀 Server is running on port ${process.env.PORT}`);
 });
