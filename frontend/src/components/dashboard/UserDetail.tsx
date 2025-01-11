@@ -142,6 +142,7 @@ export function UserDetails({ user }: UserProps) {
         </div>
         <Button
           size="lg"
+          onClick={() => navigate("/edit-profile")}
           className="w-full mt-6 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/80 hover:to-primary/80 transition-transform transform hover:scale-105"
         >
           <Edit2 className="mr-2 h-4 w-4" />

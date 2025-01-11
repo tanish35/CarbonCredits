@@ -78,7 +78,7 @@ const handleCreditTransferred = async (event: any) => {
       throw new Error('NFT not found');
     }
 
-    await prisma.$transaction(async (prisma) => {
+    await prisma.$transaction(async (prisma:any) => {
       await prisma.nFT.update({
         where: { tokenId: String(tokenId) },
         data: {
@@ -141,7 +141,7 @@ const handleCreditRetired = async (event: any) => {
   console.log('Credit Retired!');
   const { owner, tokenId } = event.returnValues;
   try {
-    await prisma.$transaction(async (prisma) => {
+    await prisma.$transaction(async (prisma:any) => {
       await prisma.nFT.delete({ where: { tokenId: String(tokenId) } });
       await prisma.creditRetirement.create({
         data: {

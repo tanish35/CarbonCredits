@@ -1,9 +1,9 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import router from "./routes/userRoutes";
-import NFTrouter from "./routes/nftRoutes";
-import verifyCert from "./routes/verifyCert";
+import router from "./routes/user.routes";
+import NFTrouter from "./routes/nft.routes";
+import verifyCert from "./routes/verifyCert.routes";
 // import { syncNFTHoldersHandler } from "./controllers/syncNFT";
 const app = express();
 

@@ -10,15 +10,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  ArrowRight,
-  Upload,
-  Loader2,
-  CheckCircle2,
-} from "lucide-react";
+import { ArrowRight, Upload, Loader2, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 interface CarbonCreditsDisplayProps {
   walletAddress: string;
@@ -86,7 +82,8 @@ export function VerifyProject({ walletAddress }: CarbonCreditsDisplayProps) {
       if (response) {
         toast({
           title: "Verification and Minting Successful",
-          description: "Your project has been successfully verified and NFT minted.",
+          description:
+            "Your project has been successfully verified and NFT minted.",
         });
       }
     } catch (error) {
@@ -172,14 +169,27 @@ export function VerifyProject({ walletAddress }: CarbonCreditsDisplayProps) {
           </DialogHeader>
           <div className="space-y-6">
             <div className="flex flex-col gap-4">
-              <Label htmlFor="certificate">Certificate Image</Label>
+              <div className="">
+                <Label htmlFor="certificate">Certificate Image</Label>
+                <p className="text-sm text-muted-foreground">
+                  The certificate should include detailed organizational
+                  information and verified emission reduction metrics. For
+                  reference, please{" "}
+                  <a href="https://i.ibb.co/7yT8054/cert.jpg" target="_blank">
+                    <span className="underline text-blue-700">CLICK HERE</span> 
+                  </a>{" "}
+                  view our sample certificate.
+                </p>
+              </div>
               <label
                 htmlFor="certificate"
                 className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center gap-2 cursor-pointer hover:border-primary transition-colors"
               >
                 <Upload className="h-8 w-8 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground text-center">
-                  {certificate ? certificate.name : "Click to upload or drag and drop"}
+                  {certificate
+                    ? certificate.name
+                    : "Click to upload or drag and drop"}
                 </p>
                 <input
                   id="certificate"
@@ -190,14 +200,22 @@ export function VerifyProject({ walletAddress }: CarbonCreditsDisplayProps) {
                 />
               </label>
 
-              <Label htmlFor="nftImage">NFT Image</Label>
+              <div className="">
+                <Label htmlFor="nftImage">NFT Image</Label>
+                <p className="text-sm text-muted-foreground">
+                  Please upload an image that represents your project, this
+                  image will be visible on the NFT
+                </p>
+              </div>
               <label
                 htmlFor="nftImage"
                 className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center gap-2 cursor-pointer hover:border-primary transition-colors"
               >
                 <Upload className="h-8 w-8 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground text-center">
-                  {nftImage ? nftImage.name : "Click to upload or drag and drop"}
+                  {nftImage
+                    ? nftImage.name
+                    : "Click to upload or drag and drop"}
                 </p>
                 <input
                   id="nftImage"

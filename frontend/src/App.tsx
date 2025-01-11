@@ -15,8 +15,8 @@ import NFTPage from "./pages/NFTPage";
 import AboutPage from "./pages/About";
 import TeamPage from "./pages/Contact";
 // import NFTAuctionPage from "./pages/NFTPage";
-import React from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import EditProfile from "./pages/EditProfile";
 
 function App() {
   return (
@@ -34,6 +34,7 @@ function App() {
               <Route path="/about" element={<AboutPage />} />
               <Route path="/nft/:id" element={<NFTPage />} />
               <Route path="/contact" element={<TeamPage />} />
+              <Route path="/edit-profile" element={<EditProfile/>} />
             </Route>
             {/* <Route path="/nft/:id" element={<NFTDetailsPage />} /> */}
             <Route path="/marketplace" element={<MarketplacePage />} />

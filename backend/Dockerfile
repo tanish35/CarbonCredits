@@ -1,35 +1,29 @@
-# Use an official Node.js runtime as a parent image
 FROM node:latest
 
-# Set the working directory in the container
 WORKDIR /app
 
-# Install required dependencies
-RUN apk add --no-cache bash
-
-# Copy package.json and package-lock.json (if available) to the container
+# Copy dependencies first for better caching
 COPY package*.json ./
-
-# Install the dependencies
 RUN npm install
 
-# Copy the rest of the application code to the container
+# Copy application code
 COPY . .
-
-# Copy the .env file to the container
 COPY .env ./
 
-# Compile TypeScript code
+# Build and prepare the application
 RUN npm run build
-
-# Run Prisma migrations
+RUN npx prisma generate
 RUN npx prisma migrate deploy
 
-# Expose the port for the main server
+# Create a startup script
+RUN echo '#!/bin/sh\n\
+npx prisma generate\n\
+node dist/index.js & \
+node dist/MarketEventListener.js & \
+node dist/NftEventListener.js & \
+wait' > /app/start.sh
+
+RUN chmod +x /app/start.sh
 EXPOSE 3001
 
-# Use a process manager to handle multiple processes gracefully
-RUN npm install -g pm2
-
-# Start all the processes using PM2
-CMD ["pm2-runtime", "start", "--name", "app", "dist/index.js", "--name", "market", "dist/MarketEventListener.js", "--name", "nft", "dist/NftEventListener.js"]
+CMD ["/app/start.sh"]

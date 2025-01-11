@@ -97,6 +97,24 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
+export const updateUserProfile = asyncHandler(async (req: Request, res: Response) => {
+  const { name, address, phone } = req.body;
+
+  if (!name || !address || !phone) {
+    res.status(400).json({ message: "Please provide all the required fields" });
+    return;
+  }
+
+  // @ts-ignore
+  const user = await prisma.user.update({
+    //@ts-ignore
+    where: { id: req.user.id },
+    data: { name, address, phone },
+  });
+
+  res.status(201).json(user);
+});
+
 export const googleLogin = asyncHandler(async (req: Request, res: Response) => {
   const { name, email } = req.body;
 
