@@ -21,14 +21,14 @@ let web3Instance;
 let contract;
 // Initialize Web3 and Contract
 const initializeWeb3 = () => {
-    const provider = new web3_1.default.providers.WebsocketProvider('wss://api.avax-test.network/ext/bc/C/ws');
-    provider.on('connect', () => console.log('WebSocket connected'));
-    provider.on('error', (error) => {
-        console.error('WebSocket error:', error);
+    const provider = new web3_1.default.providers.WebsocketProvider("wss://api.avax-test.network/ext/bc/C/ws");
+    provider.on("connect", () => console.log("WebSocket connected"));
+    provider.on("error", (error) => {
+        console.error("WebSocket error:", error);
         reconnect();
     });
-    provider.on('end', (error) => {
-        console.error('WebSocket connection ended:', error);
+    provider.on("end", (error) => {
+        console.error("WebSocket connection ended:", error);
         reconnect();
     });
     web3Instance = new web3_1.default(provider);
@@ -65,7 +65,7 @@ const safeSendMail = (htmlContent, walletAddress, subject) => __awaiter(void 0, 
 });
 // Event Handlers
 const handleCreditTransferred = (event) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('Credit Transferred!');
+    console.log("Credit Transferred!");
     const { from, to, tokenId, amount } = event.returnValues;
     console.log({ from, to, tokenId: Number(tokenId), amount });
     try {
@@ -76,13 +76,13 @@ const handleCreditTransferred = (event) => __awaiter(void 0, void 0, void 0, fun
             where: { address: String(to) },
         });
         if (!fromWallet || !toWallet) {
-            throw new Error('One or both wallets not found');
+            throw new Error("One or both wallets not found");
         }
         const nft = yield prisma_1.default.nFT.findFirst({
             where: { tokenId: String(tokenId) },
         });
         if (!nft) {
-            throw new Error('NFT not found');
+            throw new Error("NFT not found");
         }
         yield prisma_1.default.$transaction((prisma) => __awaiter(void 0, void 0, void 0, function* () {
             yield prisma.nFT.update({
@@ -108,11 +108,11 @@ const handleCreditTransferred = (event) => __awaiter(void 0, void 0, void 0, fun
         // console.log('CreditTransferred:', { from, to, tokenId, amount });
     }
     catch (error) {
-        console.error('Error handling CreditTransferred event:', error);
+        console.error("Error handling CreditTransferred event:", error);
     }
 });
 const handleCreditMinted = (event) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('Credit Minted!');
+    console.log("Credit Minted!");
     const { to, tokenId, price, typeofcredit, quantity, certificateURI, expiryDate, } = event.returnValues;
     try {
         const nft = yield prisma_1.default.nFT.create({
@@ -130,11 +130,11 @@ const handleCreditMinted = (event) => __awaiter(void 0, void 0, void 0, function
         // console.log('CreditMinted:', nft);
     }
     catch (error) {
-        console.error('Error handling CreditMinted event:', error);
+        console.error("Error handling CreditMinted event:", error);
     }
 });
 const handleCreditRetired = (event) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('Credit Retired!');
+    console.log("Credit Retired!");
     const { owner, tokenId } = event.returnValues;
     try {
         yield prisma_1.default.$transaction((prisma) => __awaiter(void 0, void 0, void 0, function* () {
@@ -149,14 +149,20 @@ const handleCreditRetired = (event) => __awaiter(void 0, void 0, void 0, functio
         // console.log('CreditRetired:', { owner, tokenId });
     }
     catch (error) {
-        console.error('Error handling CreditRetired event:', error);
+        console.error("Error handling CreditRetired event:", error);
     }
 });
 // Subscribe to events
 const subscribeToEvents = () => {
-    contract.events.CreditTransferred({ fromBlock: 'latest' }).on('data', handleCreditTransferred);
-    contract.events.CreditMinted({ fromBlock: 'latest' }).on('data', handleCreditMinted);
-    contract.events.CreditRetired({ fromBlock: 'latest' }).on('data', handleCreditRetired);
+    contract.events
+        .CreditTransferred({ fromBlock: "latest" })
+        .on("data", handleCreditTransferred);
+    contract.events
+        .CreditMinted({ fromBlock: "latest" })
+        .on("data", handleCreditMinted);
+    contract.events
+        .CreditRetired({ fromBlock: "latest" })
+        .on("data", handleCreditRetired);
 };
 // Initialize and subscribe
 initializeWeb3();

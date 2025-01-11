@@ -15,12 +15,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const server_1 = require("@google/generative-ai/server");
 const generative_ai_1 = require("@google/generative-ai");
 const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
 const secrets_1 = __importDefault(require("../secrets"));
 const { GEMINI_API_KEY } = secrets_1.default;
 const mediaPath = path_1.default.resolve(__dirname, "../../public/certificate");
 const getEmissionReductionData = () => __awaiter(void 0, void 0, void 0, function* () {
     const fileManager = new server_1.GoogleAIFileManager(GEMINI_API_KEY);
     console.log("Uploading file...");
+    const filePath = path_1.default.join(mediaPath, "cert.jpeg");
     const uploadResult = yield fileManager.uploadFile(path_1.default.join(mediaPath, "cert.jpeg"), {
         mimeType: "image/jpeg",
         displayName: "cert.jpeg",
@@ -40,6 +42,7 @@ const getEmissionReductionData = () => __awaiter(void 0, void 0, void 0, functio
         },
     ]);
     const responseText = result.response.text();
+    fs_1.default.unlinkSync(filePath);
     // console.log("Response text:", responseText);
     const parts = responseText.split("|");
     const data = {

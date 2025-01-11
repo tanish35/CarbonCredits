@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getMarketPlaceNFTs = exports.setNFTstatus = exports.getNFTstatus = exports.transferNFT = exports.getAllNFTs = exports.getNFT = exports.getOwnedNFTs = exports.NFTtrasactions = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
@@ -27,7 +28,7 @@ if (!RPC_URL || !CONTRACT_ADDRESS) {
     throw new Error("Please provide a RPC URL and a contract address");
 }
 const provider = new ethers_1.ethers.JsonRpcProvider(RPC_URL);
-const wallet = new ethers_1.ethers.Wallet(PRIVATE_KEY, provider);
+const wallet = new ethers_1.ethers.Wallet(((_a = process.env.PRIVATE_KEY) === null || _a === void 0 ? void 0 : _a.replace(/^0x/, '')) || '');
 const contract = new ethers_1.ethers.Contract(CONTRACT_ADDRESS, abi_1.abi, wallet);
 exports.NFTtrasactions = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { buyerId, sellerId, nftId, price } = req.body;

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.signOut = exports.getUserDetails = exports.getUserWallet = exports.updateUserWallet = exports.googleLogin = exports.loginUser = exports.registerUser = void 0;
+exports.signOut = exports.getUserDetails = exports.getUserWallet = exports.updateUserWallet = exports.googleLogin = exports.updateUserProfile = exports.loginUser = exports.registerUser = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const prisma_1 = __importDefault(require("../lib/prisma"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -89,6 +89,20 @@ exports.loginUser = (0, express_async_handler_1.default)((req, res) => __awaiter
             email: user.email,
         },
     });
+}));
+exports.updateUserProfile = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { name, address, phone } = req.body;
+    if (!name || !address || !phone) {
+        res.status(400).json({ message: "Please provide all the required fields" });
+        return;
+    }
+    // @ts-ignore
+    const user = yield prisma_1.default.user.update({
+        //@ts-ignore
+        where: { id: req.user.id },
+        data: { name, address, phone },
+    });
+    res.status(201).json(user);
 }));
 exports.googleLogin = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, email } = req.body;

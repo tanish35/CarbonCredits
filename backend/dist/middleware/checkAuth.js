@@ -21,7 +21,7 @@ function requireAuth(req, res, next) {
         try {
             const token = (_a = req.cookies) === null || _a === void 0 ? void 0 : _a.token;
             if (!token) {
-                console.log("4");
+                // console.log("4");
                 res.sendStatus(401);
                 return;
             }
@@ -34,7 +34,7 @@ function requireAuth(req, res, next) {
             // }
             const userId = decoded.sub;
             if (!userId) {
-                console.log("3");
+                // console.log("3");
                 res.sendStatus(401);
                 return;
             }
@@ -53,7 +53,7 @@ function requireAuth(req, res, next) {
             next();
         }
         catch (err) {
-            console.log("1", err);
+            // console.log("1",err);
             res.sendStatus(401);
             return;
         }

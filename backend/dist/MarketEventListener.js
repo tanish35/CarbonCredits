@@ -21,16 +21,16 @@ let web3Instance;
 let contract;
 // Initialize Web3 and Contract
 const initializeWeb3 = () => {
-    const provider = new web3_1.default.providers.WebsocketProvider('wss://api.avax-test.network/ext/bc/C/ws');
-    provider.on('connect', () => console.log('WebSocket connected'));
+    const provider = new web3_1.default.providers.WebsocketProvider("wss://api.avax-test.network/ext/bc/C/ws");
+    provider.on("connect", () => console.log("WebSocket connected"));
     //@ts-ignore
-    provider.on('error', (error) => {
-        console.error('WebSocket error:', error);
+    provider.on("error", (error) => {
+        console.error("WebSocket error:", error);
         reconnect();
     });
     //@ts-ignore
-    provider.on('end', (error) => {
-        console.error('WebSocket connection ended:', error);
+    provider.on("end", (error) => {
+        console.error("WebSocket connection ended:", error);
         reconnect();
     });
     web3Instance = new web3_1.default(provider);
@@ -75,7 +75,7 @@ const handleAuctionCreated = (event) => __awaiter(void 0, void 0, void 0, functi
     <p>Starting Price: ${basePrice}</p>
     <p>Auction End Time: ${new Date(Number(endTime) * 1000)}</p>
   `;
-    yield safeSendMail(htmlContent, createrId, 'New Auction Created');
+    yield safeSendMail(htmlContent, createrId, "New Auction Created");
 });
 const handleAuctionEnded = (event) => __awaiter(void 0, void 0, void 0, function* () {
     // console.log("Auction Ended!");
@@ -90,8 +90,8 @@ const handleAuctionEnded = (event) => __awaiter(void 0, void 0, void 0, function
         where: { tokenId: String(tokenId) },
         data: { isAuction: false },
     });
-    yield safeSendMail(htmlContent, auctionStarter, 'Auction Ended');
-    yield safeSendMail(htmlContent, winner, 'Auction Ended');
+    yield safeSendMail(htmlContent, auctionStarter, "Auction Ended");
+    yield safeSendMail(htmlContent, winner, "Auction Ended");
 });
 const handleAuctionCancelled = (event) => __awaiter(void 0, void 0, void 0, function* () {
     // console.log("Auction Cancelled!");
@@ -106,8 +106,8 @@ const handleAuctionCancelled = (event) => __awaiter(void 0, void 0, void 0, func
         where: { tokenId: String(tokenId) },
         data: { isAuction: false },
     });
-    yield safeSendMail(htmlContent, auctionStarter, 'Auction Cancelled');
-    yield safeSendMail(htmlContent, lastBidder, 'Auction Cancelled');
+    yield safeSendMail(htmlContent, auctionStarter, "Auction Cancelled");
+    yield safeSendMail(htmlContent, lastBidder, "Auction Cancelled");
 });
 const handleAuctionOutBid = (event) => __awaiter(void 0, void 0, void 0, function* () {
     // console.log("Auction OutBid!");
@@ -118,7 +118,7 @@ const handleAuctionOutBid = (event) => __awaiter(void 0, void 0, void 0, functio
     <p>You have been outbid</p>
     <p>Current Auction Price: ${amount}</p>
   `;
-    yield safeSendMail(htmlContent, outBidder, 'Auction OutBid');
+    yield safeSendMail(htmlContent, outBidder, "Auction OutBid");
 });
 const handleBidPlaced = (event) => __awaiter(void 0, void 0, void 0, function* () {
     // console.log("Bid Placed!");
@@ -129,15 +129,25 @@ const handleBidPlaced = (event) => __awaiter(void 0, void 0, void 0, function* (
     <p>Your bid has been placed</p>
     <p>Current Auction Price: ${price}</p>
   `;
-    yield safeSendMail(htmlContent, bidder, 'Bid Placed');
+    yield safeSendMail(htmlContent, bidder, "Bid Placed");
 });
 // Subscribe to events
 const subscribeToEvents = () => {
-    contract.events.AuctionCreated({ fromBlock: 'latest' }).on('data', handleAuctionCreated);
-    contract.events.AuctionEnded({ fromBlock: 'latest' }).on('data', handleAuctionEnded);
-    contract.events.AuctionCancelled({ fromBlock: 'latest' }).on('data', handleAuctionCancelled);
-    contract.events.AuctionOutBid({ fromBlock: 'latest' }).on('data', handleAuctionOutBid);
-    contract.events.BidPlaced({ fromBlock: 'latest' }).on('data', handleBidPlaced);
+    contract.events
+        .AuctionCreated({ fromBlock: "latest" })
+        .on("data", handleAuctionCreated);
+    contract.events
+        .AuctionEnded({ fromBlock: "latest" })
+        .on("data", handleAuctionEnded);
+    contract.events
+        .AuctionCancelled({ fromBlock: "latest" })
+        .on("data", handleAuctionCancelled);
+    contract.events
+        .AuctionOutBid({ fromBlock: "latest" })
+        .on("data", handleAuctionOutBid);
+    contract.events
+        .BidPlaced({ fromBlock: "latest" })
+        .on("data", handleBidPlaced);
 };
 // Initialize and subscribe
 initializeWeb3();
