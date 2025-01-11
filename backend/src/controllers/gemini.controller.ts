@@ -1,6 +1,7 @@
 import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import path from "path";
+import fs from "fs";
 import secrets from "../secrets";
 
 const { GEMINI_API_KEY } = secrets;
@@ -10,6 +11,7 @@ const mediaPath: string = path.resolve(__dirname, "../../public/certificate");
 const getEmissionReductionData = async (): Promise<Object> => {
   const fileManager = new GoogleAIFileManager(GEMINI_API_KEY);
   console.log("Uploading file...");
+  const filePath = path.join(mediaPath, "cert.jpeg");
 
   const uploadResult = await fileManager.uploadFile(
     path.join(mediaPath, "cert.jpeg"),
@@ -37,6 +39,7 @@ const getEmissionReductionData = async (): Promise<Object> => {
   ]);
 
   const responseText = result.response.text();
+  fs.unlinkSync(filePath);
   // console.log("Response text:", responseText);
   const parts = responseText.split("|");
   const data = {
