@@ -17,10 +17,6 @@ interface NFT {
   description?: string; // To store the fetched description from IPFS
 }
 
-const formatDate = (date: string | Date) => {
-  return new Date(date).toLocaleDateString();
-};
-
 const isExpired = (date: string | Date) => {
   return new Date() > new Date(date);
 };

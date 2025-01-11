@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Award, Gift, Leaf, Droplets, Wind, Zap, Star, Trophy } from "lucide-react";
+import { Award, Gift, Leaf, Droplets, Wind, Zap, Trophy } from "lucide-react";
 import {
   Card,
   CardContent,

@@ -14,7 +14,6 @@ import { ArrowRight, Upload, Loader2, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import axios from "axios";
-import { Link } from "react-router-dom";
 
 interface CarbonCreditsDisplayProps {
   walletAddress: string;

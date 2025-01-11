@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useAccount, useBalance, useDisconnect } from "wagmi";
+import { useAccount, useBalance } from "wagmi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
@@ -19,7 +19,7 @@ interface WalletProps {
 export const Wallet: React.FC<WalletProps> = ({ onWalletChange }) => {
   const { isConnected, address } = useAccount();
   const { data: balance, isError, isLoading } = useBalance({ address });
-  const { disconnect } = useDisconnect();
+  //const { disconnect } = useDisconnect();
   const {toast} = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -46,10 +46,10 @@ export const Wallet: React.FC<WalletProps> = ({ onWalletChange }) => {
     }
   }
 
-  const handleDisconnect = () => {
-    disconnect();
-    onWalletChange(null);
-  };
+  // const handleDisconnect = () => {
+  //   disconnect();
+  //   onWalletChange(null);
+  // };
 
   const handleCopy = async (text: string) => {
     try {

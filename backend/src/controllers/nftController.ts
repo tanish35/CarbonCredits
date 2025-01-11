@@ -15,7 +15,9 @@ if (!RPC_URL || !CONTRACT_ADDRESS) {
   throw new Error("Please provide a RPC URL and a contract address");
 }
 const provider = new ethers.JsonRpcProvider(RPC_URL);
-const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+const wallet = new ethers.Wallet(
+  process.env.PRIVATE_KEY?.replace(/^0x/, '') || ''
+);
 const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, wallet);
 
 export const NFTtrasactions = asyncHandler(

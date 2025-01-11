@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/tooltip";
 import axios from "axios";
 import { toast } from "@/hooks/use-toast";
-import { Navigate, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 
 interface UserProps {
   user: {

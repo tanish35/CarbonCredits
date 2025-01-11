@@ -3,7 +3,7 @@ import { abi_marketplace } from './abi/abi_marketplace';
 import prisma from './lib/prisma';
 import sendMail from './mail/sendMail';
 
-const contractAddress = process.env.MARKETPLACE_CONTRACT_ADDRESS;
+const contractAddress = process.env.MARKETPLACE_CONTRACT_ADDRESS?.trim() || '';
 
 let web3Instance: Web3;
 let contract: any;

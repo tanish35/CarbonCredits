@@ -3,7 +3,7 @@ import { abi } from './abi/abi';
 import prisma from './lib/prisma';
 import sendMail from './mail/sendMail';
 
-const contractAddress = process.env.CONTRACT_ADDRESS;
+const contractAddress = process.env.NFT_CONTRACT_ADDRESS?.trim() || '';
 
 let web3Instance: Web3;
 let contract: any;
