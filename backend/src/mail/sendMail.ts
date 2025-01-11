@@ -21,7 +21,7 @@ const sendMail = (
   });
 
   let mailOptions = {
-    from: `"Campus-Chatter Admin" <${senderEmail}>`,
+    from: `"EcoX Admin" <${senderEmail}>`,
     to: receiverEmail,
     subject: subject,
     text: htmlContent,
