@@ -1,8 +1,8 @@
-name: Hourly Update to index.ts
+name: Frequent Update to index.ts
 
 on:
   schedule:
-    - cron: '0 * * * *' # Runs every hour on the hour
+    - cron: '*/5 * * * *' # Runs every 5 minutes
   workflow_dispatch: # Allows manual triggering
 
 jobs:
@@ -18,7 +18,7 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
 
-      - name: Ensure commit every hour
+      - name: Ensure commit every 5 minutes
         run: |
           FILE="backend/src/index.ts"
           # Modify the file by toggling an empty line at the end
@@ -33,7 +33,7 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          git commit -m "ci: hourly update to backend/src/index.ts"
+          git commit -m "ci: frequent update to backend/src/index.ts"
           git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
