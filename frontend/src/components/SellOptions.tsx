@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import axios from "axios";
 import { abi } from "@/lib/abi";
 import { abi_marketplace } from "@/lib/abi_marketplace";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface SellOptionsProps {
   tokenId: number;
@@ -26,7 +28,8 @@ export const SellOptions: React.FC<SellOptionsProps> = ({
   const [price, setPrice] = useState("");
   const [duration, setDuration] = useState("");
   const { address } = useAccount();
-
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const { writeContract } = useWriteContract();
 
   const { data: isApproved } = useReadContract({
@@ -65,6 +68,13 @@ export const SellOptions: React.FC<SellOptionsProps> = ({
         tokenId: tokenId.toString(),
         type,
       });
+      if (type === "directSell") {
+        toast({
+          title: "Direct Sell",
+          description: "You have selected direct sell option",
+        });
+        navigate(`/marketplace`);
+      }
     } catch (error) {
       console.error("Error setting sell type:", error);
     }
@@ -167,25 +177,27 @@ export const SellOptions: React.FC<SellOptionsProps> = ({
 
   return (
     <div className="space-y-4">
-      <div>
-        <Label htmlFor="price">Price (ETH)</Label>
-        <Input
-          id="price"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          placeholder="0.1"
-        />
-      </div>
       {sellType === "auction" && (
-        <div>
-          <Label htmlFor="duration">Duration (hours)</Label>
-          <Input
-            id="duration"
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            placeholder="24"
-          />
-        </div>
+        <>
+          <div>
+            <Label htmlFor="price">Price (ETH)</Label>
+            <Input
+              id="price"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="0.1"
+            />
+          </div>
+          <div>
+            <Label htmlFor="duration">Duration (hours)</Label>
+            <Input
+              id="duration"
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              placeholder="24"
+            />
+          </div>
+        </>
       )}
       <Button onClick={handleSetPrice} className="w-full">
         {sellType === "auction" ? "Start Auction" : "Set Price"}
