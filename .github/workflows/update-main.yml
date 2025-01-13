@@ -1,0 +1,39 @@
+name: Hourly Update to index.ts
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Runs every hour on the hour
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  update-blank-line:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+
+      - name: Ensure commit every hour
+        run: |
+          FILE="backend/src/index.ts"
+          # Modify the file by toggling an empty line at the end
+          if tail -n 1 "$FILE" | grep -q '^$'; then
+            # Remove the blank line
+            sed -i '' -e '$d' "$FILE"
+          else
+            # Add a blank line
+            echo "" >> "$FILE"
+          fi
+          git add "$FILE"
+
+      - name: Commit and push changes
+        run: |
+          git commit -m "ci: hourly update to backend/src/index.ts"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
