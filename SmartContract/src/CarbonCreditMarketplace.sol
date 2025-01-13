@@ -191,10 +191,16 @@ contract CarbonCreditMarketplace is AutomationCompatible {
     }
 
     function performUpkeep(bytes calldata performData) external override {
-        uint256 tokenId = abi.decode(performData, (uint256));
-        Auction storage auction = auctions[tokenId];
-        if (auction.active && block.timestamp >= auction.endTime) {
+    uint256 tokenId = abi.decode(performData, (uint256));
+    Auction storage auction = auctions[tokenId];
+    
+    if (auction.active && block.timestamp >= auction.endTime) {
+        if (auction.currentBidder != address(0)) {
             endAuction(tokenId);
+        } else {
+            cancelAuction(tokenId);
         }
     }
+}
+
 }

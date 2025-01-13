@@ -306,31 +306,27 @@ const NFTPage: React.FC = () => {
                     </motion.div>
                   )}
 
-                  {!isOwner && (isAuction || isDirectSelling) && basePrice && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="space-y-4"
-                    >
-                      {isAuction && (
-                        <AuctionBidComponent
-                          tokenId={TOKEN_ID}
-                          basePrice={basePrice}
-                          MARKETPLACE_ADDRESS={MARKETPLACE_ADDRESS}
-                        />
-                      )}
-                      {isDirectSelling && (
-                        <DirectBuyComponent
-                          tokenId={TOKEN_ID}
-                          basePrice={basePrice}
-                          MARKETPLACE_ADDRESS={MARKETPLACE_ADDRESS}
-                        />
-                      )}
-                    </motion.div>
+                  {!isOwner &&
+                    isAuction &&
+                    auctionDetails &&
+                    auctionDetails[5] &&
+                    basePrice && (
+                      <AuctionBidComponent
+                        tokenId={TOKEN_ID}
+                        basePrice={basePrice}
+                        MARKETPLACE_ADDRESS={MARKETPLACE_ADDRESS}
+                      />
+                    )}
+
+                  {!isOwner && isDirectSelling && basePrice && (
+                    <DirectBuyComponent
+                      tokenId={TOKEN_ID}
+                      basePrice={basePrice}
+                      MARKETPLACE_ADDRESS={MARKETPLACE_ADDRESS}
+                    />
                   )}
-                </AnimatePresence>
-              </motion.div>
+                </motion.div>
+              </div>
             </div>
           </CardContent>
         </Card>
