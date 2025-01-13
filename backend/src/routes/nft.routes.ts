@@ -9,7 +9,6 @@ import {
   getNFTstatus,
   setNFTstatus,
   getAllNFTs,
-
 } from "../controllers/nftController";
 
 const NFTrouter = express.Router();

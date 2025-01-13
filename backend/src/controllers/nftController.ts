@@ -4,7 +4,6 @@ import prisma from "../lib/prisma";
 import { ethers } from "ethers";
 import { abi } from "../abi/abi";
 
-
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 if (!PRIVATE_KEY) {
   throw new Error("Please provide a private key");
@@ -16,7 +15,8 @@ if (!RPC_URL || !CONTRACT_ADDRESS) {
 }
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 const wallet = new ethers.Wallet(
-  process.env.PRIVATE_KEY?.replace(/^0x/, '') || ''
+  process.env.PRIVATE_KEY?.replace(/^0x/, "") || "",
+  provider
 );
 const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, wallet);
 
@@ -113,6 +113,55 @@ export const getAllNFTs = asyncHandler(async (_req: Request, res: Response) => {
   res.json(nfts);
 });
 
+export const setNFTs = async (walletAddress: string): Promise<string> => {
+  if (!walletAddress) {
+    throw new Error("Wallet address is required.");
+  }
+
+  try {
+    const credits = await contract.getCreditByOwner(walletAddress);
+
+    for (const credit of credits) {
+      const {
+        id: tokenId,
+        typeofcredit: typeofCredit,
+        quantity,
+        certificateURI,
+        expiryDate,
+        retired: isAuction,
+      } = credit;
+      const price = await contract.getRate(tokenId);
+      await prisma.nFT.upsert({
+        where: { tokenId: tokenId.toString() },
+        update: {
+          walletAddress,
+          typeofCredit,
+          quantity: quantity.toString(),
+          certificateURI,
+          expiryDate: expiryDate ? new Date(Number(expiryDate) * 1000) : null,
+          isAuction,
+          price: price.toString(),
+        },
+        create: {
+          tokenId: tokenId.toString(),
+          typeofCredit,
+          quantity: quantity.toString(),
+          certificateURI,
+          expiryDate: expiryDate ? new Date(Number(expiryDate) * 1000) : null,
+          isAuction,
+          price: price.toString(),
+          wallet: { connect: { address: walletAddress } },
+        },
+      });
+    }
+
+    return "NFTs updated successfully.";
+  } catch (error) {
+    console.error("Error processing NFTs:", error);
+    throw new Error("Failed to process NFTs.");
+  }
+};
+
 // export const NFTMint = asyncHandler(async (req: Request, res: Response) => {
 //   const { ownerId } = req.body;
 //   if (!ownerId) {
@@ -140,8 +189,6 @@ export const getAllNFTs = asyncHandler(async (_req: Request, res: Response) => {
 
 //     // Wait for the transaction to be mined
 //     const receipt = await tx.wait();
-
-    
 
 //     // Return success response with transaction details
 //     res.status(200).json({
