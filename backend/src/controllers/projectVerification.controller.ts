@@ -3,6 +3,7 @@ import expressAsyncHandler from "express-async-handler";
 import multer from "multer";
 import getEmissionReductionData from "./gemini.controller";
 import uploadToPinata from "./pinataController";
+import { setNFTs } from "./nftController";
 import { ethers } from "ethers";
 import { abi } from "../abi/abi";
 
@@ -95,6 +96,7 @@ export const getEmissionReduction = expressAsyncHandler(async (req, res) => {
       // Wait for the transaction to be mined
       const receipt = await tx.wait();
       console.log("Transaction receipt:", receipt);
+      setNFTs(ownerId);
 
       // Return success response with transaction details
       res.status(200).json({
