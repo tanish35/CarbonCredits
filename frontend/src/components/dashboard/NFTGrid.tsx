@@ -43,21 +43,8 @@ const fetchIPFSData = async (uri: string): Promise<{ image?: string; description
 };
 const formatAVAX = (wei: string) => {
   const num = parseFloat(wei) / 10 ** 18;
-  const units = [
-    { value: 1e12, symbol: 'T' },  // Trillion
-    { value: 1e9, symbol: 'B' },   // Billion
-    { value: 1e6, symbol: 'M' },   // Million
-    { value: 1e3, symbol: 'K' }    // Thousand
-  ];
-
-  for (const unit of units) {
-    if (num >= unit.value) {
-      const value = num / unit.value;
-      // If the value has no decimal places, don't show .0
-      return value % 1 === 0 ? Math.floor(value) + unit.symbol : value.toFixed(1) + unit.symbol;
-    }
-  }
-  return num.toString();
+  
+  return num.toFixed(3).toString();
 };
 
 const formatQuantity = (quantity: string) => {
