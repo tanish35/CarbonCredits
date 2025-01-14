@@ -1,18 +1,21 @@
 {
   "version": 2,
-  "routes": [
+  "headers": [
     {
       "source": "/nft/:id",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "s-maxage=3600"
+        }
+      ],
       "has": [
         {
           "type": "header",
           "key": "user-agent",
           "value": "(WhatsApp|facebookexternalhit|twitterbot|LinkedInBot)"
         }
-      ],
-      "headers": {
-        "Cache-Control": "s-maxage=3600"
-      }
+      ]
     }
   ],
   "rewrites": [
