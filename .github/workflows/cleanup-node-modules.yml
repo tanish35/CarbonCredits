@@ -1,0 +1,22 @@
+name: Cleanup Node Modules
+
+on:
+  workflow_dispatch: # Allows manual triggering
+  pull_request: # Runs on pull requests
+
+jobs:
+  cleanup-node-modules:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16' # Use your desired Node.js version
+
+      - name: Run Node Modules Scrapper
+        run: |
+          node scripts/remove-node-modules.js
