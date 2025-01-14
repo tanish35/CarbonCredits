@@ -1,8 +1,6 @@
 # Carbon Credit NFT Application
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)  
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/tanish35/CarbonCredits/pulls)  
-[![Live Deployment](https://img.shields.io/badge/live-deployed-green.svg)](https://ecox.wedevelopers.online)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/tanish35/CarbonCredits/pulls) [![Live Deployment](https://img.shields.io/badge/live-deployed-green.svg)](https://ecox.wedevelopers.online)
 
 This application is designed to manage and trade carbon credit NFTs. It ensures transparency, traceability, and compliance through blockchain technology. Below are the steps to set up and run the backend and frontend of the app.
 
