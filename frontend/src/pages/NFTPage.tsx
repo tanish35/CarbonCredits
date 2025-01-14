@@ -177,27 +177,27 @@ const NFTPage: React.FC = () => {
 
   return (
     <>
-      {creditDetails && (
-        <Helmet>
-          <meta property="og:title" content={`NFT #${TOKEN_ID}`} />
-          <meta
-            property="og:description"
-            content={creditDetails.description || "Check out this amazing NFT!"}
-          />
-          <meta
-            property="og:image"
-            content={
-              creditDetails.certificateURI ||
-              "https://example.com/default-image.jpg"
-            }
-          />
-          <meta
-            property="og:url"
-            content={`https://ecox.wedevelopers.online/nft/${TOKEN_ID}`}
-          />
-          <meta property="og:type" content="website" />
-        </Helmet>
-      )}
+      <Helmet>
+        <meta property="og:title" content={`Carbon Credit #${TOKEN_ID}`} />
+        <meta
+          property="og:description"
+          content={
+            creditDetails.description ||
+            "Check out this amazing Carbon Credit NFT!"
+          }
+        />
+        <meta
+          property="og:image"
+          content={`${import.meta.env.VITE_APP_URL}/api/og/${TOKEN_ID}`}
+        />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta
+          property="og:url"
+          content={`${import.meta.env.VITE_APP_URL}/nft/${TOKEN_ID}`}
+        />
+        <meta property="og:type" content="website" />
+      </Helmet>
 
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-12 px-4 sm:px-6">
         <motion.div
