@@ -188,7 +188,7 @@ const NFTPage: React.FC = () => {
         />
         <meta
           property="og:image"
-          content={`${import.meta.env.VITE_APP_URL}/api/og/${TOKEN_ID}`}
+          content={`${import.meta.env.VITE_APP_URL}/api/og?id=${TOKEN_ID}`}
         />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
