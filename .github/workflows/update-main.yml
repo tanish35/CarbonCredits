@@ -24,11 +24,11 @@ jobs:
           echo "Listing directory structure:"
           ls -R
           echo "Checking if the target file exists:"
-          ls -l CarbonCredits/backend/src/index.ts || echo "File not found!"
+          ls -l backend/src/index.ts || echo "File not found!"
 
       - name: Ensure commit every hour
         run: |
-          FILE="CarbonCredits/backend/src/index.ts"
+          FILE="backend/src/index.ts"
           echo "Target file: $FILE"
           if [ -f "$FILE" ]; then
             echo "File found. Modifying it..."
@@ -48,7 +48,7 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          git commit -m "ci: hourly update to CarbonCredits/backend/src/index.ts"
+          git commit -m "ci: hourly update to backend/src/index.ts"
           git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
