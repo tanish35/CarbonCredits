@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 import { Button } from "../ui/button";
-import { Power, WalletIcon, CircleDollarSign, Plus } from "lucide-react";
+import { Power, WalletIcon, CircleDollarSign } from "lucide-react";
 import { formatAddress } from "@/lib/utils";
 import { Separator } from "../ui/separator";
 import {
