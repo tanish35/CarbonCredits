@@ -4,10 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 import { Button } from "../ui/button";
-import { Power, Wallet as WalletIcon, CircleDollarSign } from "lucide-react";
+import { Power, WalletIcon, CircleDollarSign, Plus } from "lucide-react";
 import { formatAddress } from "@/lib/utils";
 import { Separator } from "../ui/separator";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
@@ -19,8 +23,7 @@ interface WalletProps {
 export const Wallet: React.FC<WalletProps> = ({ onWalletChange }) => {
   const { isConnected, address } = useAccount();
   const { data: balance, isError, isLoading } = useBalance({ address });
-  //const { disconnect } = useDisconnect();
-  const {toast} = useToast();
+  const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
 
   const truncatedAddress = address ? formatAddress(address) : "";
@@ -46,11 +49,6 @@ export const Wallet: React.FC<WalletProps> = ({ onWalletChange }) => {
     }
   }
 
-  // const handleDisconnect = () => {
-  //   disconnect();
-  //   onWalletChange(null);
-  // };
-
   const handleCopy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -67,6 +65,46 @@ export const Wallet: React.FC<WalletProps> = ({ onWalletChange }) => {
     }
   };
 
+  const addFujiCChainToMetaMask = async () => {
+    if (typeof window.ethereum !== "undefined") {
+      try {
+        await window.ethereum.request({
+          method: "wallet_addEthereumChain",
+          params: [
+            {
+              chainId: "0xa869",
+              chainName: "Avalanche Fuji Testnet",
+              nativeCurrency: {
+                name: "Avalanche",
+                symbol: "AVAX",
+                decimals: 18,
+              },
+              rpcUrls: ["https://api.avax-test.network/ext/bc/C/rpc"],
+              blockExplorerUrls: ["https://testnet.snowtrace.io/"],
+            },
+          ],
+        });
+        toast({
+          title: "Success",
+          description: "Fuji C-Chain has been added to MetaMask",
+        });
+      } catch (error) {
+        console.error(error);
+        toast({
+          title: "Error",
+          description: "Failed to add Fuji C-Chain to MetaMask",
+          variant: "destructive",
+        });
+      }
+    } else {
+      toast({
+        title: "Error",
+        description: "MetaMask is not installed",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     if (isConnected && address) {
       onWalletChange(address);
@@ -77,7 +115,7 @@ export const Wallet: React.FC<WalletProps> = ({ onWalletChange }) => {
   }, [isConnected, address, onWalletChange]);
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
@@ -108,14 +146,17 @@ export const Wallet: React.FC<WalletProps> = ({ onWalletChange }) => {
                 Manage your wallet details
               </p>
             </div>
-            <Badge variant={"outline"} className="p-2 bg-background/80 backdrop-blur-sm">
+            <Badge
+              variant={"outline"}
+              className="p-2 bg-background/80 backdrop-blur-sm"
+            >
               <WalletIcon className="h-5 w-5" />
             </Badge>
           </CardHeader>
           <Separator />
           <CardContent className="pt-6 space-y-6">
             <div className="grid gap-6">
-              <motion.div 
+              <motion.div
                 whileHover={{ scale: 1.01 }}
                 className="flex items-center justify-between p-6 bg-gradient-to-br from-muted/20 to-muted/10 rounded-xl hover:shadow-md transition-all duration-200"
               >
@@ -153,7 +194,7 @@ export const Wallet: React.FC<WalletProps> = ({ onWalletChange }) => {
                 </div>
               </motion.div>
 
-              <motion.div 
+              <motion.div
                 whileHover={{ scale: 1.01 }}
                 className="p-6 bg-gradient-to-br from-muted/20 to-muted/10 rounded-xl hover:shadow-md transition-all"
               >
@@ -178,6 +219,23 @@ export const Wallet: React.FC<WalletProps> = ({ onWalletChange }) => {
                     <span className="text-xl">{balance?.symbol}</span>
                   </div>
                 )}
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.01 }}
+                className="p-6 bg-gradient-to-br from-muted/20 to-muted/10 rounded-xl hover:shadow-md transition-all"
+              >
+                <Button
+                  onClick={addFujiCChainToMetaMask}
+                  className="w-full flex items-center justify-center gap-2"
+                >
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg"
+                    alt="MetaMask Icon"
+                    className="h-5 w-5"
+                  />
+                  Add Fuji C-Chain to MetaMask
+                </Button>
               </motion.div>
             </div>
           </CardContent>
