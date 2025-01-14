@@ -1,65 +1,72 @@
-import { createCanvas, loadImage, registerFont } from "canvas";
+import { createCanvas, loadImage } from "@vercel/canvas";
 import { ethers } from "ethers";
 import axios from "axios";
+import { abi } from "./abi";
 
-const abi = [
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "tokenId",
-        type: "uint256",
-      },
-    ],
-    name: "getCredit",
-    outputs: [
-      {
-        components: [
-          {
-            internalType: "string",
-            name: "typeofcredit",
-            type: "string",
-          },
-          {
-            internalType: "uint256",
-            name: "quantity",
-            type: "uint256",
-          },
-          {
-            internalType: "string",
-            name: "certificateURI",
-            type: "string",
-          },
-          {
-            internalType: "uint256",
-            name: "expiryDate",
-            type: "uint256",
-          },
-          {
-            internalType: "bool",
-            name: "retired",
-            type: "bool",
-          },
-        ],
-        internalType: "struct CarbonCredit.Credit",
-        name: "",
-        type: "tuple",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-];
+export const config = {
+  runtime: "edge",
+};
+
+// const abi = [
+//   {
+//     inputs: [
+//       {
+//         internalType: "uint256",
+//         name: "tokenId",
+//         type: "uint256",
+//       },
+//     ],
+//     name: "getCredit",
+//     outputs: [
+//       {
+//         components: [
+//           {
+//             internalType: "string",
+//             name: "typeofcredit",
+//             type: "string",
+//           },
+//           {
+//             internalType: "uint256",
+//             name: "quantity",
+//             type: "uint256",
+//           },
+//           {
+//             internalType: "string",
+//             name: "certificateURI",
+//             type: "string",
+//           },
+//           {
+//             internalType: "uint256",
+//             name: "expiryDate",
+//             type: "uint256",
+//           },
+//           {
+//             internalType: "bool",
+//             name: "retired",
+//             type: "bool",
+//           },
+//         ],
+//         internalType: "struct CarbonCredit.Credit",
+//         name: "",
+//         type: "tuple",
+//       },
+//     ],
+//     stateMutability: "view",
+//     type: "function",
+//   },
+// ];
 
 const NFT_CONTRACT_ADDRESS = "0x1A33A6F1A7D001A5767Cd9303831Eb3B9b916AEA";
 
-export default async function handler(req, res) {
+export default async function handler(req) {
   try {
-    const tokenId = req.query.id;
+    const url = new URL(req.url);
+    const tokenId = url.searchParams.get("id");
 
     if (!tokenId) {
-      return res.status(400).send("Missing token ID");
+      return new Response("Missing token ID", { status: 400 });
     }
+
     const provider = new ethers.JsonRpcProvider(process.env.VITE_RPC_URL);
     const contract = new ethers.Contract(NFT_CONTRACT_ADDRESS, abi, provider);
 
@@ -78,12 +85,15 @@ export default async function handler(req, res) {
     const canvas = createCanvas(1200, 630);
     const ctx = canvas.getContext("2d");
 
+    // Set background
     ctx.fillStyle = "#1a1b1e";
     ctx.fillRect(0, 0, 1200, 630);
 
+    // Load and draw image
     const image = await loadImage(imageUrl);
     ctx.drawImage(image, 48, 115, 400, 400);
 
+    // Add text
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 48px Arial";
     ctx.fillText(`Carbon Credit #${tokenId}`, 496, 160);
@@ -98,13 +108,16 @@ export default async function handler(req, res) {
       300
     );
 
-    res.setHeader("Content-Type", "image/png");
-    res.setHeader("Cache-Control", "s-maxage=3600");
+    const buffer = await canvas.encode("png");
 
-    const buffer = canvas.toBuffer("image/png");
-    res.send(buffer);
+    return new Response(buffer, {
+      headers: {
+        "Content-Type": "image/png",
+        "Cache-Control": "public, s-maxage=3600",
+      },
+    });
   } catch (error) {
     console.error("Error generating image:", error);
-    res.status(500).send("Error generating image");
+    return new Response("Error generating image", { status: 500 });
   }
 }
