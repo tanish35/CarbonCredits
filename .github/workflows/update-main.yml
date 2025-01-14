@@ -1,8 +1,8 @@
-name: Frequent Update to index.ts
+name: Hourly Update to index.ts
 
 on:
   schedule:
-    - cron: '0 * * * *' # Runs every 5 minutes
+    - cron: '0 * * * *' # Runs every 1 hour
   workflow_dispatch: # Allows manual triggering
 
 jobs:
@@ -18,22 +18,37 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
 
-      - name: Ensure commit every 5 minutes
+      - name: Debug Repository Structure
         run: |
-          FILE="backend/src/index.ts"
-          # Modify the file by toggling an empty line at the end
-          if tail -n 1 "$FILE" | grep -q '^$'; then
-            # Remove the blank line
-            sed -i '' -e '$d' "$FILE"
+          echo "Current directory: $(pwd)"
+          echo "Listing directory structure:"
+          ls -R
+          echo "Checking if the target file exists:"
+          ls -l CarbonCredits/backend/src/index.ts || echo "File not found!"
+
+      - name: Ensure commit every hour
+        run: |
+          FILE="CarbonCredits/backend/src/index.ts"
+          echo "Target file: $FILE"
+          if [ -f "$FILE" ]; then
+            echo "File found. Modifying it..."
+            # Modify the file by toggling an empty line at the end
+            if tail -n 1 "$FILE" | grep -q '^$'; then
+              echo "Removing blank line at the end."
+              sed -i '$d' "$FILE"
+            else
+              echo "Adding a blank line at the end."
+              echo "" >> "$FILE"
+            fi
+            git add "$FILE"
           else
-            # Add a blank line
-            echo "" >> "$FILE"
+            echo "Error: Target file does not exist."
+            exit 1
           fi
-          git add "$FILE"
 
       - name: Commit and push changes
         run: |
-          git commit -m "ci: frequent update to backend/src/index.ts"
+          git commit -m "ci: hourly update to CarbonCredits/backend/src/index.ts"
           git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
