@@ -28,6 +28,7 @@
     "@types/nodemailer": "^6.4.17",
     "@types/web3": "^1.0.20",
     "bcrypt": "^5.1.1",
+    "canvas": "^3.0.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",

@@ -336,3 +336,61 @@ export const getMarketPlaceNFTs = asyncHandler(
     res.json(nfts);
   }
 );
+
+// import { createCanvas, loadImage } from "canvas";
+// import fs from "fs";
+// import path from "path";
+
+// export const getOGImage = asyncHandler(async (req: Request, res: Response) => {
+//   const { tokenId } = req.params;
+//   if (!tokenId) {
+//     res.status(400).json({ message: "Please provide an NFT id" });
+//     return;
+//   }
+//   const nft = await prisma.nFT.findUnique({
+//     where: { tokenId },
+//   });
+//   if (!nft) {
+//     res.status(404).json({ message: "NFT not found" });
+//     return;
+//   }
+//   const canvas = createCanvas(1200, 630);
+//   const ctx = canvas.getContext("2d");
+
+//   ctx.fillStyle = "#1a1b1e";
+//   ctx.fillRect(0, 0, 1200, 630);
+
+//   ctx.fillStyle = "#ffffff";
+//   ctx.font = "bold 48px Arial";
+//   ctx.fillText(`Carbon Credit #${nft.tokenId}`, 50, 100);
+
+//   ctx.fillStyle = "#a1a1aa";
+//   ctx.font = "24px Arial";
+//   ctx.fillText(`Type: ${nft.typeofCredit}`, 50, 160);
+//   ctx.fillText(`Quantity: ${nft.quantity}`, 50, 200);
+//   ctx.fillText(
+//     `Status: ${
+//       nft.isAuction
+//         ? "Auction"
+//         : nft.isDirectSale
+//         ? "Direct Sale"
+//         : "Not for sale"
+//     }`,
+//     50,
+//     240
+//   );
+
+//   const buffer: Buffer = canvas.toBuffer("image/png");
+//   const fileName: string = `og-${tokenId}.png`;
+//   const filePath: string = path.join(
+//     __dirname,
+//     "..",
+//     "public",
+//     "images",
+//     fileName
+//   );
+//   fs.writeFileSync(filePath, buffer);
+
+//   const imageUrl: string = `${process.env.BASE_URL}/images/${fileName}`;
+//   res.json({ imageUrl });
+// });
