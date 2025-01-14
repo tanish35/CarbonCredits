@@ -8,12 +8,13 @@ import App from "./App";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import "./index.css";
 import { Toaster } from "./components/ui/toaster";
+
 import axios from "axios";
 
 //@ts-ignore
 globalThis.Buffer = Buffer;
 
-const API_URL = import.meta.env.VITE_API_URL; 
+const API_URL = import.meta.env.VITE_API_URL;
 axios.defaults.baseURL = API_URL;
 
 const queryClient = new QueryClient();
