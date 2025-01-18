@@ -274,6 +274,31 @@ export const transferNFT = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
+export const getToTalNFTRetired = asyncHandler(
+  async (req: Request, res: Response) => {
+    try {
+      const allNftRetired = await prisma.wallet.findMany({
+        include: {
+          creditRetirement: true,
+        },
+      });
+
+      const result = allNftRetired.map(wallet => {
+        const totalQuantity = wallet.creditRetirement.reduce((acc, curr) => acc + Number(curr.quantity), 0);
+        return {
+          walletAddress: wallet.address,
+          totalRetiredCount: wallet.creditRetirement.length,
+          totalQuantityRetired: totalQuantity,
+        };
+      });
+
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching retired NFTs:", error);
+      res.status(500).json({ message: "Failed to fetch retired NFTs" });
+    }
+  }
+);
 export const getNFTstatus = asyncHandler(
   async (req: Request, res: Response) => {
     let { tokenId } = req.body;

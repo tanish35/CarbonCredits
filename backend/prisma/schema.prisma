@@ -58,7 +58,8 @@ model Transaction {
 model CreditRetirement {
   id            String   @id @default(cuid())
   nftId         String
-  walletAddress String                        
+  walletAddress String      
+  quantity      String                  
   wallet        Wallet   @relation(fields: [walletAddress], references: [address])
   createdAt     DateTime @default(now())
 }

@@ -151,11 +151,15 @@ const handleCreditRetired = async (event: any) => {
   const { owner, tokenId } = event.returnValues;
   try {
     await prisma.$transaction(async (prisma) => {
+      const nFt = await prisma.nFT.findFirst({
+        where: tokenId
+      })
       await prisma.nFT.delete({ where: { tokenId: String(tokenId) } });
       await prisma.creditRetirement.create({
         data: {
           nftId: String(tokenId),
           walletAddress: String(owner),
+          quantity: String(nFt?.quantity)
         },
       });
     });
