@@ -274,7 +274,7 @@ export const transferNFT = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-export const getToTalNFTRetired = asyncHandler(
+export const getAllNFTRetired = asyncHandler(
   async (req: Request, res: Response) => {
     try {
       const allNftRetired = await prisma.wallet.findMany({
