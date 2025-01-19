@@ -188,16 +188,22 @@ export default function MarketplacePage() {
                   : "grid-cols-1"
               } gap-6`}
             >
-              {filteredNFTs.map((nft, index) => (
-                <motion.div
-                  key={nft.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                >
-                  <CarbonCreditCard nft={nft} viewMode={viewMode} />
-                </motion.div>
-              ))}
+              {filteredNFTs.length === 0 ? (
+                <div className="col-span-full text-center text-muted-foreground">
+                  No items listed
+                </div>
+              ) : (
+                filteredNFTs.map((nft, index) => (
+                  <motion.div
+                    key={nft.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                  >
+                    <CarbonCreditCard nft={nft} viewMode={viewMode} />
+                  </motion.div>
+                ))
+              )}
             </motion.div>
           </AnimatePresence>
         </main>

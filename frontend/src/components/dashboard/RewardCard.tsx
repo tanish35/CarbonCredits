@@ -56,11 +56,11 @@ const RewardContent = ({ reward }: { reward: Reward }) => (
           <div className="flex flex-col">
             <span
               className="font-semibold text-lg
-              bg-clip-text text-primary-foreground"
+              bg-clip-text  text-black dark:text-white"
             >
               {reward.name}
             </span>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs  text-black dark:text-white">
               Level {reward.level}
             </span>
           </div>
@@ -70,7 +70,7 @@ const RewardContent = ({ reward }: { reward: Reward }) => (
           {reward.points} pts
         </Badge>
       </div>
-      <p className="text-primary-foreground/90 text-sm leading-relaxed font-medium">
+      <p className=" text-sm leading-relaxed font-medium  text-black dark:text-white">
         {reward.description}
       </p>
       <div className="space-y-2">
