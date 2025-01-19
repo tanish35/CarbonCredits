@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/tooltip";
 import { AlertCircle, Clock, Coins, User } from "lucide-react";
 import { Retire } from "@/components/Retire";
+import { formatEther } from "viem";
 
 const NFT_CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
 const MARKETPLACE_ADDRESS = import.meta.env.VITE_MARKETPLACE_CONTRACT_ADDRESS;
@@ -300,6 +301,49 @@ const NFTPage: React.FC = () => {
                     </div>
                   </div>
 
+                  {/* Auction Details Section */}
+                  {auctionDetails && auctionDetails[5] && (
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: 0.6 }}
+                      className="space-y-6"
+                    >
+                      <h2 className="text-xl font-semibold text-foreground/90">
+                        Auction Details
+                      </h2>
+                      <div className="grid grid-cols-2 gap-4">
+                        <InfoItem
+                          label="Current Price"
+                          value={`${formatEther(auctionDetails[2])} AVAX`}
+                          icon={<Coins className="h-4 w-4" />}
+                        />
+                        <InfoItem
+                          label="Current Bidder"
+                          value={
+                            auctionDetails[3] ===
+                            "0x0000000000000000000000000000000000000000"
+                              ? "No bids yet"
+                              : `${auctionDetails[3].slice(0, 6)}...${auctionDetails[3].slice(-4)}`
+                          }
+                          icon={<User className="h-4 w-4" />}
+                        />
+                        <InfoItem
+                          label="Auction Ends"
+                          value={new Date(
+                            Number(auctionDetails[4]) * 1000
+                          ).toLocaleString()}
+                          icon={<Clock className="h-4 w-4" />}
+                        />
+                        <InfoItem
+                          label="Base Price"
+                          value={`${formatEther(auctionDetails[1])} AVAX`}
+                          icon={<Coins className="h-4 w-4" />}
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+
                   {/* Action Buttons Section */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -325,9 +369,9 @@ const NFTPage: React.FC = () => {
                     )}
 
                     {isOwner && !isAuction && !isDirectSelling && (
-                      <Retire 
-                        tokenId={TOKEN_ID} 
-                        CONTRACT_ADDRESS={NFT_CONTRACT_ADDRESS} 
+                      <Retire
+                        tokenId={TOKEN_ID}
+                        CONTRACT_ADDRESS={NFT_CONTRACT_ADDRESS}
                       />
                     )}
 
