@@ -100,7 +100,7 @@ const RewardContent = ({ reward }: { reward: Reward }) => (
 export function RewardCard({ user }: { user: User }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  // const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [greenPioneer, setGreenPioneer] = useState<Achievement[]>([]);
   const [waterWarrior, setWaterWarrior] = useState<Achievement[]>([]);
   const [energyExpert, setEnergyExpert] = useState<Achievement[]>([]);
@@ -111,13 +111,21 @@ export function RewardCard({ user }: { user: User }) {
     const getAchievements = async () => {
       try {
         const response = await api.get("/user/achievements");
-        setAchievements(response.data);
-        
+        // setAchievements(response.data);
+
         // Categorize achievements
-        setGreenPioneer(response.data.filter((a: Achievement) => a.type === "Green_Pioneer"));
-        setWaterWarrior(response.data.filter((a: Achievement) => a.type === "Water_Warrior"));
-        setEnergyExpert(response.data.filter((a: Achievement) => a.type === "Energy_Expert"));
-        setAirAdvocate(response.data.filter((a: Achievement) => a.type === "Air_Advocate"));
+        setGreenPioneer(
+          response.data.filter((a: Achievement) => a.type === "Green_Pioneer")
+        );
+        setWaterWarrior(
+          response.data.filter((a: Achievement) => a.type === "Water_Warrior")
+        );
+        setEnergyExpert(
+          response.data.filter((a: Achievement) => a.type === "Energy_Expert")
+        );
+        setAirAdvocate(
+          response.data.filter((a: Achievement) => a.type === "Air_Advocate")
+        );
       } catch (error) {
         toast({
           variant: "destructive",
@@ -135,13 +143,18 @@ export function RewardCard({ user }: { user: User }) {
   };
 
   const calculatePoints = (achievements: Achievement[]) => {
-    return achievements.reduce((sum, achievement) => sum + achievement.points, 0);
+    return achievements.reduce(
+      (sum, achievement) => sum + achievement.points,
+      0
+    );
   };
 
   const getLatestDate = (achievements: Achievement[]) => {
     if (achievements.length === 0) return undefined;
     return achievements.reduce((latest, achievement) => {
-      return new Date(achievement.createdAt) > new Date(latest) ? achievement.createdAt : latest;
+      return new Date(achievement.createdAt) > new Date(latest)
+        ? achievement.createdAt
+        : latest;
     }, achievements[0].createdAt);
   };
 
@@ -155,7 +168,9 @@ export function RewardCard({ user }: { user: User }) {
       id: "1",
       name: "Green Pioneer",
       icon: <Leaf className="h-6 w-6" />,
-      description: getLatestDescription(greenPioneer) || "Achieved significant reduction in carbon footprint.",
+      description:
+        getLatestDescription(greenPioneer) ||
+        "Achieved significant reduction in carbon footprint.",
       progress: calculateProgress(greenPioneer),
       level: Math.floor(greenPioneer.length / 3) + 1,
       points: calculatePoints(greenPioneer),
@@ -165,7 +180,9 @@ export function RewardCard({ user }: { user: User }) {
       id: "2",
       name: "Water Warrior",
       icon: <Droplets className="h-6 w-6" />,
-      description: getLatestDescription(waterWarrior) || "Successfully implemented water conservation measures.",
+      description:
+        getLatestDescription(waterWarrior) ||
+        "Successfully implemented water conservation measures.",
       progress: calculateProgress(waterWarrior),
       level: Math.floor(waterWarrior.length / 3) + 1,
       points: calculatePoints(waterWarrior),
@@ -175,7 +192,9 @@ export function RewardCard({ user }: { user: User }) {
       id: "3",
       name: "Energy Expert",
       icon: <Zap className="h-6 w-6" />,
-      description: getLatestDescription(energyExpert) || "Demonstrated excellence in energy efficiency.",
+      description:
+        getLatestDescription(energyExpert) ||
+        "Demonstrated excellence in energy efficiency.",
       progress: calculateProgress(energyExpert),
       level: Math.floor(energyExpert.length / 3) + 1,
       points: calculatePoints(energyExpert),
@@ -185,7 +204,9 @@ export function RewardCard({ user }: { user: User }) {
       id: "4",
       name: "Air Advocate",
       icon: <Wind className="h-6 w-6" />,
-      description: getLatestDescription(airAdvocate) || "Contributed to improving air quality standards.",
+      description:
+        getLatestDescription(airAdvocate) ||
+        "Contributed to improving air quality standards.",
       progress: calculateProgress(airAdvocate),
       level: Math.floor(airAdvocate.length / 3) + 1,
       points: calculatePoints(airAdvocate),
@@ -198,9 +219,9 @@ export function RewardCard({ user }: { user: User }) {
     setIsLoading(true);
     try {
       const formData = new FormData();
-      formData.append('achievement', file);
-      
-    await api.post("/emission/achievements", formData, {
+      formData.append("achievement", file);
+
+      await api.post("/emission/achievements", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -212,7 +233,6 @@ export function RewardCard({ user }: { user: User }) {
       setDialogOpen(false);
 
       //console.log(response.data);
-
     } catch (error) {
       toast({
         variant: "destructive",
