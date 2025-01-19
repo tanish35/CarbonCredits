@@ -15,6 +15,7 @@ model User {
   address   String?
   phone     String?
   wallets   Wallet[] 
+  achievements Achievement[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -61,4 +62,20 @@ model CreditRetirement {
   walletAddress String                        
   wallet        Wallet   @relation(fields: [walletAddress], references: [address])
   createdAt     DateTime @default(now())
+}
+
+enum AchievementType {
+  Green_Pioneer
+  Water_Warrior
+  Energy_Expert
+  Air_Advocate
+}
+model Achievement {
+  id        String   @id @default(cuid())
+  userId    String                         
+  user      User    @relation(fields: [userId], references: [id])
+  type      AchievementType @default(Green_Pioneer)
+  description String @default("Start your journey to become a Green Pioneer")
+  points    Int @default(0)
+  createdAt DateTime @default(now())
 }
