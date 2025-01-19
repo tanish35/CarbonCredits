@@ -268,8 +268,8 @@ exports.getAllNFTRetired = (0, express_async_handler_1.default)((req, res) => __
             const totalQuantity = wallet.creditRetirement.reduce((acc, curr) => acc + Number(curr.quantity), 0);
             return {
                 walletAddress: wallet.address,
-                totalRetiredCount: wallet.creditRetirement.length,
-                totalQuantityRetired: totalQuantity,
+                tokensRetired: wallet.creditRetirement.length,
+                quantity: totalQuantity,
             };
         });
         res.json(result);

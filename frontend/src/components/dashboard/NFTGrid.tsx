@@ -108,7 +108,7 @@ export function NFTGrid({ nfts }: { nfts: NFT[] }) {
               {/* Content */}
               <div className="relative h-full flex flex-col justify-between p-4 z-10">
                 <div className="flex items-center justify-between">
-                  <Badge variant="outline" className="bg-black/50 backdrop-blur-sm border-primary/50">
+                  <Badge variant="outline" className="bg-black/50 backdrop-blur-sm border-primary/50 text-white">
                     #{nft.tokenId}
                   </Badge>
                   <Badge

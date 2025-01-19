@@ -287,8 +287,8 @@ export const getAllNFTRetired = asyncHandler(
         const totalQuantity = wallet.creditRetirement.reduce((acc, curr) => acc + Number(curr.quantity), 0);
         return {
           walletAddress: wallet.address,
-          totalRetiredCount: wallet.creditRetirement.length,
-          totalQuantityRetired: totalQuantity,
+          tokensRetired: wallet.creditRetirement.length,
+          quantity: totalQuantity,
         };
       });
 
