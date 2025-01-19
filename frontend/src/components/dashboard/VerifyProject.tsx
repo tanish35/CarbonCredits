@@ -85,6 +85,7 @@ export function VerifyProject({ walletAddress }: CarbonCreditsDisplayProps) {
             "Your project has been successfully verified and NFT minted.",
         });
       }
+      setVerificationOpen(false);
     } catch (error) {
       setIsVerifying(false);
       toast({
@@ -175,7 +176,7 @@ export function VerifyProject({ walletAddress }: CarbonCreditsDisplayProps) {
                   information and verified emission reduction metrics. For
                   reference, please{" "}
                   <a href="https://i.ibb.co/7yT8054/cert.jpg" target="_blank">
-                    <span className="underline text-blue-700">CLICK HERE</span> 
+                    <span className="underline text-blue-700">CLICK HERE</span>
                   </a>{" "}
                   view our sample certificate.
                 </p>
