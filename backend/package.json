@@ -7,6 +7,7 @@
     "build": "tsc",
     "migrate": "prisma migrate deploy",
     "start": "node dist/index.js",
+    "generate": "npx prisma generate",
     "server1": "nodemon --watch server1 src/MarketEventListener.ts",
     "server2": "nodemon --watch server2 src/NftEventListener.ts",
     "dev:all": "concurrently \"npx prisma generate\" \"tsc -b\" \"node dist/index.js\" \"node dist/NftEventListener\" \"node dist/MarketEventListener\""
