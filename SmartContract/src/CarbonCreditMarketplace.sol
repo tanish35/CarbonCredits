@@ -54,7 +54,6 @@ contract CarbonCreditMarketplace is AutomationCompatible {
         address indexed lastBidder
     );
 
-
     constructor(address _carbonCreditNFT) {
         require(_carbonCreditNFT != address(0), "Invalid NFT contract address");
         carbonCreditNFT = _carbonCreditNFT;
@@ -104,7 +103,12 @@ contract CarbonCreditMarketplace is AutomationCompatible {
             active: true
         });
 
-        emit AuctionCreated(tokenId,msg.sender, basePrice, block.timestamp + duration);
+        emit AuctionCreated(
+            tokenId,
+            msg.sender,
+            basePrice,
+            block.timestamp + duration
+        );
     }
 
     function placeBid(uint256 tokenId) external payable {
@@ -153,10 +157,13 @@ contract CarbonCreditMarketplace is AutomationCompatible {
         }
     }
 
-    function cancelAuction(uint256 tokenId) external payable{
+    function cancelAuction(uint256 tokenId) external payable {
         Auction storage auction = auctions[tokenId];
         require(auction.active, "Auction not active");
-        require(msg.sender == IERC721(carbonCreditNFT).ownerOf(tokenId), "Not the owner of the token");
+        require(
+            msg.sender == IERC721(carbonCreditNFT).ownerOf(tokenId),
+            "Not the owner of the token"
+        );
         auction.active = false;
         if (auction.currentBidder != address(0)) {
             payable(auction.currentBidder).transfer(auction.currentPrice);
@@ -191,16 +198,15 @@ contract CarbonCreditMarketplace is AutomationCompatible {
     }
 
     function performUpkeep(bytes calldata performData) external override {
-    uint256 tokenId = abi.decode(performData, (uint256));
-    Auction storage auction = auctions[tokenId];
-    
-    if (auction.active && block.timestamp >= auction.endTime) {
-        if (auction.currentBidder != address(0)) {
-            endAuction(tokenId);
-        } else {
-            cancelAuction(tokenId);
+        uint256 tokenId = abi.decode(performData, (uint256));
+        Auction storage auction = auctions[tokenId];
+
+        if (auction.active && block.timestamp >= auction.endTime) {
+            if (auction.currentBidder != address(0)) {
+                endAuction(tokenId);
+            } else {
+                this.cancelAuction(tokenId);
+            }
         }
     }
-}
-
 }

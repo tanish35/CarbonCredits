@@ -94,6 +94,7 @@ const handleCreditTransferred = async (event: any) => {
           walletAddress: String(to),
           isAuction: false,
           isDirectSale: false,
+          isAllowedToSell: false,
         },
       });
 

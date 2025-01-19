@@ -22,8 +22,8 @@ import {
 } from "@/components/ui/tooltip";
 import { AlertCircle, Clock, Coins, User } from "lucide-react";
 
-const NFT_CONTRACT_ADDRESS = "0x1A33A6F1A7D001A5767Cd9303831Eb3B9b916AEA";
-const MARKETPLACE_ADDRESS = "0x79298aF4e4F51c746dEeE692a40a3141C9b142ef";
+const NFT_CONTRACT_ADDRESS = "0x0d388696b31522Cd45776190783072b10E8e2776";
+const MARKETPLACE_ADDRESS = "0x276F9bEAa4E3aAC344613468cff5Cf6B5210161B";
 
 interface Credit {
   id: number;

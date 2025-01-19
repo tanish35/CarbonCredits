@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMarketPlaceNFTs = exports.setNFTstatus = exports.getNFTstatus = exports.transferNFT = exports.getAllNFTs = exports.getNFT = exports.getOwnedNFTs = exports.NFTtrasactions = void 0;
+exports.getMarketPlaceNFTs = exports.setNFTstatus = exports.getNFTstatus = exports.getAllNFTRetired = exports.transferNFT = exports.setNFTs = exports.getAllNFTs = exports.getNFT = exports.getOwnedNFTs = exports.NFTtrasactions = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const prisma_1 = __importDefault(require("../lib/prisma"));
 const ethers_1 = require("ethers");
@@ -28,7 +28,7 @@ if (!RPC_URL || !CONTRACT_ADDRESS) {
     throw new Error("Please provide a RPC URL and a contract address");
 }
 const provider = new ethers_1.ethers.JsonRpcProvider(RPC_URL);
-const wallet = new ethers_1.ethers.Wallet(((_a = process.env.PRIVATE_KEY) === null || _a === void 0 ? void 0 : _a.replace(/^0x/, '')) || '');
+const wallet = new ethers_1.ethers.Wallet(((_a = process.env.PRIVATE_KEY) === null || _a === void 0 ? void 0 : _a.replace(/^0x/, "")) || "", provider);
 const contract = new ethers_1.ethers.Contract(CONTRACT_ADDRESS, abi_1.abi, wallet);
 exports.NFTtrasactions = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { buyerId, sellerId, nftId, price } = req.body;
@@ -113,6 +113,46 @@ exports.getAllNFTs = (0, express_async_handler_1.default)((_req, res) => __await
     const nfts = yield prisma_1.default.nFT.findMany();
     res.json(nfts);
 }));
+const setNFTs = (walletAddress) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!walletAddress) {
+        throw new Error("Wallet address is required.");
+    }
+    try {
+        const credits = yield contract.getCreditByOwner(walletAddress);
+        for (const credit of credits) {
+            const { id: tokenId, typeofcredit: typeofCredit, quantity, certificateURI, expiryDate, retired: isAuction, } = credit;
+            const price = yield contract.getRate(tokenId);
+            yield prisma_1.default.nFT.upsert({
+                where: { tokenId: tokenId.toString() },
+                update: {
+                    walletAddress,
+                    typeofCredit,
+                    quantity: quantity.toString(),
+                    certificateURI,
+                    expiryDate: expiryDate ? new Date(Number(expiryDate) * 1000) : null,
+                    isAuction,
+                    price: price.toString(),
+                },
+                create: {
+                    tokenId: tokenId.toString(),
+                    typeofCredit,
+                    quantity: quantity.toString(),
+                    certificateURI,
+                    expiryDate: expiryDate ? new Date(Number(expiryDate) * 1000) : null,
+                    isAuction,
+                    price: price.toString(),
+                    wallet: { connect: { address: walletAddress } },
+                },
+            });
+        }
+        return "NFTs updated successfully.";
+    }
+    catch (error) {
+        console.error("Error processing NFTs:", error);
+        throw new Error("Failed to process NFTs.");
+    }
+});
+exports.setNFTs = setNFTs;
 // export const NFTMint = asyncHandler(async (req: Request, res: Response) => {
 //   const { ownerId } = req.body;
 //   if (!ownerId) {
@@ -217,6 +257,28 @@ exports.transferNFT = (0, express_async_handler_1.default)((req, res) => __await
         res.status(500).json({ message: errorMessage });
     }
 }));
+exports.getAllNFTRetired = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const allNftRetired = yield prisma_1.default.wallet.findMany({
+            include: {
+                creditRetirement: true,
+            },
+        });
+        const result = allNftRetired.map(wallet => {
+            const totalQuantity = wallet.creditRetirement.reduce((acc, curr) => acc + Number(curr.quantity), 0);
+            return {
+                walletAddress: wallet.address,
+                totalRetiredCount: wallet.creditRetirement.length,
+                totalQuantityRetired: totalQuantity,
+            };
+        });
+        res.json(result);
+    }
+    catch (error) {
+        console.error("Error fetching retired NFTs:", error);
+        res.status(500).json({ message: "Failed to fetch retired NFTs" });
+    }
+}));
 exports.getNFTstatus = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let { tokenId } = req.body;
     if (tokenId == null) {
@@ -271,3 +333,54 @@ exports.getMarketPlaceNFTs = (0, express_async_handler_1.default)((_req, res) =>
     });
     res.json(nfts);
 }));
+// import { createCanvas, loadImage } from "canvas";
+// import fs from "fs";
+// import path from "path";
+// export const getOGImage = asyncHandler(async (req: Request, res: Response) => {
+//   const { tokenId } = req.params;
+//   if (!tokenId) {
+//     res.status(400).json({ message: "Please provide an NFT id" });
+//     return;
+//   }
+//   const nft = await prisma.nFT.findUnique({
+//     where: { tokenId },
+//   });
+//   if (!nft) {
+//     res.status(404).json({ message: "NFT not found" });
+//     return;
+//   }
+//   const canvas = createCanvas(1200, 630);
+//   const ctx = canvas.getContext("2d");
+//   ctx.fillStyle = "#1a1b1e";
+//   ctx.fillRect(0, 0, 1200, 630);
+//   ctx.fillStyle = "#ffffff";
+//   ctx.font = "bold 48px Arial";
+//   ctx.fillText(`Carbon Credit #${nft.tokenId}`, 50, 100);
+//   ctx.fillStyle = "#a1a1aa";
+//   ctx.font = "24px Arial";
+//   ctx.fillText(`Type: ${nft.typeofCredit}`, 50, 160);
+//   ctx.fillText(`Quantity: ${nft.quantity}`, 50, 200);
+//   ctx.fillText(
+//     `Status: ${
+//       nft.isAuction
+//         ? "Auction"
+//         : nft.isDirectSale
+//         ? "Direct Sale"
+//         : "Not for sale"
+//     }`,
+//     50,
+//     240
+//   );
+//   const buffer: Buffer = canvas.toBuffer("image/png");
+//   const fileName: string = `og-${tokenId}.png`;
+//   const filePath: string = path.join(
+//     __dirname,
+//     "..",
+//     "public",
+//     "images",
+//     fileName
+//   );
+//   fs.writeFileSync(filePath, buffer);
+//   const imageUrl: string = `${process.env.BASE_URL}/images/${fileName}`;
+//   res.json({ imageUrl });
+// });

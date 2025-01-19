@@ -91,6 +91,7 @@ const handleCreditTransferred = (event) => __awaiter(void 0, void 0, void 0, fun
                     walletAddress: String(to),
                     isAuction: false,
                     isDirectSale: false,
+                    isAllowedToSell: false,
                 },
             });
             // Log the transaction
@@ -138,11 +139,15 @@ const handleCreditRetired = (event) => __awaiter(void 0, void 0, void 0, functio
     const { owner, tokenId } = event.returnValues;
     try {
         yield prisma_1.default.$transaction((prisma) => __awaiter(void 0, void 0, void 0, function* () {
+            const nFt = yield prisma.nFT.findFirst({
+                where: tokenId
+            });
             yield prisma.nFT.delete({ where: { tokenId: String(tokenId) } });
             yield prisma.creditRetirement.create({
                 data: {
                     nftId: String(tokenId),
                     walletAddress: String(owner),
+                    quantity: String(nFt === null || nFt === void 0 ? void 0 : nFt.quantity)
                 },
             });
         }));

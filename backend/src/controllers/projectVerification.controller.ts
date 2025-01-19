@@ -1,4 +1,3 @@
-import express from "express";
 import expressAsyncHandler from "express-async-handler";
 import multer from "multer";
 import getEmissionReductionData from "./gemini.controller";

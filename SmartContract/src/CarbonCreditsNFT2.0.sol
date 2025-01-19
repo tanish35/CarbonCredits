@@ -85,7 +85,15 @@ contract CarbonCreditNFT is ERC721URIStorage, Ownable(msg.sender) {
 
         tokenRates[id] = rate > 0 ? rate : defaultRate;
 
-        emit CreditMinted(to, id, rate, typeofcredit, quantity, certificateURI, expiryDate);
+        emit CreditMinted(
+            to,
+            id,
+            rate,
+            typeofcredit,
+            quantity,
+            certificateURI,
+            expiryDate
+        );
     }
 
     modifier setApproved(uint256 tokenId, address _from) {
@@ -177,6 +185,19 @@ contract CarbonCreditNFT is ERC721URIStorage, Ownable(msg.sender) {
 
     function setRate(uint256 tokenId, uint256 rate) public onlyOwner {
         tokenRates[tokenId] = rate;
+    }
+
+    function reduceQuantity(uint256 tokenId, uint256 quantity) public {
+        require(
+            creditOwner[tokenId] == msg.sender,
+            "You are not the owner of this credit"
+        );
+        require(
+            creditId[tokenId].quantity >= quantity,
+            "Quantity is greater than available"
+        );
+
+        creditId[tokenId].quantity -= quantity;
     }
 
     function withdraw() public onlyOwner {
