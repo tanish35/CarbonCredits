@@ -21,9 +21,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { AlertCircle, Clock, Coins, User } from "lucide-react";
+import { Retire } from "@/components/Retire";
 
-const NFT_CONTRACT_ADDRESS = "0x0d388696b31522Cd45776190783072b10E8e2776";
-const MARKETPLACE_ADDRESS = "0x276F9bEAa4E3aAC344613468cff5Cf6B5210161B";
+const NFT_CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
+const MARKETPLACE_ADDRESS = import.meta.env.VITE_MARKETPLACE_CONTRACT_ADDRESS;
 
 interface Credit {
   id: number;
@@ -320,6 +321,13 @@ const NFTPage: React.FC = () => {
                         tokenId={TOKEN_ID}
                         basePrice={basePrice}
                         MARKETPLACE_ADDRESS={MARKETPLACE_ADDRESS}
+                      />
+                    )}
+
+                    {isOwner && !isAuction && !isDirectSelling && (
+                      <Retire 
+                        tokenId={TOKEN_ID} 
+                        CONTRACT_ADDRESS={NFT_CONTRACT_ADDRESS} 
                       />
                     )}
 
