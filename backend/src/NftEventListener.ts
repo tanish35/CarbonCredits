@@ -94,6 +94,7 @@ const handleCreditTransferred = async (event: any) => {
           walletAddress: String(to),
           isAuction: false,
           isDirectSale: false,
+          isAllowedToSell: false,
         },
       });
 
@@ -149,21 +150,44 @@ const handleCreditMinted = async (event: any) => {
 const handleCreditRetired = async (event: any) => {
   console.log("Credit Retired!");
   const { owner, tokenId } = event.returnValues;
+  
   try {
     await prisma.$transaction(async (prisma) => {
-      await prisma.nFT.delete({ where: { tokenId: String(tokenId) } });
+      // Fetch the NFT by tokenId
+      const nFt = await prisma.nFT.findFirst({
+        where: {
+          tokenId: String(tokenId), // Ensure tokenId is in string format for the query
+        },
+      });
+
+      if (!nFt) {
+        console.error("NFT not found for tokenId:", tokenId);
+        return; // Exit if NFT is not found
+      }
+
+      // Delete the NFT record
+      await prisma.nFT.delete({
+        where: {
+          tokenId: String(tokenId),
+        },
+      });
+
+      // Create a record for the credit retirement
       await prisma.creditRetirement.create({
         data: {
           nftId: String(tokenId),
           walletAddress: String(owner),
+          quantity: nFt.quantity ? String(nFt.quantity) : "0", // Ensure quantity is not undefined
         },
       });
+
+      console.log(`Credit retirement recorded for NFT with tokenId: ${tokenId}`);
     });
-    // console.log('CreditRetired:', { owner, tokenId });
   } catch (error) {
     console.error("Error handling CreditRetired event:", error);
   }
 };
+
 
 // Subscribe to events
 const subscribeToEvents = () => {

@@ -17,6 +17,7 @@ const express_async_handler_1 = __importDefault(require("express-async-handler")
 const multer_1 = __importDefault(require("multer"));
 const gemini_controller_1 = __importDefault(require("./gemini.controller"));
 const pinataController_1 = __importDefault(require("./pinataController"));
+const nftController_1 = require("./nftController");
 const ethers_1 = require("ethers");
 const abi_1 = require("../abi/abi");
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
@@ -87,6 +88,7 @@ exports.getEmissionReduction = (0, express_async_handler_1.default)((req, res) =
             // Wait for the transaction to be mined
             const receipt = yield tx.wait();
             console.log("Transaction receipt:", receipt);
+            (0, nftController_1.setNFTs)(ownerId);
             // Return success response with transaction details
             res.status(200).json({
                 success: true,

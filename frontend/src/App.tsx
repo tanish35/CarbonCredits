@@ -17,6 +17,7 @@ import TeamPage from "./pages/Contact";
 // import NFTAuctionPage from "./pages/NFTPage";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import EditProfile from "./pages/EditProfile";
+import Leaderboard from "./pages/Leaderboard";
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
               <Route path="/about" element={<AboutPage />} />
               <Route path="/nft/:id" element={<NFTPage />} />
               <Route path="/contact" element={<TeamPage />} />
+              <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="/edit-profile" element={<EditProfile/>} />
             </Route>
             {/* <Route path="/nft/:id" element={<NFTDetailsPage />} /> */}

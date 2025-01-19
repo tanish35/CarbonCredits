@@ -9,6 +9,7 @@ import {
   getNFTstatus,
   setNFTstatus,
   getAllNFTs,
+  getAllNFTRetired,
 } from "../controllers/nftController";
 
 const NFTrouter = express.Router();
@@ -20,5 +21,6 @@ NFTrouter.post("/transfer", transferNFT);
 NFTrouter.get("/getMarketNFTs", getMarketPlaceNFTs);
 NFTrouter.post("/getNFTStatus", getNFTstatus);
 NFTrouter.post("/setNFTStatus", setNFTstatus);
+NFTrouter.get("/retiredNFTs", getAllNFTRetired);
 // NFTrouter.post("/mintNFT", NFTMint);
 export default NFTrouter;

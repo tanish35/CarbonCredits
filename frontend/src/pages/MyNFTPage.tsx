@@ -14,7 +14,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 
-const contractAddress = "0x1A33A6F1A7D001A5767Cd9303831Eb3B9b916AEA";
+const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
+if (!contractAddress) {
+  throw new Error("Contract address is not defined");
+}
 const abi = [
   {
     inputs: [{ internalType: "address", name: "owner", type: "address" }],

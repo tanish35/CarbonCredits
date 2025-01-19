@@ -15,5 +15,6 @@ NFTrouter.post("/transfer", nftController_1.transferNFT);
 NFTrouter.get("/getMarketNFTs", nftController_1.getMarketPlaceNFTs);
 NFTrouter.post("/getNFTStatus", nftController_1.getNFTstatus);
 NFTrouter.post("/setNFTStatus", nftController_1.setNFTstatus);
+NFTrouter.get("/retiredNFTs", nftController_1.getAllNFTRetired);
 // NFTrouter.post("/mintNFT", NFTMint);
 exports.default = NFTrouter;

@@ -8,50 +8,51 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String?
-  address   String?
-  phone     String?
-  wallets   Wallet[] 
+  id           String        @id @default(cuid())
+  email        String        @unique
+  password     String
+  name         String?
+  address      String?
+  phone        String?
+  wallets      Wallet[]
   achievements Achievement[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 model Wallet {
-  id                String   @id @default(cuid())
-  address           String   @unique             
-  userId            String                        
-  user              User     @relation(fields: [userId], references: [id])
-  nfts              NFT[]                         
-  creditRetirement  CreditRetirement[]
-  createdAt         DateTime @default(now())
+  id               String             @id @default(cuid())
+  address          String             @unique
+  userId           String
+  user             User               @relation(fields: [userId], references: [id])
+  nfts             NFT[]
+  creditRetirement CreditRetirement[]
+  createdAt        DateTime           @default(now())
 }
 
 model NFT {
-  id                String   @id @default(cuid()) 
-  tokenId           String   @unique             
-  walletAddress     String                        
-  wallet            Wallet   @relation(fields: [walletAddress], references: [address])
-  price             String   
-  typeofCredit      String   @default("Renewable Energy Credit")   
-  quantity          String  @default("1")           
-  certificateURI    String                        
-  expiryDate        DateTime?
-  isAuction         Boolean  @default(false)
-  isDirectSale      Boolean  @default(false)                      
-  createdAt         DateTime @default(now())       
-  transaction       Transaction[]
+  id              String        @id @default(cuid())
+  tokenId         String        @unique
+  walletAddress   String
+  wallet          Wallet        @relation(fields: [walletAddress], references: [address])
+  price           String
+  typeofCredit    String        @default("Renewable Energy Credit")
+  quantity        String        @default("1")
+  certificateURI  String
+  expiryDate      DateTime?
+  isAllowedToSell Boolean       @default(true)
+  isAuction       Boolean       @default(false)
+  isDirectSale    Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  transaction     Transaction[]
 }
 
 model Transaction {
   id           String   @id @default(cuid())
   nftId        String
   nft          NFT      @relation(fields: [nftId], references: [id])
-  sellerWallet String                        
-  buyerWallet  String                        
+  sellerWallet String
+  buyerWallet  String
   price        String
   createdAt    DateTime @default(now())
 }
@@ -59,7 +60,8 @@ model Transaction {
 model CreditRetirement {
   id            String   @id @default(cuid())
   nftId         String
-  walletAddress String                        
+  walletAddress String
+  quantity      String
   wallet        Wallet   @relation(fields: [walletAddress], references: [address])
   createdAt     DateTime @default(now())
 }
@@ -70,12 +72,13 @@ enum AchievementType {
   Energy_Expert
   Air_Advocate
 }
+
 model Achievement {
-  id        String   @id @default(cuid())
-  userId    String                         
-  user      User    @relation(fields: [userId], references: [id])
-  type      AchievementType @default(Green_Pioneer)
-  description String @default("Start your journey to become a Green Pioneer")
-  points    Int @default(0)
-  createdAt DateTime @default(now())
+  id          String          @id @default(cuid())
+  userId      String
+  user        User            @relation(fields: [userId], references: [id])
+  type        AchievementType @default(Green_Pioneer)
+  description String          @default("Start your journey to become a Green Pioneer")
+  points      Int             @default(0)
+  createdAt   DateTime        @default(now())
 }
