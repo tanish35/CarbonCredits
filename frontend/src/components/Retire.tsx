@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useWriteContract } from "wagmi";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { abi } from "@/lib/abi";
 import { Loader2 } from "lucide-react";
@@ -14,7 +13,7 @@ interface RetireProps {
 export const Retire: React.FC<RetireProps> = ({ tokenId, CONTRACT_ADDRESS }) => {
   const { writeContract } = useWriteContract();
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+
 
   const handleRetire = async () => {
     setIsLoading(true);
@@ -30,14 +29,11 @@ export const Retire: React.FC<RetireProps> = ({ tokenId, CONTRACT_ADDRESS }) => 
 
       console.log("Retire transaction sent:", tx);
 
-
       toast({
         title: "Retire Transaction Sent",
         description: "Your retire transaction has been sent successfully",
       });
 
-      // Redirect after successful transaction
-      navigate("/dashboard");
     } catch (error) {
       console.error("Error retiring:", error);
       toast({
