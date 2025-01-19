@@ -7,6 +7,7 @@ import {
   googleLogin,
   signOut,
   updateUserProfile,
+  getUserAchievements,
 } from "../controllers/userControllers";
 import requireAuth from "../middleware/checkAuth";
 const router = express.Router();
@@ -19,5 +20,6 @@ router.post("/signout", signOut);
 router.get("/details", requireAuth, getUserDetails);
 router.put("/walletUpdate", requireAuth, updateUserWallet);
 router.post("/google", googleLogin);
+router.get("/achievements", requireAuth, getUserAchievements);
 
 export default router;

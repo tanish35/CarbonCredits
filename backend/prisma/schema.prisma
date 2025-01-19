@@ -8,15 +8,16 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String?
-  address   String?
-  phone     String?
-  wallets   Wallet[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String        @id @default(cuid())
+  email        String        @unique
+  password     String
+  name         String?
+  address      String?
+  phone        String?
+  wallets      Wallet[]
+  achievements Achievement[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 model Wallet {
@@ -59,8 +60,25 @@ model Transaction {
 model CreditRetirement {
   id            String   @id @default(cuid())
   nftId         String
-  walletAddress String      
-  quantity      String                  
+  walletAddress String
+  quantity      String
   wallet        Wallet   @relation(fields: [walletAddress], references: [address])
   createdAt     DateTime @default(now())
+}
+
+enum AchievementType {
+  Green_Pioneer
+  Water_Warrior
+  Energy_Expert
+  Air_Advocate
+}
+
+model Achievement {
+  id          String          @id @default(cuid())
+  userId      String
+  user        User            @relation(fields: [userId], references: [id])
+  type        AchievementType @default(Green_Pioneer)
+  description String          @default("Start your journey to become a Green Pioneer")
+  points      Int             @default(0)
+  createdAt   DateTime        @default(now())
 }

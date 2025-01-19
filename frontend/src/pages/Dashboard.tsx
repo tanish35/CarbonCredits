@@ -9,6 +9,7 @@ import { CarbonCreditsDisplay } from "@/components/dashboard/ProjectDetails";
 import axios from "axios";
 import { useUser } from "@/hooks/useUser";
 import { Navigate } from "react-router-dom";
+import { User } from "@/lib/interface";
 
 interface NFTMetadata {
   id: string;
@@ -24,16 +25,7 @@ interface NFTMetadata {
   description?: string;
 }
 
-interface User {
-  id: string;
-  email: string;
-  password: string;
-  name?: string;
-  address?: string;
-  phone?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+
 
 export const Dashboard = () => {
   const [role, setRole] = useState<"buyer" | "seller" | "admin" | null>(null);
@@ -212,7 +204,7 @@ const SellerDashboard = ({
       <div className="flex flex-col gap-6">
         <Wallet onWalletChange={onWalletChange} />
         <CarbonCreditsDisplay walletAddress={wallet} />
-        <RewardCard />
+        <RewardCard user={user} />
       </div>
       <div className="flex flex-col gap-6">
         <UserDetails user={user} />

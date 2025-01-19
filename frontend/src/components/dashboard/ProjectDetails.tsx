@@ -153,8 +153,11 @@ export function CarbonCreditsDisplay({ walletAddress }: CarbonCreditsDisplayProp
                 Overview
               </h3>
             </div>
-            <Badge variant="outline" className="text-primary">
-              <Leaf className="h-6 w-6" />
+            <Badge
+              variant="outline"
+              className="p-2 bg-background/80 backdrop-blur-sm"
+            >
+              <Leaf className="h-5 w-5" />
             </Badge>
           </div>
         </CardHeader>
@@ -167,20 +170,26 @@ export function CarbonCreditsDisplay({ walletAddress }: CarbonCreditsDisplayProp
             className="text-center relative group"
           >
             <h3 className="text-5xl font-bold mb-2 transition-all duration-300 group-hover:scale-110">
-              <span className={`
-                ${creditStatus === 'good' ? 'text-green-500 group-hover:text-green-600' : 
-                  creditStatus === 'low' ? 'text-amber-500 group-hover:text-amber-600' : 
-                  'text-gray-500 group-hover:text-gray-600'}
-              `}>
+              <span
+                className={`
+                ${
+                  creditStatus === "good"
+                    ? "text-green-500 group-hover:text-green-600"
+                    : creditStatus === "low"
+                      ? "text-amber-500 group-hover:text-amber-600"
+                      : "text-gray-500 group-hover:text-gray-600"
+                }
+              `}
+              >
                 {formatNumber(Number(count))}
               </span>
             </h3>
             <p className="text-xl text-muted-foreground flex items-center justify-center gap-2">
               Tons of CO₂ Equivalent
-              {creditStatus === 'none' && (
+              {creditStatus === "none" && (
                 <CircleSlash className="h-5 w-5 text-gray-500" />
               )}
-              {creditStatus === 'low' && (
+              {creditStatus === "low" && (
                 <AlertCircle className="h-5 w-5 text-amber-500" />
               )}
             </p>
@@ -189,7 +198,7 @@ export function CarbonCreditsDisplay({ walletAddress }: CarbonCreditsDisplayProp
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium">Portfolio Growth</span>
-              <motion.span 
+              <motion.span
                 className="text-sm font-bold text-primary"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -203,27 +212,35 @@ export function CarbonCreditsDisplay({ walletAddress }: CarbonCreditsDisplayProp
               animate={{ width: "100%" }}
               transition={{ duration: 1, delay: 0.5 }}
             >
-              <Progress 
-                value={75} 
+              <Progress
+                value={75}
                 className="h-2 bg-gradient-to-r from-muted to-muted/50 transition-all duration-300 hover:h-3"
               />
             </motion.div>
           </div>
 
           <div className="grid grid-cols-2 gap-4 mt-4">
-            <motion.div 
+            <motion.div
               whileHover={{ scale: 1.05 }}
               className="p-4 rounded-lg bg-muted/30 hover:bg-primary/10 transition-all duration-300"
             >
-              <h4 className="text-sm font-medium text-muted-foreground">Monthly Average</h4>
-              <p className="text-2xl font-bold text-primary">{formatNumber(Math.floor(Number(count) / 12))}</p>
+              <h4 className="text-sm font-medium text-muted-foreground">
+                Monthly Average
+              </h4>
+              <p className="text-2xl font-bold text-primary">
+                {formatNumber(Math.floor(Number(count) / 12))}
+              </p>
             </motion.div>
-            <motion.div 
+            <motion.div
               whileHover={{ scale: 1.05 }}
               className="p-4 rounded-lg bg-muted/30 hover:bg-primary/10 transition-all duration-300"
             >
-              <h4 className="text-sm font-medium text-muted-foreground">Target Achievement</h4>
-              <p className="text-2xl font-bold text-primary">{Math.min(Math.floor((Number(count) / 1000) * 100), 100)}%</p>
+              <h4 className="text-sm font-medium text-muted-foreground">
+                Target Achievement
+              </h4>
+              <p className="text-2xl font-bold text-primary">
+                {Math.min(Math.floor((Number(count) / 1000) * 100), 100)}%
+              </p>
             </motion.div>
           </div>
 

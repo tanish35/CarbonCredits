@@ -206,3 +206,17 @@ export const signOut = asyncHandler(async (req: Request, res: Response) => {
 
   res.json({ message: "Signed out successfully" });
 });
+
+export const getUserAchievements = asyncHandler(
+  async (req: Request, res: Response) => {
+    // @ts-ignore
+    const achievements = await prisma.achievement.findMany({
+      where: {
+        // @ts-ignore
+        userId: req.user.id,
+      },
+    });
+
+    res.status(200).json(achievements);
+  }
+);
