@@ -15,4 +15,5 @@ router.post("/signout", userControllers_1.signOut);
 router.get("/details", checkAuth_1.default, userControllers_1.getUserDetails);
 router.put("/walletUpdate", checkAuth_1.default, userControllers_1.updateUserWallet);
 router.post("/google", userControllers_1.googleLogin);
+router.get("/achievements", checkAuth_1.default, userControllers_1.getUserAchievements);
 exports.default = router;

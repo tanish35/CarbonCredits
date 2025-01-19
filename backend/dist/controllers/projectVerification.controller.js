@@ -12,14 +12,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getEmissionReduction = void 0;
+exports.addAchievement = exports.getEmissionReduction = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const multer_1 = __importDefault(require("multer"));
-const gemini_controller_1 = __importDefault(require("./gemini.controller"));
+const gemini_controller_1 = require("./gemini.controller");
 const pinataController_1 = __importDefault(require("./pinataController"));
 const nftController_1 = require("./nftController");
 const ethers_1 = require("ethers");
 const abi_1 = require("../abi/abi");
+const prisma_1 = __importDefault(require("../lib/prisma"));
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 if (!PRIVATE_KEY) {
     throw new Error("Please provide a private key");
@@ -44,6 +45,9 @@ const storage = multer_1.default.diskStorage({
         else if (file.fieldname === "companyLogo") {
             cb(null, "companyLogo.jpeg");
         }
+        else if (file.fieldname === "achievement") {
+            cb(null, "achievement.jpeg");
+        }
     },
 });
 const upload = (0, multer_1.default)({ storage: storage });
@@ -65,7 +69,7 @@ exports.getEmissionReduction = (0, express_async_handler_1.default)((req, res) =
         }
         const multipler = BigInt(1e13);
         try {
-            let emissionReduction = yield (0, gemini_controller_1.default)();
+            let emissionReduction = yield (0, gemini_controller_1.getEmissionReductionData)();
             let certificateURI = yield (0, pinataController_1.default)(
             // @ts-ignore
             emissionReduction.companyName, 
@@ -104,3 +108,55 @@ exports.getEmissionReduction = (0, express_async_handler_1.default)((req, res) =
         }
     }));
 }));
+exports.addAchievement = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    upload.fields([{ name: "achievement", maxCount: 1 }])(req, res, (err) => __awaiter(void 0, void 0, void 0, function* () {
+        if (err) {
+            console.error("Multer Error:", err);
+            return res.status(500).json("Error uploading files");
+        }
+        //@ts-ignore
+        const user = req.user;
+        if (!user) {
+            return res.status(401).json({ message: "User not found" });
+        }
+        try {
+            const achievementData = yield (0, gemini_controller_1.checkAchievement)();
+            // @ts-ignore
+            if (!achievementData) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid certificate or achievement not verified",
+                });
+            }
+            console.log(achievementData);
+            //update db
+            //@ts-ignore
+            const user = req.user;
+            yield prisma_1.default.achievement.create({
+                data: {
+                    userId: user.id,
+                    description: achievementData.description,
+                    points: parseInt(achievementData.points),
+                    type: achievementData.type,
+                },
+            });
+            return res.status(200).json(Object.assign({}, achievementData));
+        }
+        catch (error) {
+            console.error("Error verifying achievement:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Error processing achievement verification",
+            });
+        }
+    }));
+}));
+// model Achievement {
+//   id        String   @id @default(cuid())
+//   userId    String
+//   user      User    @relation(fields: [userId], references: [id])
+//   type      AchievementType @default(Green_Pioneer)
+//   description String @default("Start your journey to become a Green Pioneer")
+//   points    Int @default(0)
+//   createdAt DateTime @default(now())
+// }

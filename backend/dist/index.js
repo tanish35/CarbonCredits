@@ -25,7 +25,7 @@ app.use((0, cors_1.default)({
 app.use((0, cookie_parser_1.default)());
 //req logger middleware
 app.use((req, res, next) => {
-    // console.log("Request logged:", req.method, req.path);
+    console.log("Request logged:", req.method, req.path);
     next();
 });
 app.get("/", (req, res) => {

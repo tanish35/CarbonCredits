@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.signOut = exports.getUserDetails = exports.getUserWallet = exports.updateUserWallet = exports.googleLogin = exports.updateUserProfile = exports.loginUser = exports.registerUser = void 0;
+exports.getUserAchievements = exports.signOut = exports.getUserDetails = exports.getUserWallet = exports.updateUserWallet = exports.googleLogin = exports.updateUserProfile = exports.loginUser = exports.registerUser = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const prisma_1 = __importDefault(require("../lib/prisma"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -179,4 +179,14 @@ exports.getUserDetails = (0, express_async_handler_1.default)((req, res) => __aw
 exports.signOut = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.clearCookie("token", { path: "/", httpOnly: true, secure: true });
     res.json({ message: "Signed out successfully" });
+}));
+exports.getUserAchievements = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // @ts-ignore
+    const achievements = yield prisma_1.default.achievement.findMany({
+        where: {
+            // @ts-ignore
+            userId: req.user.id,
+        },
+    });
+    res.status(200).json(achievements);
 }));
