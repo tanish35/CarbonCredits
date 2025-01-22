@@ -25,11 +25,9 @@ import { AlertCircle, Clock, Coins, User } from "lucide-react";
 import { Retire } from "@/components/Retire";
 import { formatEther } from "viem";
 
-// Environment variables
 const NFT_CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
 const MARKETPLACE_ADDRESS = import.meta.env.VITE_MARKETPLACE_CONTRACT_ADDRESS;
 
-// Types
 interface Credit {
   id: number;
   typeofcredit: string;
@@ -42,7 +40,6 @@ interface Credit {
 
 type Auction = [bigint, bigint, bigint, string, bigint, boolean];
 
-// Info Item Component
 const InfoItem: React.FC<{
   label: string;
   value: string;
@@ -80,7 +77,6 @@ const NFTPage: React.FC = () => {
   const TOKEN_ID = Number(params.id);
   const { address } = useAccount();
 
-  // State
   const [creditDetails, setCreditDetails] = useState<Credit | null>(null);
   const [isAuction, setIsAuction] = useState(false);
   const [isDirectSelling, setIsDirectSelling] = useState(false);
@@ -92,7 +88,6 @@ const NFTPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [expired, setExpired] = useState(false);
 
-  // Contract Reads
   const { data: nftOwner, isLoading: isLoadingOwner } = useReadContract({
     address: NFT_CONTRACT_ADDRESS,
     abi,
@@ -122,7 +117,6 @@ const NFTPage: React.FC = () => {
       args: [BigInt(TOKEN_ID)],
     });
 
-  // Check if all data is loaded
   const isLoading =
     isLoadingOwner ||
     isLoadingCredit ||
@@ -131,7 +125,6 @@ const NFTPage: React.FC = () => {
     loading;
   const hasError = error !== null;
 
-  // IPFS Data Fetching
   const fetchIPFSData = async (uri: string) => {
     try {
       const ipfsURL = uri.replace("ipfs://", "https://ipfs.io/ipfs/");
@@ -153,18 +146,14 @@ const NFTPage: React.FC = () => {
     return {};
   };
 
-  // Data Loading Effect
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
 
-        // Wait for all contract data
         if (!creditData || !nftOwner || !basePriceData) {
           return;
         }
-
-        // Process credit data
         const { image, description } = await fetchIPFSData(
           creditData.certificateURI
         );
@@ -175,25 +164,20 @@ const NFTPage: React.FC = () => {
           description,
         });
 
-        // Check expiry
         if (creditData.expiryDate < Date.now() / 1000) {
           setExpired(true);
         }
 
-        // Set ownership
         setIsOwner(nftOwner === address);
 
-        // Set auction details
         if (auctionData) {
           setAuctionDetails(auctionData as Auction);
         }
 
-        // Set base price
         if (basePriceData) {
           setBasePrice(Number(basePriceData));
         }
 
-        // Get NFT status
         const { data: statusData } = await axios.post("/nft/getNFTStatus", {
           tokenId: TOKEN_ID,
         });
@@ -212,12 +196,10 @@ const NFTPage: React.FC = () => {
     loadData();
   }, [creditData, nftOwner, auctionData, basePriceData, TOKEN_ID, address]);
 
-  // Loading State
   if (isLoading) {
     return <Loader isLoading />;
   }
 
-  // Error State
   if (hasError) {
     return (
       <div className="container mx-auto p-4 text-center">
@@ -228,12 +210,10 @@ const NFTPage: React.FC = () => {
     );
   }
 
-  // No Data State
   if (!creditDetails) {
     return <Loader isLoading />;
   }
 
-  // Render NFT Page
   return (
     <>
       <Helmet>
