@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import type React from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useAccount, useReadContract } from "wagmi";
@@ -24,9 +25,11 @@ import { AlertCircle, Clock, Coins, User } from "lucide-react";
 import { Retire } from "@/components/Retire";
 import { formatEther } from "viem";
 
+// Environment variables
 const NFT_CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
 const MARKETPLACE_ADDRESS = import.meta.env.VITE_MARKETPLACE_CONTRACT_ADDRESS;
 
+// Types
 interface Credit {
   id: number;
   typeofcredit: string;
@@ -39,10 +42,45 @@ interface Credit {
 
 type Auction = [bigint, bigint, bigint, string, bigint, boolean];
 
+// Info Item Component
+const InfoItem: React.FC<{
+  label: string;
+  value: string;
+  icon?: React.ReactNode;
+  valueClass?: string;
+}> = ({ label, value, icon, valueClass }) => (
+  <Card className="bg-card/50 backdrop-blur-sm hover:bg-card/70 transition-all duration-300 border-2">
+    <CardContent className="p-4">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                {icon && <span>{icon}</span>}
+                {label}
+              </div>
+              <div className={cn("font-semibold text-base", valueClass)}>
+                {value}
+              </div>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>
+              {label}: {value}
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </CardContent>
+  </Card>
+);
+
 const NFTPage: React.FC = () => {
   const params = useParams();
   const TOKEN_ID = Number(params.id);
   const { address } = useAccount();
+
+  // State
   const [creditDetails, setCreditDetails] = useState<Credit | null>(null);
   const [isAuction, setIsAuction] = useState(false);
   const [isDirectSelling, setIsDirectSelling] = useState(false);
@@ -53,37 +91,48 @@ const NFTPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expired, setExpired] = useState(false);
-  const { data: nftOwner } = useReadContract({
+
+  // Contract Reads
+  const { data: nftOwner, isLoading: isLoadingOwner } = useReadContract({
     address: NFT_CONTRACT_ADDRESS,
     abi,
     functionName: "ownerOf",
     args: [BigInt(TOKEN_ID)],
   });
 
-  const { data: creditData } = useReadContract({
+  const { data: creditData, isLoading: isLoadingCredit } = useReadContract({
     address: NFT_CONTRACT_ADDRESS,
     abi,
     functionName: "getCredit",
     args: [BigInt(TOKEN_ID)],
-  }) as { data: Credit };
+  }) as { data: Credit; isLoading: boolean };
 
-  const { data: auctionData } = useReadContract({
+  const { data: auctionData, isLoading: isLoadingAuction } = useReadContract({
     address: MARKETPLACE_ADDRESS,
     abi: abi_marketplace,
     functionName: "auctions",
     args: [BigInt(TOKEN_ID)],
   });
 
-  const { data: basePrice1 } = useReadContract({
-    address: NFT_CONTRACT_ADDRESS,
-    abi,
-    functionName: "getRate",
-    args: [BigInt(TOKEN_ID)],
-  });
+  const { data: basePriceData, isLoading: isLoadingBasePrice } =
+    useReadContract({
+      address: NFT_CONTRACT_ADDRESS,
+      abi,
+      functionName: "getRate",
+      args: [BigInt(TOKEN_ID)],
+    });
 
-  const fetchIPFSData = async (
-    uri: string
-  ): Promise<{ image?: string; description?: string }> => {
+  // Check if all data is loaded
+  const isLoading =
+    isLoadingOwner ||
+    isLoadingCredit ||
+    isLoadingAuction ||
+    isLoadingBasePrice ||
+    loading;
+  const hasError = error !== null;
+
+  // IPFS Data Fetching
+  const fetchIPFSData = async (uri: string) => {
     try {
       const ipfsURL = uri.replace("ipfs://", "https://ipfs.io/ipfs/");
       const response = await axios.get(ipfsURL);
@@ -104,79 +153,87 @@ const NFTPage: React.FC = () => {
     return {};
   };
 
+  // Data Loading Effect
   useEffect(() => {
-    if (basePrice1) setBasePrice(Number(basePrice1));
-  }, [basePrice1]);
-
-  useEffect(() => {
-    const fetchData = async () => {
+    const loadData = async () => {
       try {
         setLoading(true);
-        if (creditData) {
-          const {
-            typeofcredit,
-            quantity,
-            expiryDate,
-            retired,
-            certificateURI,
-          } = creditData;
-          const { image, description } = await fetchIPFSData(certificateURI);
 
-          setCreditDetails({
-            id: TOKEN_ID,
-            typeofcredit: typeofcredit as string,
-            quantity: BigInt(quantity),
-            certificateURI: image || certificateURI,
-            expiryDate: BigInt(expiryDate),
-            retired: retired as boolean,
-            description,
-          });
-          if (BigInt(expiryDate) < Date.now() / 1000) {
-            setExpired(true);
-          }
-          setLoading(false);
+        // Wait for all contract data
+        if (!creditData || !nftOwner || !basePriceData) {
+          return;
         }
 
-        if (nftOwner) setIsOwner(nftOwner === address);
+        // Process credit data
+        const { image, description } = await fetchIPFSData(
+          creditData.certificateURI
+        );
 
-        if (auctionData) setAuctionDetails(auctionData as Auction);
+        setCreditDetails({
+          ...creditData,
+          certificateURI: image || creditData.certificateURI,
+          description,
+        });
 
-        const statusResponse = await axios.post("/nft/getNFTStatus", {
+        // Check expiry
+        if (creditData.expiryDate < Date.now() / 1000) {
+          setExpired(true);
+        }
+
+        // Set ownership
+        setIsOwner(nftOwner === address);
+
+        // Set auction details
+        if (auctionData) {
+          setAuctionDetails(auctionData as Auction);
+        }
+
+        // Set base price
+        if (basePriceData) {
+          setBasePrice(Number(basePriceData));
+        }
+
+        // Get NFT status
+        const { data: statusData } = await axios.post("/nft/getNFTStatus", {
           tokenId: TOKEN_ID,
         });
 
-        setIsAuction(statusResponse.data.isAuction);
-        setIsDirectSelling(statusResponse.data.isDirectSale);
+        setIsAuction(statusData.isAuction);
+        setIsDirectSelling(statusData.isDirectSale);
         setShowSellOptions(nftOwner === address);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error loading data:", error);
         setError("Failed to load NFT data");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [creditData, nftOwner, address, auctionData, TOKEN_ID]);
+    loadData();
+  }, [creditData, nftOwner, auctionData, basePriceData, TOKEN_ID, address]);
 
-  if (loading) {
+  // Loading State
+  if (isLoading) {
     return <Loader isLoading />;
   }
 
-  if (error) {
+  // Error State
+  if (hasError) {
     return (
       <div className="container mx-auto p-4 text-center">
         <AlertCircle className="mx-auto text-red-500 w-16 h-16 mb-4" />
         <h2 className="text-2xl font-bold mb-2">Error</h2>
-        <p>{error || "Failed to load NFT data"}</p>
+        <p>{error}</p>
       </div>
     );
   }
 
+  // No Data State
   if (!creditDetails) {
     return <Loader isLoading />;
   }
 
+  // Render NFT Page
   return (
     <>
       <Helmet>
@@ -209,6 +266,7 @@ const NFTPage: React.FC = () => {
           className="container max-w-7xl mx-auto"
         >
           <Card className="overflow-hidden border-2 shadow-lg backdrop-blur-sm bg-card/95">
+            {/* Header */}
             <CardHeader className="space-y-2 border-b bg-muted/10 p-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
@@ -230,9 +288,10 @@ const NFTPage: React.FC = () => {
               </div>
             </CardHeader>
 
+            {/* Content */}
             <CardContent className="p-6">
               <div className="grid lg:grid-cols-2 gap-8">
-                {/* Left Column - Image Section */}
+                {/* Left Column - Image */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -243,12 +302,12 @@ const NFTPage: React.FC = () => {
                     className="overflow-hidden rounded-2xl border-2"
                   >
                     <img
-                      src={creditDetails?.certificateURI}
+                      src={creditDetails.certificateURI || "/placeholder.svg"}
                       alt="Carbon Credit Certificate"
                       className="object-cover h-full w-full transition-transform duration-500 hover:scale-105"
                     />
                   </AspectRatio>
-                  {creditDetails?.description && (
+                  {creditDetails.description && (
                     <Card className="bg-muted/30 backdrop-blur-sm">
                       <CardContent className="p-4">
                         <p className="text-sm leading-relaxed text-muted-foreground">
@@ -259,13 +318,14 @@ const NFTPage: React.FC = () => {
                   )}
                 </motion.div>
 
-                {/* Right Column - Details Section */}
+                {/* Right Column - Details */}
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2 }}
                   className="space-y-8"
                 >
+                  {/* Credit Details */}
                   <div className="space-y-6">
                     <h2 className="text-xl font-semibold text-foreground/90">
                       Credit Details
@@ -273,26 +333,26 @@ const NFTPage: React.FC = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <InfoItem
                         label="Credit Type"
-                        value={creditDetails?.typeofcredit || ""}
+                        value={creditDetails.typeofcredit}
                         icon={<AlertCircle className="h-4 w-4" />}
                       />
                       <InfoItem
                         label="Quantity"
-                        value={creditDetails?.quantity.toString() || ""}
+                        value={creditDetails.quantity.toString()}
                         icon={<Coins className="h-4 w-4" />}
                       />
                       <InfoItem
                         label="Expiry"
                         value={new Date(
-                          Number(creditDetails?.expiryDate || 0) * 1000
+                          Number(creditDetails.expiryDate) * 1000
                         ).toLocaleDateString()}
                         icon={<Clock className="h-4 w-4" />}
                       />
                       <InfoItem
                         label="Status"
-                        value={creditDetails?.retired ? "Retired" : "Active"}
+                        value={creditDetails.retired ? "Retired" : "Active"}
                         valueClass={
-                          creditDetails?.retired
+                          creditDetails.retired
                             ? "text-destructive"
                             : "text-green-500"
                         }
@@ -301,7 +361,7 @@ const NFTPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Auction Details Section */}
+                  {/* Auction Details */}
                   {auctionDetails && auctionDetails[5] && (
                     <motion.div
                       initial={{ opacity: 0, x: 20 }}
@@ -344,13 +404,14 @@ const NFTPage: React.FC = () => {
                     </motion.div>
                   )}
 
-                  {/* Action Buttons Section */}
+                  {/* Action Buttons */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
                     className="space-y-4"
                   >
+                    {/* Sell Options */}
                     {!expired && showSellOptions && (
                       <SellOptions
                         tokenId={TOKEN_ID}
@@ -360,6 +421,7 @@ const NFTPage: React.FC = () => {
                       />
                     )}
 
+                    {/* Auction Bid Component */}
                     {!isOwner && isAuction && auctionDetails?.[5] && (
                       <AuctionBidComponent
                         tokenId={TOKEN_ID}
@@ -368,6 +430,7 @@ const NFTPage: React.FC = () => {
                       />
                     )}
 
+                    {/* Retire Component */}
                     {isOwner && !isAuction && !isDirectSelling && (
                       <Retire
                         tokenId={TOKEN_ID}
@@ -375,6 +438,7 @@ const NFTPage: React.FC = () => {
                       />
                     )}
 
+                    {/* Direct Buy Component */}
                     {!isOwner && isDirectSelling && (
                       <DirectBuyComponent
                         tokenId={TOKEN_ID}
@@ -392,36 +456,5 @@ const NFTPage: React.FC = () => {
     </>
   );
 };
-const InfoItem: React.FC<{
-  label: string;
-  value: string;
-  icon?: React.ReactNode;
-  valueClass?: string;
-}> = ({ label, value, icon, valueClass }) => (
-  <Card className="bg-card/50 backdrop-blur-sm hover:bg-card/70 transition-all duration-300 border-2">
-    <CardContent className="p-4">
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                {icon && <span>{icon}</span>}
-                {label}
-              </div>
-              <div className={cn("font-semibold text-base", valueClass)}>
-                {value}
-              </div>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>
-              {label}: {value}
-            </p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    </CardContent>
-  </Card>
-);
 
 export default NFTPage;

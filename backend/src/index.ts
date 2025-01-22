@@ -24,7 +24,7 @@ app.use(cookieParser());
 
 //req logger middleware
 app.use((req, res, next) => {
-  console.log("Request logged:", req.method, req.path);
+  // console.log("Request logged:", req.method, req.path);
   next();
 });
 

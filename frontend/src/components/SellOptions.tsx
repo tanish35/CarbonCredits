@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface SellOptionsProps {
   tokenId: number;
@@ -29,6 +30,7 @@ export const SellOptions: React.FC<SellOptionsProps> = ({
   NFT_CONTRACT_ADDRESS,
   MARKETPLACE_ADDRESS,
 }) => {
+  // Component State
   const [sellType, setSellType] = useState<"auction" | "directSell" | null>(
     null
   );
@@ -39,42 +41,50 @@ export const SellOptions: React.FC<SellOptionsProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isResellApproved, setIsResellApproved] = useState(false);
+  const [emission, setEmission] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Hooks
   const { address } = useAccount();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [isResellApproved, setIsResellApproved] = useState(false);
-  const [emission, setEmission] = useState("");
   const { writeContract } = useWriteContract();
 
-  const { data: isApproved } = useReadContract({
+  // Contract Reads
+  const { data: isApproved, isLoading: isLoadingApproval } = useReadContract({
     address: NFT_CONTRACT_ADDRESS,
     abi,
     functionName: "isApprovedForAll",
     args: [address, MARKETPLACE_ADDRESS],
   });
 
-  const { data: owner } = useReadContract({
+  const { data: owner, isLoading: isLoadingOwner } = useReadContract({
     address: NFT_CONTRACT_ADDRESS,
     abi,
     functionName: "ownerOf",
     args: [BigInt(tokenId)],
-  }) as { data: string };
+  }) as { data: string; isLoading: boolean };
 
-  const { data: auctionData } = useReadContract({
+  const { data: auctionData, isLoading: isLoadingAuction } = useReadContract({
     address: MARKETPLACE_ADDRESS,
     abi: abi_marketplace,
     functionName: "auctions",
     args: [BigInt(tokenId)],
   });
 
-  useEffect(() => {
-    console.log(auctionData);
-  }, [auctionData]);
+  //@ts-ignore
+  const isAuctionActive = auctionData && auctionData[5];
+  const isOwner =
+    address && owner && owner.toLowerCase() === address.toLowerCase();
 
   useEffect(() => {
     const checkApproval = async () => {
       try {
+        setIsLoading(true);
         const response = await axios.post(
           "/resell/getResellApproval",
           {
@@ -85,15 +95,20 @@ export const SellOptions: React.FC<SellOptionsProps> = ({
         setIsApprovedForSale(response.data.isAllowedToSell);
       } catch (error) {
         console.error("Error checking approval:", error);
+        toast({
+          title: "Error",
+          description: "Failed to check approval status",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
-    checkApproval();
-  }, [tokenId]);
 
-  //@ts-ignore
-  const isAuctionActive = auctionData && auctionData[5];
-  const isOwner =
-    address && owner && owner.toLowerCase() === address.toLowerCase();
+    if (!isLoadingApproval && !isLoadingOwner && !isLoadingAuction) {
+      checkApproval();
+    }
+  }, [tokenId, isLoadingApproval, isLoadingOwner, isLoadingAuction]);
 
   const handleChooseSellOption = async (type: "auction" | "directSell") => {
     setSellType(type);
@@ -111,6 +126,11 @@ export const SellOptions: React.FC<SellOptionsProps> = ({
       }
     } catch (error) {
       console.error("Error setting sell type:", error);
+      toast({
+        title: "Error",
+        description: "Failed to set sell type",
+        variant: "destructive",
+      });
     }
   };
 
@@ -126,20 +146,21 @@ export const SellOptions: React.FC<SellOptionsProps> = ({
           address: MARKETPLACE_ADDRESS,
           abi: abi_marketplace,
           functionName: "createAuction",
-          args: [
-            BigInt(tokenId),
-            BigInt(priceInWei),
-            BigInt(durationInSeconds),
-          ],
+          args: [BigInt(tokenId), priceInWei, durationInSeconds],
         });
       }
       onComplete();
     } catch (error) {
       console.error("Error setting price:", error);
+      toast({
+        title: "Error",
+        description: "Failed to set price",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleApproval = async () => {
+  const handleApproval = () => {
     if (!address) return;
 
     try {
@@ -151,10 +172,15 @@ export const SellOptions: React.FC<SellOptionsProps> = ({
       });
     } catch (error) {
       console.error("Error setting approval:", error);
+      toast({
+        title: "Error",
+        description: "Failed to approve NFT",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleCancelAuction = async () => {
+  const handleCancelAuction = () => {
     try {
       writeContract({
         address: MARKETPLACE_ADDRESS,
@@ -165,6 +191,11 @@ export const SellOptions: React.FC<SellOptionsProps> = ({
       onComplete();
     } catch (error) {
       console.error("Error cancelling auction:", error);
+      toast({
+        title: "Error",
+        description: "Failed to cancel auction",
+        variant: "destructive",
+      });
     }
   };
 
@@ -191,12 +222,12 @@ export const SellOptions: React.FC<SellOptionsProps> = ({
           setUploadProgress(percentCompleted);
         },
       });
+
       setIsUploading(false);
       setIsProcessing(true);
 
       const { emission } = response.data;
       setEmission(emission);
-      // console.log(emission);
 
       writeContract({
         address: NFT_CONTRACT_ADDRESS,
@@ -206,12 +237,12 @@ export const SellOptions: React.FC<SellOptionsProps> = ({
       });
 
       setIsResellApproved(true);
-
       setIsApprovedForSale(true);
       setShowCertificateDialog(false);
       setIsProcessing(false);
+
       toast({
-        title: "Certificate Uploaded",
+        title: "Success",
         description: "Your NFT is now approved for sale.",
       });
     } catch (error) {
@@ -220,7 +251,7 @@ export const SellOptions: React.FC<SellOptionsProps> = ({
       setIsProcessing(false);
       toast({
         title: "Error",
-        description: "Failed to upload certificate and process data.",
+        description: "Failed to upload certificate",
         variant: "destructive",
       });
     }
@@ -241,11 +272,20 @@ export const SellOptions: React.FC<SellOptionsProps> = ({
           window.location.reload();
         } catch (error) {
           console.error("Error setting approval:", error);
+          toast({
+            title: "Error",
+            description: "Failed to set approval",
+            variant: "destructive",
+          });
         }
       }
     };
     setApproval();
-  }, [isResellApproved]);
+  }, [isResellApproved, tokenId, emission]);
+
+  if (isLoading || isLoadingApproval || isLoadingOwner || isLoadingAuction) {
+    return <Skeleton className="w-full h-10" />;
+  }
 
   return (
     <>
