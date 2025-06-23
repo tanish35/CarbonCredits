@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/tanish35/CarbonCredits/pulls) [![Live Deployment](https://img.shields.io/badge/live-deployed-green.svg)](https://ecox.wedevelopers.online)
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/tanish35/AskVault)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/tanish35/CarbonCredits)
 
 This application is designed to manage and trade carbon credit NFTs. It ensures transparency, traceability, and compliance through blockchain technology. Below are the steps to set up and run the backend and frontend of the app.
 
