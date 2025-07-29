@@ -54,7 +54,7 @@ This application is designed to manage and trade carbon credit NFTs. It ensures 
 ## Live Deployment
 
 The application is live and deployed at:  
-[**ecox.wedevelopers.online**](https://ecox.wedevelopers.online)
+[**ecox.wedevelopers.online**](https://ecox.wedevs.site)
 
 ---
 
