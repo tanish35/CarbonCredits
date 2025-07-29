@@ -16,6 +16,7 @@ app.use(
       "http://localhost:5174",
       "https://ecox.somnathcodes.site",
       "https://ecox.wedevelopers.online",
+      "https://ecox.wedevs.site",
     ],
     credentials: true,
   })
