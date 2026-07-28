@@ -226,7 +226,7 @@ export const Wallet: React.FC<WalletProps> = ({ onWalletChange }) => {
                   <div className="text-3xl font-bold text-primary/90">
                     {balance
                       ? formatUnits(balance.value, balance.decimals)
-                    }{" "}
+                      : ""}{" "}
                     <span className="text-xl">{balance?.symbol}</span>
                   </div>
                 )}

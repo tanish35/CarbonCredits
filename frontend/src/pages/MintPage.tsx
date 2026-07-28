@@ -269,7 +269,8 @@ function MintPage() {
                 <Text fontSize="lg" fontWeight="bold">
                   {balance
                     ? formatUnits(balance.value, balance.decimals)
-                  } {balance?.symbol}
+                    : ""}{" "}
+                  {balance?.symbol}
                 </Text>
               )}
             </Box>

@@ -155,7 +155,8 @@ const MyNFTPage: React.FC = () => {
                   <p className="text-xl font-bold">
                     {balance
                       ? formatUnits(balance.value, balance.decimals)
-                    } {balance?.symbol}
+                      : ""}{" "}
+                    {balance?.symbol}
                   </p>
                 )}
               </div>
