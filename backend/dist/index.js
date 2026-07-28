@@ -19,7 +19,7 @@ app.use((0, cors_1.default)({
         "http://localhost:5174",
         "https://ecox.somnathcodes.site",
         "https://ecox.wedevelopers.online",
-        "https://ecox.wedevs.site",
+        "https://ecox.wedevs.xyz",
     ],
     credentials: true,
 }));
