@@ -75,5 +75,8 @@
     "buffer": "^6.0.3",
     "typescript": "^5.4.5",
     "vite": "^5.2.11"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.29.1"
   }
 }
