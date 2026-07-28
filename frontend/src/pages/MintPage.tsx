@@ -8,6 +8,7 @@ import {
   useReadContract,
   useBalance,
 } from "wagmi";
+import { formatUnits } from "viem";
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -266,7 +267,9 @@ function MintPage() {
                 <Text color="red.500">Error fetching balance</Text>
               ) : (
                 <Text fontSize="lg" fontWeight="bold">
-                  {balance?.formatted} {balance?.symbol}
+                  {balance
+                    ? formatUnits(balance.value, balance.decimals)
+                  } {balance?.symbol}
                 </Text>
               )}
             </Box>

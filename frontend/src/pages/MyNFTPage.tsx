@@ -7,6 +7,7 @@ import {
   useBalance,
   useReadContract,
 } from "wagmi";
+import { formatUnits } from "viem";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -152,7 +153,9 @@ const MyNFTPage: React.FC = () => {
                   <p className="text-red-500">Error fetching balance</p>
                 ) : (
                   <p className="text-xl font-bold">
-                    {balance?.formatted} {balance?.symbol}
+                    {balance
+                      ? formatUnits(balance.value, balance.decimals)
+                    } {balance?.symbol}
                   </p>
                 )}
               </div>

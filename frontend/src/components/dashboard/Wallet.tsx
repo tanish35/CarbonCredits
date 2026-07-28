@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAccount, useBalance } from "wagmi";
+import { formatUnits } from "viem";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
@@ -15,6 +16,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+
+declare global {
+  interface Window {
+    ethereum?: {
+      request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+    };
+  }
+}
 
 interface WalletProps {
   onWalletChange: (address: string | null) => void;
@@ -215,7 +224,9 @@ export const Wallet: React.FC<WalletProps> = ({ onWalletChange }) => {
                   </div>
                 ) : (
                   <div className="text-3xl font-bold text-primary/90">
-                    {balance?.formatted}{" "}
+                    {balance
+                      ? formatUnits(balance.value, balance.decimals)
+                    }{" "}
                     <span className="text-xl">{balance?.symbol}</span>
                   </div>
                 )}
