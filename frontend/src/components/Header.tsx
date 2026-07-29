@@ -13,7 +13,7 @@ import { AnimatePresence, motion } from "framer-motion";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { toast } = useToast();
-  const { connect, connectors: availableConnectors } = useConnect();
+  const { connect, connectors: availableConnectors, isPending } = useConnect();
   const { disconnect } = useDisconnect();
   const { isConnected: accountConnected, address } = useAccount();
   const location = useLocation();
@@ -74,15 +74,28 @@ const Header = () => {
 
           <div className="flex-row items-center hidden md:flex gap-4">
             {!accountConnected ? (
-              availableConnectors.slice(2, 3).map((connector) => (
+              availableConnectors.map((connector) => (
                 <Button
                   key={connector.id}
-                  onClick={() => connect({ connector })}
+                  disabled={isPending}
+                  onClick={() =>
+                    connect(
+                      { connector },
+                      {
+                        onError: (error) =>
+                          toast({
+                            title: "Wallet connection failed",
+                            description: error.message,
+                            variant: "destructive",
+                          }),
+                      }
+                    )
+                  }
                   variant="outline"
                   className="relative overflow-hidden group hover:border-secondary transition-colors duration-300"
                 >
                   <span className="relative z-10 group-hover:text-background transition-colors duration-300">
-                    Connect Wallet
+                    {isPending ? "Connecting..." : "Connect Wallet"}
                   </span>
                   <span className="absolute inset-0 transform translate-y-[101%] group-hover:translate-y-0 bg-gradient-to-r from-secondary to-secondary/80 transition-transform duration-300 ease-out" />
                 </Button>
@@ -149,14 +162,29 @@ const Header = () => {
               
               <div className="flex flex-col space-y-4 p-4 border-t border-border/50">
                 {!accountConnected ? (
-                  availableConnectors.slice(2, 3).map((connector) => (
+                  availableConnectors.map((connector) => (
                     <Button
                       key={connector.id}
-                      onClick={() => connect({ connector })}
+                      disabled={isPending}
+                      onClick={() =>
+                        connect(
+                          { connector },
+                          {
+                            onError: (error) =>
+                              toast({
+                                title: "Wallet connection failed",
+                                description: error.message,
+                                variant: "destructive",
+                              }),
+                          }
+                        )
+                      }
                       variant="outline"
                       className="w-full relative overflow-hidden group hover:text-background transition-colors duration-300"
                     >
-                      <span className="relative z-10">Connect Wallet</span>
+                      <span className="relative z-10">
+                        {isPending ? "Connecting..." : "Connect Wallet"}
+                      </span>
                       <span className="absolute inset-0 transform translate-y-full group-hover:translate-y-0 bg-secondary transition-transform duration-300 ease-out" />
                     </Button>
                   ))
